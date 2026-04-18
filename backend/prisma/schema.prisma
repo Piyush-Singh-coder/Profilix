@@ -1,0 +1,322 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String           @id @default(uuid()) @db.Uuid
+  email        String           @unique @db.VarChar(255)
+  username     String           @unique @db.VarChar(50)
+  fullName     String           @map("full_name") @db.VarChar(100)
+  password     String?          @db.VarChar(255)
+  firebaseUid  String?          @unique @map("firebase_uid") @db.VarChar(128)
+  authProvider AuthProvider     @default(EMAIL) @map("auth_provider")
+  isVerified   Boolean          @default(false) @map("is_verified")
+  avatarUrl    String?          @map("avatar_url")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+  achievements Achievement[]
+  analytics    AnalyticsEvent[]
+  educations   Education[]
+  experiences  Experience[]
+  githubStats  GitHubStats?
+  profile      Profile?
+  projects     Project[]
+  qrCodes      QRCode[]
+  resume       Resume?
+  socialLinks  SocialLink[]
+
+  @@index([username])
+  @@index([firebaseUid])
+  @@map("users")
+}
+
+model Profile {
+  id               String             @id @default(uuid()) @db.Uuid
+  userId           String             @unique @map("user_id") @db.Uuid
+  displayName      String             @map("display_name") @db.VarChar(100)
+  headline         String?            @db.VarChar(150)
+  bio              String?
+  status           ProfileStatus      @default(NOT_AVAILABLE)
+  statusCustomText String?            @map("status_custom_text") @db.VarChar(100)
+  location         String?            @db.VarChar(100)
+  isPublic         Boolean            @default(true) @map("is_public")
+  theme            ProfileTheme       @default(SKEUOMORPHIC)
+  cardTheme        CardTheme          @default(GLASSMORPHISM) @map("card_theme")
+  createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  techStacks       ProfileTechStack[]
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model TechStack {
+  id       String             @id @default(uuid()) @db.Uuid
+  name     String             @unique @db.VarChar(50)
+  slug     String             @unique @db.VarChar(50)
+  iconUrl  String?            @map("icon_url")
+  category TechCategory       @default(OTHER)
+  profiles ProfileTechStack[]
+
+  @@index([category])
+  @@map("tech_stacks")
+}
+
+model ProfileTechStack {
+  profileId  String    @map("profile_id") @db.Uuid
+  techId     String    @map("tech_id") @db.Uuid
+  assignedAt DateTime  @default(now()) @map("assigned_at") @db.Timestamptz(3)
+  profile    Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tech       TechStack @relation(fields: [techId], references: [id], onDelete: Cascade)
+
+  @@id([profileId, techId])
+  @@map("profile_tech_stacks")
+}
+
+model Project {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  title        String   @db.VarChar(100)
+  description  String?
+  bullets      Json?
+  repoUrl      String?  @map("repo_url")
+  liveUrl      String?  @map("live_url")
+  videoUrl     String?  @map("video_url")
+  isPinned     Boolean  @default(false) @map("is_pinned")
+  displayOrder Int      @default(0) @map("display_order")
+  techTags     Json?    @map("tech_tags")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isPinned])
+  @@index([userId, displayOrder])
+  @@map("projects")
+}
+
+model SocialLink {
+  id                 String         @id @default(uuid()) @db.Uuid
+  userId             String         @map("user_id") @db.Uuid
+  platform           SocialPlatform
+  url                String
+  visibleInDefault   Boolean        @default(true) @map("visible_in_default")
+  visibleInRecruiter Boolean        @default(true) @map("visible_in_recruiter")
+  createdAt          DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user               User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@map("social_links")
+}
+
+model Resume {
+  id               String   @id @default(uuid()) @db.Uuid
+  userId           String   @unique @map("user_id") @db.Uuid
+  fileUrl          String   @map("file_url")
+  cloudinaryId     String   @map("cloudinary_id") @db.VarChar(255)
+  originalFilename String   @map("original_filename") @db.VarChar(255)
+  fileSizeBytes    Int      @map("file_size_bytes")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("resumes")
+}
+
+model QRCode {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  imageUrl  String    @map("image_url")
+  variant   QRVariant @default(STANDARD)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, variant])
+  @@map("qr_codes")
+}
+
+model AnalyticsEvent {
+  id        String             @id @default(uuid()) @db.Uuid
+  userId    String             @map("user_id") @db.Uuid
+  eventType AnalyticsEventType @map("event_type")
+  referrer  String?
+  userAgent String?            @map("user_agent")
+  ipHash    String?            @map("ip_hash") @db.VarChar(64)
+  metadata  Json?
+  timestamp DateTime           @default(now()) @db.Timestamptz(3)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, eventType])
+  @@index([userId, timestamp])
+  @@map("analytics_events")
+}
+
+model GitHubStats {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @map("user_id") @db.Uuid
+  githubUsername String   @map("github_username") @db.VarChar(100)
+  totalRepos     Int      @default(0) @map("total_repos")
+  totalStars     Int      @default(0) @map("total_stars")
+  totalForks     Int      @default(0) @map("total_forks")
+  followers      Int      @default(0)
+  following      Int      @default(0)
+  contributions  Json?
+  pinnedRepos    Json?    @map("pinned_repos")
+  avatarUrl      String?  @map("avatar_url")
+  bio            String?
+  company        String?  @db.VarChar(100)
+  blog           String?
+  location       String?  @db.VarChar(100)
+  lastSynced     DateTime @default(now()) @map("last_synced") @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("github_stats")
+}
+
+model Experience {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  company      String    @db.VarChar(150)
+  role         String    @db.VarChar(150)
+  location     String?   @db.VarChar(100)
+  startDate    DateTime  @map("start_date") @db.Date
+  endDate      DateTime? @map("end_date") @db.Date
+  isCurrent    Boolean   @default(false) @map("is_current")
+  description  String?
+  bullets      Json?
+  logoUrl      String?   @map("logo_url")
+  displayOrder Int       @default(0) @map("display_order")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startDate(sort: Desc)])
+  @@map("experiences")
+}
+
+model Achievement {
+  id           String          @id @default(uuid()) @db.Uuid
+  userId       String          @map("user_id") @db.Uuid
+  title        String          @db.VarChar(200)
+  provider     String?         @db.VarChar(150)
+  type         AchievementType @default(OTHER)
+  date         DateTime?       @db.Date
+  url          String?
+  imageUrl     String?         @map("image_url")
+  cloudinaryId String?         @map("cloudinary_id") @db.VarChar(255)
+  description  String?
+  displayOrder Int             @default(0) @map("display_order")
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([userId, displayOrder])
+  @@map("achievements")
+}
+
+model Education {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  school       String    @db.VarChar(200)
+  degree       String?   @db.VarChar(150)
+  fieldOfStudy String?   @map("field_of_study") @db.VarChar(150)
+  startDate    DateTime  @map("start_date") @db.Date
+  endDate      DateTime? @map("end_date") @db.Date
+  isCurrent    Boolean   @default(false) @map("is_current")
+  description  String?
+  bullets      Json?
+  displayOrder Int       @default(0) @map("display_order")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, displayOrder])
+  @@index([userId, startDate(sort: Desc)])
+  @@map("educations")
+}
+
+enum AuthProvider {
+  EMAIL
+  GITHUB
+  GOOGLE
+}
+
+enum ProfileStatus {
+  LOOKING_FOR_ROLES
+  OPEN_TO_HACKATHONS
+  BUILDING_SOMETHING
+  AVAILABLE_FOR_FREELANCE
+  NOT_AVAILABLE
+  CUSTOM
+}
+
+enum TechCategory {
+  LANGUAGE
+  FRAMEWORK
+  FRONTEND
+  BACKEND
+  DATABASE
+  DEVOPS
+  TOOL
+  CLOUD
+  CS_CORE
+  OTHER
+}
+
+enum SocialPlatform {
+  GITHUB
+  LINKEDIN
+  TWITTER
+  LEETCODE
+  HACKERRANK
+  PERSONAL_WEBSITE
+  OTHER
+}
+
+enum QRVariant {
+  STANDARD
+  LOCK_SCREEN
+}
+
+enum AnalyticsEventType {
+  PROFILE_VIEW
+  RESUME_DOWNLOAD
+  SOCIAL_LINK_CLICK
+  QR_SCAN
+  OG_IMAGE_RENDER
+}
+
+enum ProfileTheme {
+  GLASS
+  BRUTALISM
+  CLAY
+  SKEUOMORPHIC
+  MINIMAL
+  NEON
+  RETRO
+  AURORA
+}
+
+enum CardTheme {
+  GLASSMORPHISM
+  NEOBRUTALISM
+  APPLE
+  CLAY
+  SKEUOMORPHIC
+}
+
+enum AchievementType {
+  HACKATHON
+  COMPETITION
+  CERTIFICATE
+  AWARD
+  OTHER
+}

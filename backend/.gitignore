@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.env
+*.env.local
+.DS_Store
+nexora-289f9-firebase-adminsdk-fbsvc-2dabfa07cc.json

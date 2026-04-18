@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: profilix-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: bash build.sh
+    startCommand: node dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      # Set these in Render dashboard (never commit secrets):
+      # DATABASE_URL        -> your Neon connection string
+      # JWT_SECRET          -> a long random string
+      # FIREBASE_*          -> Firebase Admin credentials
+      # CLOUDINARY_*        -> Cloudinary credentials
+      # OPENAI_API_KEY      -> if AI tailoring is enabled
+      # FRONTEND_URL        -> your Vercel URL e.g. https://profilix.vercel.app
+      # CLIENT_URL          -> same as FRONTEND_URL
