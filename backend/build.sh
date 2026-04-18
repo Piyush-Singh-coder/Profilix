@@ -9,8 +9,9 @@ NODE_ENV=development npm ci
 echo "🔨 Building TypeScript..."
 npm run build
 
-echo "🌱 Running Prisma..."
+echo "🌱 Generating Prisma Client..."
+# Only generate the client — schema is already set up in production DB.
+# Run schema changes manually with: npx prisma db push
 npx prisma generate
-npx prisma migrate deploy
 
 echo "✅ Build complete!"
