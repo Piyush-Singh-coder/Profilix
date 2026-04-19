@@ -2,7 +2,7 @@ import puppeteer from "puppeteer-core";
 import chromium from "@sparticuz/chromium";
 import { AlignmentType, Document, ExternalHyperlink, Packer, Paragraph, TextRun } from "docx";
 import { prisma } from "../config/database";
-import { tailorBulletsToJob } from "./ai.service";
+import { tailorBulletsToJob, batchTailorBullets } from "./ai.service";
 import { BadRequestError } from "../utils/errors";
 
 type ResumeFormat = "pdf" | "docx";
@@ -90,31 +90,50 @@ export async function maybeTailorWithAI(args: {
   const { jobDescription, useAI, data } = args;
   if (!useAI || !jobDescription?.trim()) return data;
 
-  const nextExperiences = await Promise.all(
-    data.experiences.map(async (exp) => {
-      const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
-      if (bullets.length === 0) return exp;
-      const tailored = await tailorBulletsToJob({
-        jobDescription,
-        bullets,
-        context: `${exp.role} @ ${exp.company}`,
-      });
-      return { ...exp, bullets: tailored };
-    })
-  );
+  const items: Array<{ id: string; context: string; bullets: string[] }> = [];
 
-  const nextProjects = await Promise.all(
-    data.projects.map(async (proj) => {
-      const bullets = Array.isArray(proj.bullets) ? (proj.bullets as string[]) : [];
-      if (bullets.length === 0) return proj;
-      const tailored = await tailorBulletsToJob({
-        jobDescription,
+  data.experiences.forEach((exp) => {
+    const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
+    if (bullets.length > 0) {
+      items.push({
+        id: exp.id,
+        context: `${exp.role} @ ${exp.company}`,
         bullets,
-        context: `Project: ${proj.title}`,
       });
-      return { ...proj, bullets: tailored };
-    })
-  );
+    }
+  });
+
+  data.projects.forEach((proj) => {
+    const bullets = Array.isArray(proj.bullets) ? (proj.bullets as string[]) : [];
+    if (bullets.length > 0) {
+      items.push({
+        id: proj.id,
+        context: `Project: ${proj.title}`,
+        bullets,
+      });
+    }
+  });
+
+  if (items.length === 0) return data;
+
+  console.log(`[BatchAI] Tailoring ${items.length} items for job description...`);
+
+  // Call batch AI service
+  const results = await batchTailorBullets({
+    jobDescription: jobDescription.trim(),
+    items,
+  });
+
+  // Map results back
+  const nextExperiences = data.experiences.map((exp) => {
+    const tailored = results[exp.id];
+    return tailored ? { ...exp, bullets: tailored } : exp;
+  });
+
+  const nextProjects = data.projects.map((proj) => {
+    const tailored = results[proj.id];
+    return tailored ? { ...proj, bullets: tailored } : proj;
+  });
 
   return { ...data, experiences: nextExperiences, projects: nextProjects };
 }

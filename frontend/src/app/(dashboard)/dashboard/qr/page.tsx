@@ -24,6 +24,7 @@ export default function QRDashboardPage() {
   const [exportSize, setExportSize] = useState<ExportSize>("1080x1080");
   const [cardTheme, setCardTheme] = useState<CardTheme>("GLASSMORPHISM");
   const [viewMode, setViewMode] = useState<"default" | "hire">("default");
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchQR("STANDARD");
@@ -72,11 +73,16 @@ export default function QRDashboardPage() {
   };
 
   const exportCard = async () => {
-    if (!user?.username) return;
-    const modeQuery = viewMode === "hire" ? "&mode=hire" : "";
-    const themeQuery = `&theme=${cardTheme}`;
-    const exportUrl = `${API_BASE_URL}/u/${user.username}/card-export?size=${exportSize}${modeQuery}${themeQuery}`;
-    await downloadUrlAsFile(exportUrl, `profilix-card-${cardTheme.toLowerCase()}-${exportSize}.png`);
+    if (!user?.username || isExporting) return;
+    try {
+      setIsExporting(true);
+      const modeQuery = viewMode === "hire" ? "&mode=hire" : "";
+      const themeQuery = `&theme=${cardTheme}`;
+      const exportUrl = `${API_BASE_URL}/u/${user.username}/card-export?size=${exportSize}${modeQuery}${themeQuery}`;
+      await downloadUrlAsFile(exportUrl, `profilix-card-${cardTheme.toLowerCase()}-${exportSize}.png`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const openProfile = () => {
@@ -177,9 +183,13 @@ export default function QRDashboardPage() {
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={exportCard}>
-              <Download className="mr-2 h-4 w-4" />
-              Export Card
+            <Button onClick={exportCard} disabled={isExporting}>
+              {isExporting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="mr-2 h-4 w-4" />
+              )}
+              {isExporting ? "Exporting..." : "Export Card"}
             </Button>
           </div>
         </CardContent>

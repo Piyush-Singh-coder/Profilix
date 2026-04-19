@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 // import { InfoLayout } from "@/components/layout/InfoLayout";
 
 export default function ResumePage() {
-  const { resume, isLoading, isSaving, error, uploadProgress, fetchResume, uploadResume, deleteResume, generateResume } =
+  const { resume, isLoading, isUploading, isGenerating, isDeleting, error, uploadProgress, fetchResume, uploadResume, deleteResume, generateResume } =
     useResumeStore();
   const { user } = useAuthStore();
   const [dragActive, setDragActive] = useState(false);
@@ -218,7 +218,7 @@ export default function ResumePage() {
                   layout="vertical"
                 />
               </div>
-              <Button onClick={handleGenerate} isLoading={isSaving} className="w-full sm:w-auto">
+              <Button onClick={handleGenerate} isLoading={isGenerating} className="w-full sm:w-auto">
                 <Download className="mr-2 h-4 w-4" />
                 Generate {templateType} Resume
               </Button>
@@ -253,8 +253,8 @@ export default function ResumePage() {
                     <Download className="mr-2 h-4 w-4" />
                     View
                   </Button>
-                  <Button variant="danger" onClick={handleDelete} disabled={isSaving}>
-                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                  <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
+                    <Trash2 className="mr-2 h-4 w-4" />
                     Remove
                   </Button>
                 </div>
@@ -296,7 +296,7 @@ export default function ResumePage() {
               <UploadCloud className="mx-auto h-10 w-10 text-primary" />
               <p className="mt-4 font-semibold text-text-primary">Drop your resume PDF here</p>
               <p className="mt-1 text-sm text-text-secondary">or click to select a file</p>
-              {isSaving ? (
+              {isUploading ? (
                 <div className="mx-auto mt-5 max-w-xs">
                   <div className="h-2 rounded-full bg-surface">
                     <div className="h-2 rounded-full bg-primary transition-all" style={{ width: `${uploadProgress}%` }} />

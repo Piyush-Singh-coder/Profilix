@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   User,
@@ -10,12 +9,12 @@ import {
   Share2,
   FileText,
   BarChart3,
-  QrCode,
   Settings,
   LogOut,
   Trophy,
   Briefcase,
   GraduationCap,
+  IdCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -30,7 +29,7 @@ const NAV_ITEMS = [
   { name: "Socials", path: "/dashboard/socials", icon: Share2 },
   { name: "Achievements", path: "/dashboard/achievements", icon: Trophy },
   { name: "Resume", path: "/dashboard/resume", icon: FileText },
-  { name: "Download & Share", path: "/dashboard/qr", icon: QrCode },
+  { name: "Profile Card", path: "/dashboard/qr", icon: IdCard },
   { name: "Analytics", path: "/dashboard/analytics", icon: BarChart3 },
   { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
@@ -49,7 +48,7 @@ export default function DashboardSidebar() {
     <>
       <aside className="hidden h-full w-72 flex-col justify-between border-r border-border bg-surface/95 p-4 md:flex">
         <div>
-          <Link href="/dashboard" className="mb-5 flex items-center gap-2 rounded-xl px-3 py-2">
+          <Link href="/" className="mb-5 flex items-center gap-2 rounded-xl px-3 py-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-high/50 border border-border/50">
               <Logo size={120} className="h-10 w-10 drop-shadow-lg" />
             </div>

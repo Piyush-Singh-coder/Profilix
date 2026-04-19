@@ -336,55 +336,15 @@ async function renderGithubSection(
 //  │  EXPERIENCE      │  SKILLS       │  ACHIEVEMENTS            │  ← row1 (3-col)
 //  ├──────────────────┴───────┬───────┴──────────────────────────┤
 //  │  PROJECT 1               │  PROJECT 2                        │  ← row2 (2-col)
-//  ├──────────────────────────┴───────────────────────────────────┤
-//  │  GitHub heatmap                                              │
-//  │  ■ repos   ■ stars   ■ forks   ■ followers                  │
-//  ├──────────────────────────────────────────────────────────────┤
-//  │  FOOTER  socials  ·  profile URL                             │
-//  └──────────────────────────────────────────────────────────────┘
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ─── Shared layout calculation ────────────────────────────────────────────────
-
-interface CardLayout {
-  innerW: number;
-  gap3: number;
-  gap2: number;
-  colW3: number;
-  colW2: number;
-  col3X: (i: number) => number;
-  col2X: (i: number) => number;
-  headerH: number;
-  headerY: number;
-  sep1Y: number;
-  bioLines: string[];
-  bioY: number;
-  bioH: number;
-  sep2Y: number;
-  row1Y: number;
-  row1H: number;
-  sep3Y: number;
-  row2Y: number;
-  row2H: number;
-  sep4Y: number;
-  heatY: number;
-  heatH: number;
-  statsBarH: number;
-  sep5Y: number;
-  footerY: number;
-  canvasH: number;
-  labelOffset: number; // pixels items are pushed down from row top to clear the label
-}
-
+//  └──────────────────────────┴───────────────────────────────────┘
 function calcLayout(
   user: Awaited<ReturnType<typeof fetchCardData>>,
   sz: Sz,
   bioCharFactor: number,
   gap3: number,
   gap2: number,
-  innerGap3: number = 20, // top indent inside each row-1 col before items
-  innerGap2: number = 24, // top indent inside each row-2 col before items
+  innerGap3: number = 20,
+  innerGap2: number = 24,
 ): CardLayout {
   const { w, pad, bodyFs, labelFs, smallFs, avatarR } = sz;
   const innerW = w - pad * 2;
@@ -405,12 +365,9 @@ function calcLayout(
   const bioH = bioLines.length * (bodyFs + 8);
   const sep2Y = bioY + bioH + 14;
 
-  // Label offset = how far items are pushed below the row's origin to clear the label
   const labelOffset = labelFs + 16;
-
-  // row1 — 3 columns
-  const row1Y = sep2Y + 14;
   const bulletLH = smallFs - 1 + 6;
+
   const calcBulletHgt = (rawBullets: unknown, cw: number) => {
     const shown = ((rawBullets as string[] | null) || []).slice(0, 3);
     if (!shown.length) return 0;
@@ -421,43 +378,22 @@ function calcLayout(
     );
   };
 
-  // Experience: label_offset + (per entry: role + company + bullets + location? + date + gap)
-  const expItemH = (exp: (typeof user.experiences)[0]) => {
-    const bulH = calcBulletHgt(exp.bullets, colW3);
+  const expItemH = (exp: (typeof user.experiences)[0], cw: number) => {
+    const bulH = calcBulletHgt(exp.bullets, cw);
     const locH = exp.location ? smallFs - 1 + 6 : 0;
     return bodyFs + 8 + smallFs + 8 + bulH + 6 + locH + (smallFs - 1) + 14;
   };
-  const totalExpH =
-    labelOffset +
-    (user.experiences.length > 0
-      ? user.experiences.reduce((s, e) => s + expItemH(e), 0) + 8
-      : bodyFs * 4);
 
-  // Skills: label_offset + 2-col grid
-  const skillCount = Math.min(user.profile!.techStacks.length, 16);
-  const totalSkillH =
-    labelOffset + Math.ceil(skillCount / 2) * (smallFs + 10) + 8;
-
-  // Achievements: label_offset + per item (title + date line)
-  const achPerItemH = smallFs + 6 + (smallFs - 2) + 8; // title + date + gap
-  const totalAchH =
-    labelOffset + Math.min(user.achievements.length, 5) * achPerItemH + 8;
-
-  const row1H = Math.max(totalExpH, totalSkillH, totalAchH, bodyFs * 6);
-  const sep3Y = row1Y + row1H + 14;
-
-  // row2 — 2 columns (projects)
-  const row2Y = sep3Y + 14;
-  const projBCPP = Math.max(Math.floor(colW2 / ((smallFs - 1) * 0.58)) - 2, 18);
-  const projBuiltH = (proj: (typeof user.projects)[0]) => {
+  const projBuiltH = (proj: (typeof user.projects)[0], cw: number) => {
     const descLines = proj.description
-      ? wrapText(proj.description, Math.floor(colW2 / (smallFs * 0.56))).slice(
+      ? wrapText(proj.description, Math.floor(cw / (smallFs * 0.56))).slice(
           0,
           3,
         )
       : [];
     const descH =
       descLines.length * (smallFs + 5) + (descLines.length > 0 ? 6 : 0);
+    const projBCPP = Math.max(Math.floor(cw / ((smallFs - 1) * 0.58)) - 2, 18);
     const bH = ((proj.bullets as string[] | null) || [])
       .slice(0, 3)
       .reduce((h, b) => h + wrapText(b, projBCPP).length * bulletLH + 3, 0);
@@ -465,21 +401,66 @@ function calcLayout(
     const urlH = proj.liveUrl || proj.repoUrl ? smallFs + 6 : 0;
     return labelOffset + bodyFs + 10 + descH + bH + tagsH + urlH + 14;
   };
-  const row2H = Math.max(
-    user.projects.slice(0, 2).length > 0
-      ? Math.max(...user.projects.slice(0, 2).map(projBuiltH))
-      : bodyFs * 5,
-    bodyFs * 5,
-  );
-  const sep4Y = row2Y + row2H + 14;
 
-  // Heatmap + stats bar
+  const skillCount = Math.min(user.profile!.techStacks.length, 16);
+  const getSkillH = (cw: number) =>
+    labelOffset + Math.ceil(skillCount / (cw === colW3 ? 2 : 2)) * (smallFs + 10) + 8;
+  const achPerItemH = smallFs + 6 + (smallFs - 2) + 8;
+  const getAchH = () =>
+    labelOffset + Math.min(user.achievements.length, 5) * achPerItemH + 8;
+
+  const hasExperience = user.experiences.length > 0;
+  const numProjects = user.projects.slice(0, 2).length;
+
+  let row1Y = sep2Y + 14;
+  let row1H = 0;
+  let sep3Y = 0;
+  let row2Y = 0;
+  let row2H = 0;
+  let sep4Y = 0;
+
+  if (hasExperience) {
+    const totalExpH =
+      labelOffset +
+      user.experiences.reduce((s, e) => s + expItemH(e, colW3), 0) + 8;
+    const totalSkillH = getSkillH(colW3);
+    const totalAchH = getAchH();
+
+    row1H = Math.max(totalExpH, totalSkillH, totalAchH, bodyFs * 6);
+    sep3Y = row1Y + row1H + 14;
+
+    row2Y = sep3Y + 14;
+    row2H = Math.max(
+      numProjects > 0
+        ? Math.max(...user.projects.slice(0, 2).map((p) => projBuiltH(p, colW2)))
+        : bodyFs * 5,
+      bodyFs * 5,
+    );
+    sep4Y = row2Y + row2H + 14;
+  } else {
+    // Scenario B: Row 1 = Projects, Row 2 = Skills | Achievements
+    const cw1 = numProjects === 1 ? innerW : colW2;
+    row1H = Math.max(
+      numProjects > 0
+        ? Math.max(...user.projects.slice(0, 2).map((p) => projBuiltH(p, cw1)))
+        : bodyFs * 5,
+      bodyFs * 5,
+    );
+    sep3Y = row1Y + row1H + 14;
+
+    row2Y = sep3Y + 14;
+    const totalSkillH = getSkillH(colW2);
+    const totalAchH = getAchH();
+    row2H = Math.max(totalSkillH, totalAchH, bodyFs * 5);
+    sep4Y = row2Y + row2H + 14;
+  }
+
   const heatY = sep4Y + 14;
-  const heatH = 7 * 20 + 30; // 7 days × 20px cell height + label row
-  const statsBarH = labelFs + smallFs + 20; // value + label text + padding
+  const heatH = 7 * 20 + 30;
+  const statsBarH = labelFs + smallFs + 20;
   const sep5Y = heatY + heatH + statsBarH + 14;
   const footerY = sep5Y + 8;
-  const canvasH = footerY + 110 + pad; // Added vertical padding for 3-line footer
+  const canvasH = footerY + 110 + pad;
 
   return {
     innerW,
@@ -509,6 +490,8 @@ function calcLayout(
     footerY,
     canvasH,
     labelOffset,
+    hasExperience,
+    numProjects,
   };
 }
 
@@ -629,12 +612,12 @@ async function buildGlass(
   })();
 
   // ── Project columns ────────────────────────────────────────────────────────
-  const buildProj = (proj: (typeof user.projects)[0]) => {
+  const buildProj = (proj: (typeof user.projects)[0], cw: number) => {
     let cy = labelOffset;
     const titleSvg = `<text y="${cy + bodyFs}" font-family="${FF}" font-size="${bodyFs}" fill="${blue}" font-weight="700">${escapeXml(truncate(proj.title, 40))}</text>`;
     cy += bodyFs + 10;
     const descLines = proj.description
-      ? wrapText(proj.description, Math.floor(colW2 / (smallFs * 0.56))).slice(
+      ? wrapText(proj.description, Math.floor(cw / (smallFs * 0.56))).slice(
           0,
           3,
         )
@@ -652,7 +635,7 @@ async function buildGlass(
       smallFs - 1,
       textMut,
       FF,
-      colW2,
+      cw,
       3,
     );
     cy += bul.totalHeight + 3;
@@ -669,10 +652,49 @@ async function buildGlass(
     return titleSvg + descSvg + bul.svg + tagSvg + urlSvg;
   };
 
-  const proj0 = user.projects[0]
-    ? buildProj(user.projects[0])
-    : `<text y="${labelOffset + smallFs}" font-family="${FF}" font-size="${smallFs}" fill="${textDim}">No projects added yet</text>`;
-  const proj1 = user.projects[1] ? buildProj(user.projects[1]) : "";
+  const { hasExperience, numProjects } = L;
+
+  let row1Svg = "";
+  let row2Svg = "";
+
+  if (hasExperience) {
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], colW2) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], colW2) : "";
+
+    row1Svg = `
+      <text x="${col3X(0)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="700" letter-spacing="0.5">EXPERIENCE</text>
+      <text x="${col3X(1)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${teal}" font-weight="700" letter-spacing="0.5">SKILLS</text>
+      <text x="${col3X(2)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="700" letter-spacing="0.5">ACHIEVEMENTS</text>
+      <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
+      <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
+      <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+    `;
+
+    row2Svg = `
+      <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="700">PROJECTS</text>
+      <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+    `;
+  } else {
+    const cw1 = numProjects === 1 ? innerW : colW2;
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], cw1) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], cw1) : "";
+
+    row1Svg = `
+      <text x="${col2X(0)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="700">PROJECTS</text>
+      <g transform="translate(${col2X(0)},${row1Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row1Y})">${proj1}</g>` : ""}
+    `;
+
+    const skillContent2 = renderSkills(techNames.slice(0, 16), labelOffset + 4, smallFs, textMut, FF, colW2).svg || skillContent;
+    row2Svg = `
+      <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${teal}" font-weight="700">SKILLS</text>
+      <text x="${col2X(1)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="700">ACHIEVEMENTS</text>
+      <g transform="translate(${col2X(0)},${row2Y})">${skillContent2}</g>
+      <g transform="translate(${col2X(1)},${row2Y})">${achContent}</g>
+    `;
+  }
+
   const renderSocials = (links: typeof user.socialLinks) =>
     links
       .map((s) => {
@@ -733,30 +755,11 @@ async function buildGlass(
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="${blue}" stroke-opacity="0.12" stroke-width="1"/>
 
-  <!-- ══ ROW 1: LABELS (Experience | Skills | Achievements) ══ -->
-  <text x="${col3X(0)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs}" fill="${blue}" font-weight="700" letter-spacing="1">EXPERIENCE</text>
-  <line x1="${col3X(0)}" y1="${row1Y + labelFs + 4}" x2="${col3X(0) + 80}" y2="${row1Y + labelFs + 4}" stroke="${blue}" stroke-width="1.5" stroke-opacity="0.5"/>
-  <text x="${col3X(1)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs}" fill="${teal}" font-weight="700" letter-spacing="1">SKILLS</text>
-  <line x1="${col3X(1)}" y1="${row1Y + labelFs + 4}" x2="${col3X(1) + 50}" y2="${row1Y + labelFs + 4}" stroke="${teal}" stroke-width="1.5" stroke-opacity="0.5"/>
-  <text x="${col3X(2)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs}" fill="${teal}" font-weight="700" letter-spacing="1">ACHIEVEMENTS</text>
-  <line x1="${col3X(2)}" y1="${row1Y + labelFs + 4}" x2="${col3X(2) + 100}" y2="${row1Y + labelFs + 4}" stroke="${teal}" stroke-width="1.5" stroke-opacity="0.5"/>
-
-  <line x1="${col3X(1) - L.gap3 / 2}" y1="${row1Y}" x2="${col3X(1) - L.gap3 / 2}" y2="${sep3Y}" stroke="white" stroke-opacity="0.05" stroke-width="1"/>
-  <line x1="${col3X(2) - L.gap3 / 2}" y1="${row1Y}" x2="${col3X(2) - L.gap3 / 2}" y2="${sep3Y}" stroke="white" stroke-opacity="0.05" stroke-width="1"/>
-
-  <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
-  <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
-  <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+  ${row1Svg}
 
   <line x1="${pad}" y1="${sep3Y}" x2="${w - pad}" y2="${sep3Y}" stroke="${blue}" stroke-opacity="0.12" stroke-width="1"/>
 
-  <!-- ══ ROW 2: PROJECTS ══ -->
-  <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs}" fill="${blue}" font-weight="700" letter-spacing="1">PROJECTS</text>
-  <line x1="${col2X(0)}" y1="${row2Y + labelFs + 4}" x2="${col2X(0) + 65}" y2="${row2Y + labelFs + 4}" stroke="${blue}" stroke-width="1.5" stroke-opacity="0.5"/>
-  <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="white" stroke-opacity="0.05" stroke-width="1"/>
-
-  <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
-  ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+  ${row2Svg}
 
   <line x1="${pad}" y1="${sep4Y}" x2="${w - pad}" y2="${sep4Y}" stroke="${blue}" stroke-opacity="0.12" stroke-width="1"/>
 
@@ -781,17 +784,20 @@ async function buildNeo(
   const { w, pad, nameFs, hlFs, bodyFs, labelFs, smallFs, avatarR } = sz;
   const profile = user.profile!;
 
-  // Darker color palette
+  // Darker color palette for high contrast
   const yellow = "#ffca28";
-  const black = "#050505";
-  const dark = "#111111"; // was #222222 — darker
-  const muted = "#333333"; // was #555555 — darker
-  const text1 = "#0a0a0a";
+  const black = "#000000";
+  const dark = "#0a0a0a";
+  const muted = "#1a1a1a";
+  const text1 = "#000000";
   const FF = "Courier New, monospace";
 
-  const L = calcLayout(user, sz, 0.58, 20, 24);
+  // Added innerPad to create a gap between the black boundary and content
+  const innerPad = 16;
+  const L = calcLayout(user, { ...sz, pad: sz.pad + innerPad }, 0.62, 36, 40);
+  // Keep the visual width separate from the layout width to prevent line overflow
+  const visualInnerW = w - pad * 2;
   const {
-    innerW,
     colW3,
     colW2,
     col3X,
@@ -889,12 +895,12 @@ async function buildNeo(
   })();
 
   // Projects
-  const buildProj = (proj: (typeof user.projects)[0]) => {
+  const buildProj = (proj: (typeof user.projects)[0], cw: number) => {
     let cy = labelOffset;
     const titleSvg = `<text y="${cy + bodyFs}" font-family="${FF}" font-size="${bodyFs}" fill="${black}" font-weight="900">${escapeXml(truncate(proj.title, 40))}</text>`;
     cy += bodyFs + 10;
     const descLines = proj.description
-      ? wrapText(proj.description, Math.floor(colW2 / (smallFs * 0.58))).slice(
+      ? wrapText(proj.description, Math.floor(cw / (smallFs * 0.58))).slice(
           0,
           3,
         )
@@ -906,13 +912,14 @@ async function buildNeo(
       )
       .join("");
     cy += descLines.length * (smallFs + 5) + (descLines.length ? 6 : 0);
+    const projBCPP = Math.max(Math.floor(cw / ((smallFs - 1) * 0.58)) - 2, 18);
     const bul = renderBullets(
       proj.bullets as string[] | null,
       cy + smallFs - 1,
       smallFs - 1,
       dark,
       FF,
-      colW2,
+      cw,
       3,
     );
     cy += bul.totalHeight + 3;
@@ -924,10 +931,61 @@ async function buildNeo(
     return titleSvg + descSvg + bul.svg + tagSvg;
   };
 
-  const proj0 = user.projects[0]
-    ? buildProj(user.projects[0])
-    : `<text y="${labelOffset + smallFs}" font-family="${FF}" font-size="${smallFs}" fill="${muted}">No projects yet</text>`;
-  const proj1 = user.projects[1] ? buildProj(user.projects[1]) : "";
+  const { hasExperience, numProjects } = L;
+
+  let row1Svg = "";
+  let row2Svg = "";
+
+  if (hasExperience) {
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], colW2) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], colW2) : "";
+
+    row1Svg = `
+      <!-- ROW 1 LABELS -->
+      ${["EXPERIENCE", "SKILLS", "ACHIEVEMENTS"].map((lbl, idx) => `
+        <rect x="${col3X(idx)}" y="${row1Y}" width="${L.colW3}" height="${labelFs + 10}" fill="${black}"/>
+        <text x="${col3X(idx) + L.colW3 / 2}" y="${row1Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">${lbl}</text>
+      `).join("")}
+      <line x1="${col3X(1) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(1) - L.gap3 / 2}" y2="${sep3Y}" stroke="${black}" stroke-width="1.5"/>
+      <line x1="${col3X(2) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(2) - L.gap3 / 2}" y2="${sep3Y}" stroke="${black}" stroke-width="1.5"/>
+      <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
+      <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
+      <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+    `;
+
+    row2Svg = `
+      <!-- ROW 2: PROJECTS LABEL -->
+      <rect x="${pad}" y="${row2Y}" width="${visualInnerW}" height="${labelFs + 10}" fill="${black}"/>
+      <text x="${pad + visualInnerW / 2}" y="${row2Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">PROJECTS</text>
+      <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="${black}" stroke-width="1.5"/>
+      <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+    `;
+  } else {
+    // Scenario B: R1=Projects, R2=Skills/Achievements
+    const cw1 = numProjects === 1 ? visualInnerW : colW2;
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], cw1) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], cw1) : "";
+
+    row1Svg = `
+      <rect x="${pad}" y="${row1Y}" width="${visualInnerW}" height="${labelFs + 10}" fill="${black}"/>
+      <text x="${pad + visualInnerW / 2}" y="${row1Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">PROJECTS</text>
+      ${numProjects > 1 ? `<line x1="${col2X(1) - L.gap2 / 2}" y1="${row1Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep3Y}" stroke="${black}" stroke-width="1.5"/>` : ""}
+      <g transform="translate(${col2X(0)},${row1Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row1Y})">${proj1}</g>` : ""}
+    `;
+
+    const skillContent2 = renderSkills(techNames.slice(0, 16), labelOffset + 4, smallFs, dark, FF, colW2).svg || skillContent;
+    row2Svg = `
+      <rect x="${col2X(0)}" y="${row2Y}" width="${L.colW2}" height="${labelFs + 10}" fill="${black}"/>
+      <text x="${col2X(0) + L.colW2 / 2}" y="${row2Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">SKILLS</text>
+      <rect x="${col2X(1)}" y="${row2Y}" width="${L.colW2}" height="${labelFs + 10}" fill="${black}"/>
+      <text x="${col2X(1) + L.colW2 / 2}" y="${row2Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">ACHIEVEMENTS</text>
+      <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="${black}" stroke-width="1.5"/>
+      <g transform="translate(${col2X(0)},${row2Y})">${skillContent2}</g>
+      <g transform="translate(${col2X(1)},${row2Y})">${achContent}</g>
+    `;
+  }
   const renderSocials = (links: typeof user.socialLinks) =>
     links
       .map((s) => {
@@ -943,7 +1001,7 @@ async function buildNeo(
     user.githubStats,
     pad,
     heatY,
-    innerW,
+    L.innerW,
     heatH,
     black,
     dark,
@@ -956,11 +1014,11 @@ async function buildNeo(
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${canvasH}" viewBox="0 0 ${w} ${canvasH}">
   <rect width="${w}" height="${canvasH}" fill="#faf8f2"/>
-  <rect x="${pad - 6}" y="${pad - 6}" width="${innerW + 12}" height="${canvasH - pad * 2 + 12}" fill="${black}"/>
-  <rect x="${pad}" y="${pad}" width="${innerW}" height="${canvasH - pad * 2}" fill="#fefefe" stroke="${black}" stroke-width="2.5"/>
+  <rect x="${pad - 6}" y="${pad - 6}" width="${visualInnerW + 12}" height="${canvasH - pad * 2 + 12}" fill="${black}"/>
+  <rect x="${pad}" y="${pad}" width="${visualInnerW}" height="${canvasH - pad * 2}" fill="#fefefe" stroke="${black}" stroke-width="2.5"/>
 
   <!-- HEADER -->
-  <rect x="${pad}" y="${pad}" width="${innerW}" height="${avatarR * 2 + 24}" fill="${yellow}" stroke="${black}" stroke-width="2.5"/>
+  <rect x="${pad}" y="${pad}" width="${visualInnerW}" height="${avatarR * 2 + 24}" fill="${yellow}" stroke="${black}" stroke-width="2.5"/>
   <circle cx="${pad + avatarR + 20}" cy="${pad + avatarR + 12}" r="${avatarR}" fill="#fff" stroke="${black}" stroke-width="3"/>
   <text x="${pad + avatarR + 20}" y="${pad + avatarR + 12 + nameFs * 0.33}" font-family="${FF}" font-size="${nameFs * 0.62}" fill="${black}" text-anchor="middle" font-weight="900">${initial}</text>
   <text x="${pad + avatarR * 2 + 44}" y="${pad + avatarR * 0.5 + 12}" font-family="${FF}" font-size="${nameFs}" fill="${black}" font-weight="900">${escapeXml(displayName)}</text>
@@ -970,46 +1028,25 @@ async function buildNeo(
   <line x1="${pad}" y1="${sep1Y}" x2="${w - pad}" y2="${sep1Y}" stroke="${black}" stroke-width="2.5"/>
 
   <!-- BIO -->
-  ${bioLines.map((line, i) => `<text x="${pad + 10}" y="${bioY + bodyFs + i * (bodyFs + 6)}" font-family="${FF}" font-size="${bodyFs}" fill="${dark}" font-weight="600">${escapeXml(line)}</text>`).join("")}
+  ${bioLines.map((line, i) => `<text x="${pad + innerPad}" y="${bioY + bodyFs + i * (bodyFs + 6)}" font-family="${FF}" font-size="${bodyFs}" fill="${dark}" font-weight="600">${escapeXml(line)}</text>`).join("")}
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="${black}" stroke-width="2.5"/>
 
-  <!-- ROW 1 LABELS -->
-  ${["EXPERIENCE", "SKILLS", "ACHIEVEMENTS"]
-    .map(
-      (lbl, idx) => `
-    <rect x="${col3X(idx)}" y="${row1Y}" width="${L.colW3}" height="${labelFs + 10}" fill="${black}"/>
-    <text x="${col3X(idx) + L.colW3 / 2}" y="${row1Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">${lbl}</text>`,
-    )
-    .join("")}
-
-  <line x1="${col3X(1) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(1) - L.gap3 / 2}" y2="${sep3Y}" stroke="${black}" stroke-width="1.5"/>
-  <line x1="${col3X(2) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(2) - L.gap3 / 2}" y2="${sep3Y}" stroke="${black}" stroke-width="1.5"/>
-
-  <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
-  <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
-  <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+  ${row1Svg}
 
   <line x1="${pad}" y1="${sep3Y}" x2="${w - pad}" y2="${sep3Y}" stroke="${black}" stroke-width="2.5"/>
 
-  <!-- ROW 2: PROJECTS LABEL -->
-  <rect x="${pad}" y="${row2Y}" width="${innerW}" height="${labelFs + 10}" fill="${black}"/>
-  <text x="${pad + innerW / 2}" y="${row2Y + labelFs + 2}" font-family="${FF}" font-size="${labelFs}" fill="${yellow}" text-anchor="middle" font-weight="900">PROJECTS</text>
-
-  <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="${black}" stroke-width="1.5"/>
-
-  <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
-  ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+  ${row2Svg}
 
   <line x1="${pad}" y1="${sep4Y}" x2="${w - pad}" y2="${sep4Y}" stroke="${black}" stroke-width="2.5"/>
 
   <!-- GITHUB -->
-  <g transform="translate(10,0)">${ghSection}</g>
+  <g transform="translate(${innerPad},0)">${ghSection}</g>
 
   <line x1="${pad}" y1="${sep5Y}" x2="${w - pad}" y2="${sep5Y}" stroke="${black}" stroke-width="2.5"/>
 
   <!-- FOOTER -->
-  <rect x="${pad}" y="${footerY}" width="${innerW}" height="${socials2 ? 100 : 70}" fill="${black}"/>
+  <rect x="${pad}" y="${footerY}" width="${visualInnerW}" height="${socials2 ? 100 : 70}" fill="${black}"/>
   <text x="${w / 2}" y="${footerY + 28}" font-family="${FF}" font-size="${smallFs}" fill="${yellow}" font-weight="700" text-anchor="middle">${escapeXml(socials1)}</text>
   ${socials2 ? `<text x="${w / 2}" y="${footerY + 52}" font-family="${FF}" font-size="${smallFs}" fill="${yellow}" font-weight="700" text-anchor="middle">${escapeXml(socials2)}</text>` : ""}
   <text x="${w / 2}" y="${footerY + (socials2 ? 80 : 56)}" font-family="${FF}" font-size="${smallFs - 1}" fill="white" text-anchor="middle">${escapeXml(profileUrl)}</text>
@@ -1030,9 +1067,9 @@ async function buildApple(
   const green = "#34c759";
   const purple = "#5856d6";
   const orange = "#ff9500";
-  const gray1 = "#1d1d1f";
-  const gray2 = "#6e6e73";
-  const gray3 = "#aeaeb2";
+  const gray1 = "#000000"; // Pitch black headers
+  const gray2 = "#2c2c2e"; // Darker secondary text
+  const gray3 = "#48484a"; // Darker muted text
   const bgGray = "#f5f5f7";
   const FF = "-apple-system, sans-serif";
 
@@ -1136,12 +1173,12 @@ async function buildApple(
   })();
 
   // Projects
-  const buildProj = (proj: (typeof user.projects)[0]) => {
+  const buildProj = (proj: (typeof user.projects)[0], cw: number) => {
     let cy = labelOffset;
     const titleSvg = `<text y="${cy + bodyFs}" font-family="${FF}" font-size="${bodyFs}" fill="${blue}" font-weight="600">${escapeXml(truncate(proj.title, 40))}</text>`;
     cy += bodyFs + 10;
     const descLines = proj.description
-      ? wrapText(proj.description, Math.floor(colW2 / (smallFs * 0.56))).slice(
+      ? wrapText(proj.description, Math.floor(cw / (smallFs * 0.56))).slice(
           0,
           3,
         )
@@ -1159,7 +1196,7 @@ async function buildApple(
       smallFs - 1,
       gray2,
       FF,
-      colW2,
+      cw,
       3,
     );
     cy += bul.totalHeight + 3;
@@ -1176,10 +1213,63 @@ async function buildApple(
     return titleSvg + descSvg + bul.svg + tagSvg + urlSvg;
   };
 
-  const proj0 = user.projects[0]
-    ? buildProj(user.projects[0])
-    : `<text y="${labelOffset + smallFs}" font-family="${FF}" font-size="${smallFs}" fill="${gray3}">No projects added yet</text>`;
-  const proj1 = user.projects[1] ? buildProj(user.projects[1]) : "";
+  const { hasExperience, numProjects } = L;
+
+  let row1Svg = "";
+  let row2Svg = "";
+
+  if (hasExperience) {
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], colW2) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], colW2) : "";
+
+    row1Svg = `
+      <!-- ROW 1 LABELS -->
+      ${[
+        ["EXPERIENCE", blue],
+        ["SKILLS", green],
+        ["ACHIEVEMENTS", orange],
+      ].map(([lbl, clr], idx) => `
+        <text x="${col3X(idx)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${clr}" font-weight="600" letter-spacing="0.5">${lbl}</text>
+        <line x1="${col3X(idx)}" y1="${row1Y + labelFs + 5}" x2="${col3X(idx) + lbl.length * (labelFs * 0.56)}" y2="${row1Y + labelFs + 5}" stroke="${clr}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+      `).join("")}
+      <line x1="${col3X(1) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(1) - L.gap3 / 2}" y2="${sep3Y}" stroke="#e5e5ea" stroke-width="1"/>
+      <line x1="${col3X(2) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(2) - L.gap3 / 2}" y2="${sep3Y}" stroke="#e5e5ea" stroke-width="1"/>
+      <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
+      <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
+      <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+    `;
+
+    row2Svg = `
+      <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="600">PROJECTS</text>
+      <line x1="${col2X(0)}" y1="${row2Y + labelFs + 5}" x2="${col2X(0) + 68}" y2="${row2Y + labelFs + 5}" stroke="${blue}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+      <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="#e5e5ea" stroke-width="1"/>
+      <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+    `;
+  } else {
+    const cw1 = numProjects === 1 ? innerW : colW2;
+    const proj0 = user.projects[0] ? buildProj(user.projects[0], cw1) : "";
+    const proj1 = numProjects > 1 ? buildProj(user.projects[1], cw1) : "";
+
+    row1Svg = `
+      <text x="${col2X(0)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="600">PROJECTS</text>
+      <line x1="${col2X(0)}" y1="${row1Y + labelFs + 5}" x2="${col2X(0) + 68}" y2="${row1Y + labelFs + 5}" stroke="${blue}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+      ${numProjects > 1 ? `<line x1="${col2X(1) - L.gap2 / 2}" y1="${row1Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep3Y}" stroke="#e5e5ea" stroke-width="1"/>` : ""}
+      <g transform="translate(${col2X(0)},${row1Y})">${proj0}</g>
+      ${proj1 ? `<g transform="translate(${col2X(1)},${row1Y})">${proj1}</g>` : ""}
+    `;
+
+    const skillContent2 = renderSkills(techNames.slice(0, 16), labelOffset + 4, smallFs, gray2, FF, colW2).svg || skillContent;
+    row2Svg = `
+      <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${green}" font-weight="600">SKILLS</text>
+      <line x1="${col2X(0)}" y1="${row2Y + labelFs + 5}" x2="${col2X(0) + 45}" y2="${row2Y + labelFs + 5}" stroke="${green}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+      <text x="${col2X(1)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${orange}" font-weight="600">ACHIEVEMENTS</text>
+      <line x1="${col2X(1)}" y1="${row2Y + labelFs + 5}" x2="${col2X(1) + 85}" y2="${row2Y + labelFs + 5}" stroke="${orange}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
+      <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="#e5e5ea" stroke-width="1"/>
+      <g transform="translate(${col2X(0)},${row2Y})">${skillContent2}</g>
+      <g transform="translate(${col2X(1)},${row2Y})">${achContent}</g>
+    `;
+  }
   const renderSocials = (links: typeof user.socialLinks) =>
     links
       .map((s) => {
@@ -1207,8 +1297,8 @@ async function buildApple(
   return `
 <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${canvasH}" viewBox="0 0 ${w} ${canvasH}">
   <rect width="${w}" height="${canvasH}" fill="white"/>
-  <rect width="${w}" height="${avatarR * 2 + pad + 28}" fill="${bgGray}"/>
-  <line x1="0" y1="${avatarR * 2 + pad + 28}" x2="${w}" y2="${avatarR * 2 + pad + 28}" stroke="#d2d2d7" stroke-width="1"/>
+  <rect width="${w}" height="${avatarR * 2 + pad + 48}" fill="${bgGray}"/>
+  <line x1="0" y1="${avatarR * 2 + pad + 48}" x2="${w}" y2="${avatarR * 2 + pad + 48}" stroke="#d2d2d7" stroke-width="1.5"/>
 
   <!-- HEADER -->
   <circle cx="${pad + avatarR + 12}" cy="${pad + avatarR + 12}" r="${avatarR + 3}" fill="none" stroke="${blue}" stroke-width="1.5" stroke-opacity="0.3"/>
@@ -1226,35 +1316,11 @@ async function buildApple(
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="#d2d2d7" stroke-width="1"/>
 
-  <!-- ROW 1 LABELS -->
-  ${[
-    ["EXPERIENCE", blue],
-    ["SKILLS", green],
-    ["ACHIEVEMENTS", orange],
-  ]
-    .map(
-      ([lbl, clr], idx) => `
-    <text x="${col3X(idx)}" y="${row1Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${clr}" font-weight="600" letter-spacing="0.5">${lbl}</text>
-    <line x1="${col3X(idx)}" y1="${row1Y + labelFs + 5}" x2="${col3X(idx) + lbl.length * (labelFs * 0.56)}" y2="${row1Y + labelFs + 5}" stroke="${clr}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>`,
-    )
-    .join("")}
-
-  <line x1="${col3X(1) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(1) - L.gap3 / 2}" y2="${sep3Y}" stroke="#e5e5ea" stroke-width="1"/>
-  <line x1="${col3X(2) - L.gap3 / 2}" y1="${sep2Y}" x2="${col3X(2) - L.gap3 / 2}" y2="${sep3Y}" stroke="#e5e5ea" stroke-width="1"/>
-
-  <g transform="translate(${col3X(0)},${row1Y})">${expContent}</g>
-  <g transform="translate(${col3X(1)},${row1Y})">${skillContent}</g>
-  <g transform="translate(${col3X(2)},${row1Y})">${achContent}</g>
+  ${row1Svg}
 
   <line x1="${pad}" y1="${sep3Y}" x2="${w - pad}" y2="${sep3Y}" stroke="#d2d2d7" stroke-width="1"/>
 
-  <!-- ROW 2: PROJECTS -->
-  <text x="${col2X(0)}" y="${row2Y + labelFs}" font-family="${FF}" font-size="${labelFs - 1}" fill="${blue}" font-weight="600">PROJECTS</text>
-  <line x1="${col2X(0)}" y1="${row2Y + labelFs + 5}" x2="${col2X(0) + 68}" y2="${row2Y + labelFs + 5}" stroke="${blue}" stroke-width="1.5" stroke-linecap="round" stroke-opacity="0.6"/>
-  <line x1="${col2X(1) - L.gap2 / 2}" y1="${row2Y}" x2="${col2X(1) - L.gap2 / 2}" y2="${sep4Y}" stroke="#e5e5ea" stroke-width="1"/>
-
-  <g transform="translate(${col2X(0)},${row2Y})">${proj0}</g>
-  ${proj1 ? `<g transform="translate(${col2X(1)},${row2Y})">${proj1}</g>` : ""}
+  ${row2Svg}
 
   <line x1="${pad}" y1="${sep4Y}" x2="${w - pad}" y2="${sep4Y}" stroke="#d2d2d7" stroke-width="1"/>
 

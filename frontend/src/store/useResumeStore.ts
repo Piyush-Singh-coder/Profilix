@@ -6,7 +6,9 @@ import { AxiosProgressEvent } from "axios";
 interface ResumeState {
   resume: Resume | null;
   isLoading: boolean;
-  isSaving: boolean;
+  isUploading: boolean;
+  isGenerating: boolean;
+  isDeleting: boolean;
   error: string | null;
   uploadProgress: number;
 
@@ -25,7 +27,9 @@ interface ResumeState {
 export const useResumeStore = create<ResumeState>((set) => ({
   resume: null,
   isLoading: false,
-  isSaving: false,
+  isUploading: false,
+  isGenerating: false,
+  isDeleting: false,
   error: null,
   uploadProgress: 0,
 
@@ -46,7 +50,7 @@ export const useResumeStore = create<ResumeState>((set) => ({
 
   uploadResume: async (file: File, onProgress) => {
     try {
-      set({ isSaving: true, error: null, uploadProgress: 0 });
+      set({ isUploading: true, error: null, uploadProgress: 0 });
       const formData = new FormData();
       formData.append("resume", file);
       
@@ -60,29 +64,29 @@ export const useResumeStore = create<ResumeState>((set) => ({
         },
       });
       
-      set({ resume: data.data, isSaving: false, uploadProgress: 100 });
+      set({ resume: data.data, isUploading: false, uploadProgress: 100 });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to upload resume", isSaving: false, uploadProgress: 0 });
+      set({ error: err.response?.data?.message || "Failed to upload resume", isUploading: false, uploadProgress: 0 });
       throw error;
     }
   },
 
   deleteResume: async () => {
     try {
-      set({ isSaving: true, error: null });
+      set({ isDeleting: true, error: null });
       await api.delete("/resume");
-      set({ resume: null, isSaving: false, uploadProgress: 0 });
+      set({ resume: null, isDeleting: false, uploadProgress: 0 });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to delete resume", isSaving: false });
+      set({ error: err.response?.data?.message || "Failed to delete resume", isDeleting: false });
       throw error;
     }
   },
 
   generateResume: async ({ format, templateType, activeTheme, jobDescription, useAI }) => {
     try {
-      set({ isSaving: true, error: null });
+      set({ isGenerating: true, error: null });
 
       const response = await api.post("/resume/generate", { 
         format, 
@@ -116,10 +120,10 @@ export const useResumeStore = create<ResumeState>((set) => ({
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      set({ isSaving: false });
+      set({ isGenerating: false });
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to generate resume", isSaving: false });
+      set({ error: err.response?.data?.message || "Failed to generate resume", isGenerating: false });
       throw error;
     }
   },

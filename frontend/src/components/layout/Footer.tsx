@@ -1,7 +1,6 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Heart } from "lucide-react";
-import { FaGithub, FaTwitter, FaLinkedin } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
@@ -24,13 +23,13 @@ export function Footer() {
               The modern identity platform for developers. Create a dynamic portfolio card, export ATS resumes, and share via QR instantly.
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <a href="#" className="text-text-secondary hover:text-primary transition-colors">
-                <FaTwitter className="h-5 w-5" />
+              <a href="https://www.instagram.com/profilix.qzz.io" className="text-text-secondary hover:text-primary transition-colors">
+                <FaInstagram className="h-5 w-5" />
               </a>
-              <a href="https://github.com/profilix" className="text-text-secondary hover:text-primary transition-colors">
+              <a href="https://github.com/Piyush-Singh-coder" className="text-text-secondary hover:text-primary transition-colors">
                 <FaGithub className="h-5 w-5" />
               </a>
-              <a href="#" className="text-text-secondary hover:text-primary transition-colors">
+              <a href="https://www.linkedin.com/in/piyush-singh-0927a2330/" className="text-text-secondary hover:text-primary transition-colors">
                 <FaLinkedin className="h-5 w-5" />
               </a>
             </div>
@@ -76,7 +75,7 @@ export function Footer() {
             © {year} Profilix. All rights reserved.
           </p>
           <div className="flex items-center text-sm text-text-secondary">
-            Built with <Heart className="h-4 w-4 mx-1 text-danger inline-block" /> for developers
+            Built with <Heart className="h-4 w-4 mx-1 text-danger inline-block" /> for students & professionals
           </div>
         </div>
       </div>
