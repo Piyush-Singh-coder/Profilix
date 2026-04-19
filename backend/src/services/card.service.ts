@@ -337,6 +337,39 @@ async function renderGithubSection(
 //  ├──────────────────┴───────┬───────┴──────────────────────────┤
 //  │  PROJECT 1               │  PROJECT 2                        │  ← row2 (2-col)
 //  └──────────────────────────┴───────────────────────────────────┘
+
+interface CardLayout {
+  innerW: number;
+  gap3: number;
+  gap2: number;
+  colW3: number;
+  colW2: number;
+  col3X: (i: number) => number;
+  col2X: (i: number) => number;
+  headerH: number;
+  headerY: number;
+  sep1Y: number;
+  bioLines: string[];
+  bioY: number;
+  bioH: number;
+  sep2Y: number;
+  row1Y: number;
+  row1H: number;
+  sep3Y: number;
+  row2Y: number;
+  row2H: number;
+  sep4Y: number;
+  heatY: number;
+  heatH: number;
+  statsBarH: number;
+  sep5Y: number;
+  footerY: number;
+  canvasH: number;
+  labelOffset: number;
+  hasExperience: boolean;
+  numProjects: number;
+}
+
 function calcLayout(
   user: Awaited<ReturnType<typeof fetchCardData>>,
   sz: Sz,
@@ -751,7 +784,7 @@ async function buildGlass(
   <line x1="${pad}" y1="${sep1Y}" x2="${w - pad}" y2="${sep1Y}" stroke="${blue}" stroke-opacity="0.12" stroke-width="1"/>
 
   <!-- ══ BIO ══ -->
-  ${bioLines.map((line, i) => `<text x="${pad}" y="${bioY + bodyFs + i * (bodyFs + 8)}" font-family="${FF}" font-size="${bodyFs}" fill="${textMut}">${escapeXml(line)}</text>`).join("")}
+  ${bioLines.map((line: string, i: number) => `<text x="${pad}" y="${bioY + bodyFs + i * (bodyFs + 8)}" font-family="${FF}" font-size="${bodyFs}" fill="${textMut}">${escapeXml(line)}</text>`).join("")}
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="${blue}" stroke-opacity="0.12" stroke-width="1"/>
 
@@ -1028,7 +1061,7 @@ async function buildNeo(
   <line x1="${pad}" y1="${sep1Y}" x2="${w - pad}" y2="${sep1Y}" stroke="${black}" stroke-width="2.5"/>
 
   <!-- BIO -->
-  ${bioLines.map((line, i) => `<text x="${pad + innerPad}" y="${bioY + bodyFs + i * (bodyFs + 6)}" font-family="${FF}" font-size="${bodyFs}" fill="${dark}" font-weight="600">${escapeXml(line)}</text>`).join("")}
+  ${bioLines.map((line: string, i: number) => `<text x="${pad + innerPad}" y="${bioY + bodyFs + i * (bodyFs + 6)}" font-family="${FF}" font-size="${bodyFs}" fill="${dark}" font-weight="600">${escapeXml(line)}</text>`).join("")}
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="${black}" stroke-width="2.5"/>
 
@@ -1312,7 +1345,7 @@ async function buildApple(
   <line x1="${pad}" y1="${sep1Y}" x2="${w - pad}" y2="${sep1Y}" stroke="#d2d2d7" stroke-width="1"/>
 
   <!-- BIO -->
-  ${bioLines.map((line, i) => `<text x="${pad}" y="${bioY + bodyFs + i * (bodyFs + 8)}" font-family="${FF}" font-size="${bodyFs}" fill="${gray2}">${escapeXml(line)}</text>`).join("")}
+  ${bioLines.map((line: string, i: number) => `<text x="${pad}" y="${bioY + bodyFs + i * (bodyFs + 8)}" font-family="${FF}" font-size="${bodyFs}" fill="${gray2}">${escapeXml(line)}</text>`).join("")}
 
   <line x1="${pad}" y1="${sep2Y}" x2="${w - pad}" y2="${sep2Y}" stroke="#d2d2d7" stroke-width="1"/>
 

@@ -135,10 +135,10 @@ Instructions:
   try {
     const repaired = repairJson(content);
     const parsed = JSON.parse(repaired) as Record<string, string[]>;
-    if ('results' in parsed && typeof parsed.results === 'object') {
-      return parsed.results as Record<string, string[]>;
+    if (parsed && 'results' in parsed && typeof (parsed as any).results === 'object') {
+      return (parsed as any).results as unknown as Record<string, string[]>;
     }
-    return parsed;
+    return parsed as unknown as Record<string, string[]>;
   } catch (err) {
     console.error("[BatchAI] Parse failed. Content snippet:", content.slice(0, 100));
     return {};
