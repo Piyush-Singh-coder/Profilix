@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 
 const row1 = ["react", "nextdotjs", "vuedotjs", "nodedotjs", "express", "go", "python", "rust", "typescript"];
 const row2 = ["javascript", "nodedotjs", "postgresql", "mysql", "mongodb", "redis", "docker", "kubernetes", "vuedotjs"];
@@ -6,7 +6,8 @@ const row2 = ["javascript", "nodedotjs", "postgresql", "mysql", "mongodb", "redi
 function TechTile({ tech }: { tech: string }) {
   return (
     <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-surface grayscale transition-all duration-300 hover:scale-110 hover:border-primary/40 hover:grayscale-0">
-      <Image src={`https://cdn.simpleicons.org/${tech}`} alt={tech} width={30} height={30} />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`https://cdn.simpleicons.org/${tech}`} alt={tech} width={30} height={30} />
     </div>
   );
 }
