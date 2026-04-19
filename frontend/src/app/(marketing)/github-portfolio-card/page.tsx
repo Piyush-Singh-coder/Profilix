@@ -8,9 +8,33 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "GitHub Portfolio Card Generator",
-  description: "Create a beautiful GitHub portfolio card instantly. Sync your repos, stars, and contribution graph without touching a single line of CSS.",
-  keywords: ["github portfolio card generator", "github profile generator", "developer portfolio card"],
+  title: "GitHub Portfolio Card Generator – Showcase Your GitHub Stats Instantly",
+  description:
+    "Create a beautiful GitHub portfolio card instantly. Sync your repos, stars, contribution graph, and top languages without touching a single line of code. Free for developers.",
+  keywords: [
+    "github portfolio card generator",
+    "github profile card",
+    "github stats card",
+    "developer portfolio card",
+    "github contribution graph card",
+    "github portfolio website",
+    "github readme card generator",
+  ],
+  alternates: { canonical: "/github-portfolio-card" },
+  openGraph: {
+    title: "GitHub Portfolio Card Generator – Showcase Your GitHub Stats Instantly",
+    description:
+      "Sync your GitHub repos, stars, and contribution graph into a beautiful shareable portfolio card. Free for all developers.",
+    url: "/github-portfolio-card",
+    type: "website",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "GitHub Portfolio Card Generator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GitHub Portfolio Card Generator",
+    description: "Sync your GitHub stats into a beautiful shareable portfolio card.",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function GithubPortfolioCardPage() {

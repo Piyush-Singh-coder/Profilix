@@ -7,9 +7,35 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "Digital Portfolio Card for Students",
-  description: "Jumpstart your tech career. Generate a professional portfolio card and download an ATS-friendly resume to land your first internship or junior role.",
-  keywords: ["digital portfolio card for students", "student developer portfolio", "tech intern portfolio builder", "entry level resume generator"],
+  title: "Portfolio Card Builder for Students & Bootcamp Graduates – Get Hired Faster",
+  description:
+    "Launch your tech career with a professional portfolio card. Profilix automatically formats your student projects, GitHub activity, and hackathon wins into an ATS-ready resume. Perfect for internships and junior dev roles.",
+  keywords: [
+    "digital portfolio card for students",
+    "student developer portfolio",
+    "tech intern portfolio builder",
+    "entry level resume generator",
+    "bootcamp portfolio creator",
+    "junior developer portfolio",
+    "first tech job portfolio",
+    "github portfolio for students",
+    "cs student portfolio website",
+  ],
+  alternates: { canonical: "/student-portfolio-creator" },
+  openGraph: {
+    title: "Portfolio Card Builder for Students & Bootcamp Graduates",
+    description:
+      "Format your student projects, hackathons, and GitHub activity into a professional portfolio card and ATS-ready resume. Perfect for internships.",
+    url: "/student-portfolio-creator",
+    type: "website",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Portfolio Card Builder for Students" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Portfolio Card Builder for Students",
+    description: "Format your projects and GitHub into a professional portfolio card. Perfect for getting your first tech role.",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function StudentPortfolioPage() {

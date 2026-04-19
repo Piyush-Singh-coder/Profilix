@@ -7,9 +7,33 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "Developer Portfolio QR Code Generator",
-  description: "Share your digital portfolio via QR code instantly at hackathons, tech meetups, and job fairs. No app installation required.",
-  keywords: ["developer portfolio QR code", "digital portfolio card builder", "share portfolio via link and QR"],
+  title: "Developer Portfolio QR Code Generator – Share at Hackathons & Job Fairs",
+  description:
+    "Share your full digital portfolio via a QR code at hackathons, tech meetups, and job fairs. Let recruiters scan your GitHub stats, resume, and top projects instantly. No app needed.",
+  keywords: [
+    "developer portfolio QR code",
+    "portfolio QR code generator",
+    "share portfolio via QR code",
+    "hackathon portfolio card",
+    "digital business card developer",
+    "QR code portfolio link",
+    "tech meetup networking card",
+  ],
+  alternates: { canonical: "/qr-portfolio" },
+  openGraph: {
+    title: "Developer Portfolio QR Code Generator – Share at Hackathons & Job Fairs",
+    description:
+      "Let recruiters scan your GitHub stats, resume, and projects instantly at hackathons and job fairs. No app installation required.",
+    url: "/qr-portfolio",
+    type: "website",
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Developer Portfolio QR Code Generator" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Developer Portfolio QR Code Generator",
+    description: "Share your portfolio at hackathons and job fairs via QR code. No app needed.",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function QrPortfolioPage() {
