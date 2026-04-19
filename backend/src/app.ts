@@ -8,6 +8,9 @@ import { errorMiddleware } from "./middlewares/error.middleware";
 
 const app = express();
 
+// ── Proxy Trust (Required for Render/PaaS rate limiting) ──────────────────────
+app.set("trust proxy", 1);
+
 // ── Security Headers ──────────────────────────────────────────────────────────
 app.use(helmet());
 

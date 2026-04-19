@@ -12,9 +12,29 @@ import { useQRStore } from "@/store/useQRStore";
 import type { CardTheme } from "@/types";
 
 const EXPORT_SIZES = ["1080x1080", "1200x628", "1200x675", "1920x1080"] as const;
+const SIZE_INFO: Record<string, { label: string; sub: string; ratio: number }> = {
+  "1080x1080": { label: "Instagram", sub: "Post / Square", ratio: 1 },
+  "1200x628": { label: "LinkedIn", sub: "Wide Banner", ratio: 1.91 },
+  "1200x675": { label: "Twitter (X)", sub: "Landscape Post", ratio: 1.77 },
+  "1920x1080": { label: "Full HD", sub: "Presentation", ratio: 1.77 },
+};
 const CARD_THEMES: CardTheme[] = ["GLASSMORPHISM", "NEOBRUTALISM", "APPLE"];
 
 type ExportSize = (typeof EXPORT_SIZES)[number];
+
+function RatioBox({ ratio, active }: { ratio: number; active: boolean }) {
+  return (
+    <div className={`relative flex h-8 w-10 items-center justify-center rounded-md border ${active ? "border-primary/50 bg-primary/20" : "border-border bg-surface-low"} transition-all duration-300`}>
+      <div 
+        className={`rounded-[1.5px] border-[1.5px] ${active ? "border-primary" : "border-text-secondary/50"} transition-all duration-300`} 
+        style={{ 
+          width: ratio >= 1 ? "18px" : `${18 * ratio}px`, 
+          height: ratio >= 1 ? `${18 / ratio}px` : "18px" 
+        }} 
+      />
+    </div>
+  );
+}
 
 export default function QRDashboardPage() {
   const { user } = useAuthStore();
@@ -165,21 +185,35 @@ export default function QRDashboardPage() {
               ))}
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">Size</p>
-            <div className="grid gap-2 sm:grid-cols-4">
-              {EXPORT_SIZES.map((size) => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => setExportSize(size)}
-                  className={`rounded-[var(--radius-md)] border px-3 py-2 text-sm transition-colors ${
-                    exportSize === size ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface-low text-text-secondary"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Export Size</p>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {EXPORT_SIZES.map((size) => {
+                const info = SIZE_INFO[size];
+                const active = exportSize === size;
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setExportSize(size)}
+                    className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition-all duration-300 ${
+                      active 
+                        ? "border-primary bg-primary/10 shadow-sm shadow-primary/5" 
+                        : "border-border bg-surface-low hover:border-text-secondary/30 hover:bg-surface-medium"
+                    }`}
+                  >
+                    <RatioBox ratio={info.ratio} active={active} />
+                    <div className="flex flex-col">
+                      <span className={`text-sm font-bold transition-colors ${active ? "text-primary" : "text-text-primary group-hover:text-primary"}`}>
+                        {info.label}
+                      </span>
+                      <span className="text-[10px] font-medium text-text-tertiary">
+                        {info.sub}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="flex justify-end">
