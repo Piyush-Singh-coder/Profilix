@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { GitBranch, Loader2, Palette, RefreshCw, Save, CheckCircle2, ExternalLink } from "lucide-react";
+import { Loader2, Palette, RefreshCw, Save, CheckCircle2, ExternalLink } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -240,7 +241,7 @@ export default function IdentityDashboardPage() {
       <Card variant="surface">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <GitBranch className="h-5 w-5 text-primary" />
+            <FaGithub className="h-5 w-5 text-primary" />
             GitHub Sync
           </CardTitle>
           <CardDescription>

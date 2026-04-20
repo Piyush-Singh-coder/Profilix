@@ -8,13 +8,14 @@ import {
   ExternalLink,
   FileDown,
   FolderKanban,
-  GitBranch,
   Link as LinkIcon,
   MapPin,
   Sparkles,
   Star,
   Users,
+  Award
 } from "lucide-react";
+import { FaYoutube, FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import { PublicProfileData } from "@/types";
 
@@ -146,8 +147,10 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
     );
   }
 
-  const { fullName, avatarUrl, profile, socialLinks, projects, experiences, techStacks, resume, githubStats } =
+  const { fullName, avatarUrl, profile, socialLinks, projects, experiences, techStacks, resume, githubStats, achievements } =
     initialProfile;
+
+  const displayFullName = profile?.displayName || fullName;
 
 
   const theme = PUBLIC_THEMES[profile.theme] || PUBLIC_THEMES.GLASS;
@@ -167,7 +170,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border border-border bg-surface-high">
               <Image
                 src={avatarUrl || `https://api.dicebear.com/7.x/notionists/svg?seed=${initialUsername}`}
-                alt={fullName}
+                alt={displayFullName}
                 fill
                 className="object-cover"
                 unoptimized
@@ -180,7 +183,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                 <Sparkles className="h-3.5 w-3.5" />
                 {profile.theme} Theme
               </p>
-              <h1 className="font-heading text-4xl font-black sm:text-5xl">{fullName}</h1>
+              <h1 className="font-heading text-4xl font-black sm:text-5xl">{displayFullName}</h1>
               <p className={`mt-2 text-sm ${theme.muted}`}>@{initialUsername}</p>
               {profile.headline ? <p className="mt-4 text-lg font-medium">{profile.headline}</p> : null}
               {profile.bio ? <p className={`mt-3 max-w-3xl text-sm leading-relaxed ${theme.muted}`}>{profile.bio}</p> : null}
@@ -287,7 +290,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                         <Star className="h-3.5 w-3.5" /> {repo.stargazerCount}
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <GitBranch className="h-3.5 w-3.5" /> {repo.forkCount}
+                        <FaGithub className="h-3.5 w-3.5" /> {repo.forkCount}
                       </span>
                       {repo.primaryLanguage ? (
                         <span className={`inline-flex items-center gap-1 ${theme.muted}`}>
@@ -382,6 +385,13 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                         {project.description}
                       </p>
                     )}
+                    {project.bullets && project.bullets.length > 0 && (
+                      <ul className={`mt-3 list-disc space-y-1 pl-4 text-xs ${theme.muted}`}>
+                        {project.bullets.slice(0, 4).map((bullet, index) => (
+                          <li key={`${project.id}-bullet-${index}`}>{bullet}</li>
+                        ))}
+                      </ul>
+                    )}
                     {project.techTags && project.techTags.length > 0 && (
                       <div className="mt-4 flex flex-wrap gap-1.5">
                         {project.techTags.slice(0, 4).map((tag) => (
@@ -397,7 +407,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                   </div>
 
                   <div className="mt-6 flex items-center justify-between border-t border-border border-opacity-50 pt-4">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {project.repoUrl && (
                         <a
                           href={project.repoUrl}
@@ -406,7 +416,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                           className={`flex h-9 w-9 items-center justify-center rounded-full border border-border transition-all hover:bg-surface-high ${theme.accent}`}
                           title="View Repository"
                         >
-                          <GitBranch className="h-4.5 w-4.5" />
+                          <FaGithub className="h-4.5 w-4.5" />
                         </a>
                       )}
                       {project.liveUrl && (
@@ -420,8 +430,19 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                           <ExternalLink className="h-4.5 w-4.5" />
                         </a>
                       )}
+                      {project.videoUrl && (
+                        <a
+                          href={project.videoUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`flex h-9 w-9 items-center justify-center rounded-full border border-border transition-all hover:bg-surface-high ${theme.accent}`}
+                          title="Video Link"
+                        >
+                          <FaYoutube className="h-4.5 w-4.5" />
+                        </a>
+                      )}
                     </div>
-                    {(project.repoUrl || project.liveUrl) && (
+                    {(project.repoUrl || project.liveUrl || project.videoUrl) && (
                       <div className={`text-[10px] font-bold uppercase tracking-widest ${theme.muted}`}>
                         View Details
                       </div>
@@ -433,7 +454,45 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
           </section>
         ) : null}
 
-
+        {achievements && achievements.length > 0 ? (
+          <section className="mt-12">
+            <h2 className="font-heading text-2xl font-bold">Achievements</h2>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {achievements.map((achievement) => (
+                <article key={achievement.id} className={`flex items-start gap-4 rounded-2xl p-5 ${theme.card}`}>
+                  <div className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-high ${theme.accent}`}>
+                    <Award className="h-5 w-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-heading text-lg font-semibold">{achievement.title}</h3>
+                    {achievement.provider && <p className={`mt-0.5 text-sm ${theme.muted}`}>{achievement.provider}</p>}
+                    {achievement.description && (
+                      <p className={`mt-2 text-xs leading-relaxed ${theme.muted}`}>{achievement.description}</p>
+                    )}
+                    <div className="mt-3 flex items-center justify-between text-xs">
+                      {achievement.date && (
+                        <span className={`inline-flex items-center gap-1 ${theme.muted}`}>
+                          <CalendarDays className="h-3 w-3" />
+                          {formatMonthYear(achievement.date)}
+                        </span>
+                      )}
+                      {achievement.url && (
+                        <a
+                          href={achievement.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex items-center gap-1 font-medium hover:underline ${theme.accent}`}
+                        >
+                          View Credential <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {socialLinks.map((link) => (
@@ -455,7 +514,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
         <footer className={`mt-14 rounded-2xl p-6 ${theme.card}`}>
           <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <p className="font-heading text-lg font-semibold">Connect with {fullName.split(" ")[0]}</p>
+              <p className="font-heading text-lg font-semibold">Connect with {displayFullName.split(" ")[0]}</p>
               <p className={`mt-1 text-sm ${theme.muted}`}>
                 Built with Profilix - {socialLinks.length} social links - {projects.length} projects
               </p>

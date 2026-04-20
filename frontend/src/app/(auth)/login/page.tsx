@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { GitBranch, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import { signInWithPopup } from "firebase/auth";
 import { auth, githubProvider, googleProvider } from "@/lib/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -80,7 +81,7 @@ export default function LoginPage() {
           disabled={isLoading}
           className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 hover:bg-surface-high disabled:opacity-60"
         >
-          <GitBranch className="h-4 w-4" />
+          <FaGithub className="h-4 w-4" />
           GitHub
         </button>
       </div>

@@ -333,7 +333,7 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     <table class="layout" cellspacing="0" cellpadding="0">
       <tr>
         <td class="sidebar">
-          <div class="s-name">${escapeHtml(user.fullName)}</div>
+          <div class="s-name">${escapeHtml(user.profile?.displayName || user.fullName)}</div>
           <div class="s-headline">${escapeHtml(user.profile?.headline || "Software Engineer")}</div>
 
           <div class="s-section">Contact</div>
@@ -550,7 +550,7 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
       </style>
     </head>
     <body>
-      <h1 class="name">${escapeHtml(user.fullName)}</h1>
+      <h1 class="name">${escapeHtml(user.profile?.displayName || user.fullName)}</h1>
       <div class="contact">${headerLinks}</div>
       <div class="divider"></div>
       
@@ -602,7 +602,7 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
   children.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: user.fullName, bold: true, size: 36 })], // 18pt
+      children: [new TextRun({ text: user.profile?.displayName || user.fullName, bold: true, size: 36 })], // 18pt
     })
   );
 

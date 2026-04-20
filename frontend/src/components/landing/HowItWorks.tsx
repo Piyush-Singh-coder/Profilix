@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { GitBranch, Link as LinkIcon, Sliders } from "lucide-react";
+import { Link as LinkIcon, Sliders } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 
 const STEPS = [
   {
     id: 1,
-    icon: GitBranch,
+    icon: FaGithub,
     title: "Connect GitHub",
     description: "OAuth login pulls avatar and project context instantly.",
   },

@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ExternalLink, GitBranch } from "lucide-react";
+import { ArrowRight, ExternalLink } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "../ui/Button";
@@ -115,7 +116,7 @@ export function Hero() {
 
             <div className="mt-8 rounded-xl border border-border bg-surface-low p-4">
               <div className="mb-2 flex items-center gap-2 text-sm text-text-secondary">
-                <GitBranch className="h-4 w-4" />
+                <FaGithub className="h-4 w-4" />
                 <span>2,104 contributions</span>
               </div>
               <div className="flex gap-1">

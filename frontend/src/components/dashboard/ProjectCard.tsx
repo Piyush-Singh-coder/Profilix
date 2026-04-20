@@ -1,6 +1,7 @@
 "use client";
 
-import { ExternalLink, ExternalLinkIcon, GitBranch, Pin, Trash2 } from "lucide-react";
+import { ExternalLink, ExternalLinkIcon, Pin, Trash2 } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import { Project } from "@/types";
 import { SortableItem } from "@/components/ui/SortableItem";
 import { Button } from "@/components/ui/Button";
@@ -56,7 +57,7 @@ export default function ProjectCard({ project, onEdit, onDelete, onTogglePin }: 
               rel="noreferrer"
               className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] sm:px-3 sm:text-xs text-text-secondary transition-colors hover:border-primary/30 hover:text-primary"
             >
-              <GitBranch className="h-3.5 w-3.5" />
+              <FaGithub className="h-3.5 w-3.5" />
               Repo
             </a>
           ) : null}
