@@ -114,9 +114,6 @@ export const generateOGImage = async (username: string): Promise<Buffer> => {
   <!-- Top accent line -->
   <rect x="80" y="60" width="1040" height="3" fill="url(#accent)" rx="2" opacity="0.4"/>
 
-  <!-- Profilix wordmark -->
-  <text x="80" y="50" font-family="system-ui, -apple-system, sans-serif"
-        font-size="14" fill="#6366f1" letter-spacing="5" font-weight="700">PROFILIX</text>
 
   <!-- Name -->
   <text x="80" y="190" font-family="system-ui, -apple-system, sans-serif"

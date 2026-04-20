@@ -23,7 +23,7 @@ export function Logo({ size = 120, className, priority = true }: LogoProps) {
       width={size}
       height={size}
       priority={priority}
-      quality={100} // High quality, but loader will optimize with q-auto if needed
+      quality={75}
       className={cn("object-contain", className)}
     />
   );

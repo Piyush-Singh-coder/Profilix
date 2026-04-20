@@ -12,6 +12,7 @@ interface DialogProps {
   title?: string;
   description?: string;
   className?: string;
+  hideCloseButton?: boolean;
   children: React.ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function Dialog({
   title,
   description,
   className,
+  hideCloseButton,
   children,
 }: DialogProps) {
   useEffect(() => {
@@ -64,13 +66,15 @@ export function Dialog({
                 {title ? <h3 className="text-xl font-bold text-text-primary">{title}</h3> : null}
                 {description ? <p className="mt-1 text-sm text-text-secondary">{description}</p> : null}
               </div>
-              <button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                className="rounded-full p-2 text-text-secondary transition-colors hover:bg-surface-high hover:text-text-primary"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              {!hideCloseButton && (
+                <button
+                  type="button"
+                  onClick={() => onOpenChange(false)}
+                  className="rounded-full p-2 text-text-secondary transition-colors hover:bg-surface-high hover:text-text-primary"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
             {children}
           </motion.div>

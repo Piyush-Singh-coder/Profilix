@@ -13,5 +13,6 @@ router.put("/", validate(updateProfileSchema), profileController.updateProfile);
 router.post("/avatar", profileController.multerMiddleware, profileController.uploadAvatar);
 router.put("/tech-stack", validate(updateTechStackSchema), profileController.updateTechStack);
 router.get("/tech-stack/options", profileController.getTechStackOptions);
+router.get("/completeness", profileController.getCompleteness);
 
 export default router;

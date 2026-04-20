@@ -10,7 +10,9 @@ import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { useResumeStore } from "@/store/useResumeStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useProfileStore } from "@/store/useProfileStore";
 import { cn } from "@/lib/utils";
+import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 // import { InfoLayout } from "@/components/layout/InfoLayout";
 
 export default function ResumePage() {
@@ -24,10 +26,25 @@ export default function ResumePage() {
   const [useAI, setUseAI] = useState(false);
   const [format, setFormat] = useState<"pdf" | "docx">("pdf");
   const [templateType, setTemplateType] = useState<"ATS" | "DESIGN">("ATS");
+  
+  const { completeness, fetchProfileCompleteness } = useProfileStore();
+  const [showBlockerModal, setShowBlockerModal] = useState(false);
+  const [hasDismissedOnCurrentVisit, setHasDismissedOnCurrentVisit] = useState(false);
 
   useEffect(() => {
     fetchResume();
-  }, [fetchResume]);
+    fetchProfileCompleteness();
+  }, [fetchResume, fetchProfileCompleteness]);
+
+  useEffect(() => {
+    if (completeness) {
+      const requiredFields = ["identity", "projects", "skills", "experience", "achievements"];
+      const isMissingFields = requiredFields.some(field => !completeness[field]);
+      if (isMissingFields && !hasDismissedOnCurrentVisit) {
+        setShowBlockerModal(true);
+      }
+    }
+  }, [completeness, hasDismissedOnCurrentVisit]);
 
   const validateFile = (file: File) => {
     if (file.type !== "application/pdf") return "Please upload a PDF resume.";
@@ -308,6 +325,15 @@ export default function ResumePage() {
           )}
         </CardContent>
       </Card>
+
+      <OnboardingModal 
+        mode="BLOCKER" 
+        open={showBlockerModal} 
+        onClose={() => {
+          setShowBlockerModal(false);
+          setHasDismissedOnCurrentVisit(true);
+        }} 
+      />
     </div>
   );
 }

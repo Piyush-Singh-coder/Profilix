@@ -53,3 +53,10 @@ export const getTechStackOptions = async (req: Request, res: Response, next: Nex
     sendSuccess(res, options);
   } catch (error) { next(error); }
 };
+
+export const getCompleteness = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const completeness = await profileService.getProfileCompleteness(req.user!.id);
+    sendSuccess(res, completeness);
+  } catch (error) { next(error); }
+};

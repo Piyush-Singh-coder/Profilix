@@ -64,9 +64,6 @@ const generateLockScreenBuffer = async (
   <!-- Top accent bar -->
   <rect x="40" y="60" width="460" height="4" fill="url(#accent)" rx="2"/>
 
-  <!-- App name -->
-  <text x="270" y="110" font-family="system-ui, -apple-system, sans-serif"
-        font-size="16" fill="#6366f1" text-anchor="middle" letter-spacing="4" font-weight="600">PROFILIX</text>
 
   <!-- Name -->
   <text x="270" y="190" font-family="system-ui, -apple-system, sans-serif"

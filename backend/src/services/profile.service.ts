@@ -107,3 +107,25 @@ export const uploadAvatar = async (userId: string, fileBuffer: Buffer) => {
     data: { avatarUrl: result.secure_url },
   });
 };
+
+export const getProfileCompleteness = async (userId: string) => {
+  const [profile, projectsCount, experienceCount, achievementsCount, educationCount] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { userId },
+      select: { bio: true, headline: true, techStacks: { select: { techId: true }, take: 1 } },
+    }),
+    prisma.project.count({ where: { userId } }),
+    prisma.experience.count({ where: { userId } }),
+    prisma.achievement.count({ where: { userId } }),
+    prisma.education.count({ where: { userId } }),
+  ]);
+
+  return {
+    identity: !!(profile?.bio && profile?.headline),
+    projects: projectsCount > 0,
+    skills: (profile?.techStacks?.length ?? 0) > 0,
+    experience: experienceCount > 0,
+    achievements: achievementsCount > 0,
+    education: educationCount > 0,
+  };
+};

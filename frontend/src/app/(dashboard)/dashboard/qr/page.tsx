@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useQRStore } from "@/store/useQRStore";
+import { useProfileStore } from "@/store/useProfileStore";
+import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 import type { CardTheme } from "@/types";
 
 const EXPORT_SIZES = ["1080x1080", "1200x628", "1200x675", "1920x1080"] as const;
@@ -39,6 +41,9 @@ function RatioBox({ ratio, active }: { ratio: number; active: boolean }) {
 export default function QRDashboardPage() {
   const { user } = useAuthStore();
   const { standardQR, lockScreenQR, isLoading, error, fetchQR } = useQRStore();
+  const { completeness, fetchProfileCompleteness } = useProfileStore();
+  const [showBlockerModal, setShowBlockerModal] = useState(false);
+  const [hasDismissedOnCurrentVisit, setHasDismissedOnCurrentVisit] = useState(false);
 
   const [copied, setCopied] = useState(false);
   const [exportSize, setExportSize] = useState<ExportSize>("1080x1080");
@@ -49,7 +54,18 @@ export default function QRDashboardPage() {
   useEffect(() => {
     fetchQR("STANDARD");
     fetchQR("LOCK_SCREEN");
-  }, [fetchQR]);
+    fetchProfileCompleteness();
+  }, [fetchQR, fetchProfileCompleteness]);
+
+  useEffect(() => {
+    if (completeness) {
+      const requiredFields = ["identity", "projects", "skills", "experience", "achievements"];
+      const isMissingFields = requiredFields.some(field => !completeness[field]);
+      if (isMissingFields && !hasDismissedOnCurrentVisit) {
+        setShowBlockerModal(true);
+      }
+    }
+  }, [completeness, hasDismissedOnCurrentVisit]);
 
   const profileUrl = useMemo(() => {
     if (typeof window === "undefined" || !user?.username) return "";
@@ -290,7 +306,14 @@ export default function QRDashboardPage() {
         </Card>
       </div>
 
-
+      <OnboardingModal 
+        mode="BLOCKER" 
+        open={showBlockerModal} 
+        onClose={() => {
+          setShowBlockerModal(false);
+          setHasDismissedOnCurrentVisit(true);
+        }} 
+      />
     </div>
   );
 }

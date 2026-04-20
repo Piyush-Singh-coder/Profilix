@@ -8,6 +8,8 @@ interface ProfileState {
   isLoadingOptions: boolean;
   isLoading: boolean;
   isSaving: boolean;
+  completeness: Record<string, boolean> | null;
+  isLoadingCompleteness: boolean;
   error: string | null;
 
   fetchTechStackOptions: () => Promise<void>;
@@ -15,6 +17,7 @@ interface ProfileState {
   updateProfile: (data: Partial<Profile>) => Promise<void>;
   updateTheme: (theme: ProfileTheme) => Promise<void>;
   updateTechStack: (techIds: string[]) => Promise<void>;
+  fetchProfileCompleteness: () => Promise<void>;
 }
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
@@ -23,6 +26,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   isLoadingOptions: false,
   isLoading: false,
   isSaving: false,
+  completeness: null,
+  isLoadingCompleteness: false,
   error: null,
 
   fetchTechStackOptions: async () => {
@@ -40,6 +45,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Profile>>("/profile");
       set({ profile: data.data, isLoading: false });
+      // Refresh completeness whenever profile is fetched/updated
+      get().fetchProfileCompleteness();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({ error: err.response?.data?.message || "Failed to fetch profile", isLoading: false });
@@ -56,6 +63,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ isSaving: true, error: null });
       const { data } = await api.put<ApiSuccessResponse<Profile>>("/profile", updates);
       set({ profile: data.data, isSaving: false });
+      get().fetchProfileCompleteness();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       if (originalProfile) set({ profile: originalProfile });
@@ -74,6 +82,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ isSaving: true, error: null });
       const { data } = await api.put<ApiSuccessResponse<Profile>>("/profile", { theme });
       set({ profile: data.data, isSaving: false });
+      get().fetchProfileCompleteness();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       if (originalProfile) set({ profile: originalProfile });
@@ -91,6 +100,17 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const err = error as { response?: { data?: { message?: string } } };
       set({ error: err.response?.data?.message || "Failed to update tech stack", isSaving: false });
       throw error;
+    }
+  },
+  
+  fetchProfileCompleteness: async () => {
+    try {
+      set({ isLoadingCompleteness: true });
+      const { data } = await api.get("/profile/completeness");
+      set({ completeness: data.data, isLoadingCompleteness: false });
+    } catch (error) {
+      console.error("[ProfileStore] fetchProfileCompleteness failed:", error);
+      set({ isLoadingCompleteness: false });
     }
   }
 }));

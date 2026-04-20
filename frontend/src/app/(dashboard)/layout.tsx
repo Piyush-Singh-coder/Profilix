@@ -17,7 +17,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showMobilePreview, setShowMobilePreview] = useState(false);
 
   const { isAuthenticated, isLoading: isAuthLoading, checkAuth } = useAuthStore();
-  const { profile, fetchProfile, isLoading: isProfileLoading } = useProfileStore();
+  const { profile, fetchProfile, fetchProfileCompleteness, isLoading: isProfileLoading } = useProfileStore();
 
   const isLoading = useMemo(
     () => isBooting || isAuthLoading || (isAuthenticated && isProfileLoading && !profile),
@@ -41,8 +41,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (isAuthenticated) {
       fetchProfile();
+      fetchProfileCompleteness();
     }
-  }, [isAuthenticated, fetchProfile]);
+  }, [isAuthenticated, fetchProfile, fetchProfileCompleteness]);
 
   useEffect(() => {
     if (!profile?.theme) return;

@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ProfileStatus, ProfileTheme } from "@/types";
+import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 
 const PROFILE_STATUSES: Array<{ value: ProfileStatus; label: string }> = [
   { value: "LOOKING_FOR_ROLES", label: "Looking For Roles" },
@@ -43,6 +44,7 @@ export default function IdentityDashboardPage() {
   const [githubSummary, setGithubSummary] = useState(
     "No GitHub sync yet. Sync once to display contribution graph publicly."
   );
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
 
   const [formData, setFormData] = useState({
     displayName: "",
@@ -73,7 +75,21 @@ export default function IdentityDashboardPage() {
   useEffect(() => {
     fetchProfile();
     fetchGithubStats();
+    
+    // Welcome Modal Logic
+    const hasSeenWelcome = localStorage.getItem("profilix_welcome_shown");
+    if (!hasSeenWelcome) {
+      const timer = setTimeout(() => {
+        setShowWelcomeModal(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    }
   }, [fetchProfile]);
+  
+  const handleCloseWelcome = () => {
+    setShowWelcomeModal(false);
+    localStorage.setItem("profilix_welcome_shown", "true");
+  };
 
   useEffect(() => {
     if (!profile) return;
@@ -299,6 +315,12 @@ export default function IdentityDashboardPage() {
           Save Identity
         </Button>
       </div>
+
+      <OnboardingModal 
+        mode="WELCOME" 
+        open={showWelcomeModal} 
+        onClose={handleCloseWelcome} 
+      />
     </div>
   );
 }
