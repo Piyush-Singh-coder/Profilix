@@ -42,7 +42,7 @@ export function Footer() {
               <li><Link href="/github-portfolio-card" className="hover:text-primary transition-colors">GitHub Sync & Stats</Link></li>
               <li><Link href="/qr-portfolio" className="hover:text-primary transition-colors">QR Portfolio Sharing</Link></li>
               <li><Link href="/student-portfolio-creator" className="hover:text-primary transition-colors">For IT Students</Link></li>
-              <li><Link href="/auth" className="hover:text-primary transition-colors">ATS Resume Generator</Link></li>
+              <li><Link href="/ats-resume-generator" className="hover:text-primary transition-colors">ATS Resume Generator</Link></li>
             </ul>
           </div>
 

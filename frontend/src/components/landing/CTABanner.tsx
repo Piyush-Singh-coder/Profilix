@@ -28,7 +28,7 @@ export function CTABanner() {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/auth">
+            <Link href="/dashboard">
               <Button variant="primary" size="lg" className="w-full sm:w-auto text-lg px-8 py-6 rounded-full group">
                 Create Your Profile Free
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />

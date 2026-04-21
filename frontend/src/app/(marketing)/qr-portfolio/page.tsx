@@ -58,7 +58,7 @@ export default function QrPortfolioPage() {
             Attending a hackathon or a job fair? Let recruiters scan your dynamic QR code and instantly bookmark your GitHub stats, resume, and featured projects on their phones.
           </p>
           <div className="flex justify-center">
-            <Link href="/auth">
+            <Link href="/dashboard/qr">
               <Button size="lg" className="rounded-full px-8 py-6 text-lg">
                 <QrCode className="w-5 h-5 mr-2" /> Generate Your QR Now
               </Button>
