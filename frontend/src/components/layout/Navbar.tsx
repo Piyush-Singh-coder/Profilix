@@ -62,7 +62,7 @@ export function Navbar() {
                   <Link href="/login">
                     <Button variant="ghost">Sign In</Button>
                   </Link>
-                  <Link href="/signup">
+                  <Link href="/register">
                     <Button className="gap-2 bg-primary text-white hover:bg-primary/90">
                       <Sparkles className="h-4 w-4" />
                       Get Started

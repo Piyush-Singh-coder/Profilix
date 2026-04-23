@@ -19,7 +19,7 @@ const FAQS = [
   },
   {
     question: "Can I use my own domain?",
-    answer: "Currently, profiles are hosted on our high-speed domains (e.g. profilix.qzz.io/yourname). Custom domain support is on our roadmap for Q3.",
+    answer: "Currently, profiles are hosted on our high-speed domains (e.g. profilix.site/yourname). Custom domain support is on our roadmap for Q3.",
   },
   {
     question: "What happens if I make my profile private?",

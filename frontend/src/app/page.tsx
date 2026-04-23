@@ -41,7 +41,7 @@ const faqJsonLd = {
       name: "Can I use my own domain?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Currently, profiles are hosted on our high-speed domains (e.g. profilix.qzz.io/yourname). Custom domain support is on our roadmap for Q3.",
+        text: "Currently, profiles are hosted on our high-speed domains (e.g. profilix.site/yourname). Custom domain support is on our roadmap for Q3.",
       },
     },
     {
@@ -59,12 +59,12 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Profilix",
-  url: "https://profilix.qzz.io",
+  url: "https://profilix.site",
   description:
     "The best ATS resume generator and portfolio card creator for developers. Sync your GitHub, showcase your projects, and share via QR code.",
   potentialAction: {
     "@type": "SearchAction",
-    target: "https://profilix.qzz.io/u/{search_term_string}",
+    target: "https://profilix.site/u/{search_term_string}",
     "query-input": "required name=search_term_string",
   },
 };

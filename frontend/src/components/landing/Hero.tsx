@@ -49,11 +49,11 @@ export function Hero() {
             Premium Developer Identity
           </div>
           <h1 className="mt-7 font-heading text-6xl font-black leading-[1.03] tracking-tight text-text-primary sm:text-7xl lg:text-[80px]">
-            Your code.
+            Create.
             <br />
-            Your career.
+            Impress.
             <br />
-            <span className="animated-gradient-text">One link.</span>
+            <span className="animated-gradient-text">Get Hired.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">
             Stop sending five links. Profilix is the <strong>easiest way to generate best-in-class, ATS-friendly resumes</strong> and premium developer identity cards from one setup.
@@ -77,7 +77,7 @@ export function Hero() {
                 <Link href="/register">
                   <Button size="lg">Build My Profile Free</Button>
                 </Link>
-                <Link href="/u/alex">
+                <Link href="/u/piyushsingh">
                   <Button variant="outline" size="lg" className="group">
                     See Live Example
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

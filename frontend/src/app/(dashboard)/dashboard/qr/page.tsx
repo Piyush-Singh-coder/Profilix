@@ -58,6 +58,12 @@ export default function QRDashboardPage() {
   }, [fetchQR, fetchProfileCompleteness]);
 
   useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (completeness) {
       const requiredFields = ["identity", "projects", "skills", "experience", "achievements"];
       const isMissingFields = requiredFields.some(field => !completeness[field]);
@@ -131,12 +137,6 @@ export default function QRDashboardPage() {
         <h1 className="font-heading text-3xl font-bold">Share & QR</h1>
         <p className="mt-1 text-sm text-text-secondary">Copy your profile URL, download QR assets and export profile cards.</p>
       </div>
-
-      {error ? (
-        <div className="rounded-[var(--radius-md)] border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
-      ) : null}
 
       <Card variant="glass">
         <CardHeader>

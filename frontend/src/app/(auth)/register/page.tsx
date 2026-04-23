@@ -10,6 +10,7 @@ import { auth, githubProvider, googleProvider } from "@/lib/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -21,14 +22,12 @@ export default function RegisterPage() {
     email: "",
     password: "",
   });
-  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setFormError(null);
 
     if (!form.fullName.trim() || !form.username.trim() || !form.email.trim() || !form.password.trim()) {
-      setFormError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
 
@@ -39,14 +38,14 @@ export default function RegisterPage() {
         email: form.email.trim().toLowerCase(),
         password: form.password,
       });
+      toast.success("Successfully registered! Please verify your email.");
       router.push("/verify");
-    } catch {
-      // Store handles error state.
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Registration failed.");
     }
   };
 
   const handleOAuth = async (provider: "google" | "github") => {
-    setFormError(null);
     try {
       if (provider === "google") {
         const result = await signInWithPopup(auth, googleProvider);
@@ -57,11 +56,11 @@ export default function RegisterPage() {
         const idToken = await result.user.getIdToken();
         await githubLogin(idToken);
       }
+      toast.success("Successfully logged in");
       router.push("/dashboard");
-    } catch (oauthError: unknown) {
-      const err = oauthError as { code?: string; message?: string };
-      if (err.code !== "auth/popup-closed-by-user") {
-        setFormError(err.message || "Authentication failed.");
+    } catch (oauthError: any) {
+      if (oauthError.code !== "auth/popup-closed-by-user") {
+        toast.error(oauthError.message || "Authentication failed.");
       }
     }
   };
@@ -104,11 +103,6 @@ export default function RegisterPage() {
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-        {(formError || error) && (
-          <div className="rounded-[var(--radius-md)] border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
-            {formError || error}
-          </div>
-        )}
         <Input
           label="Full Name"
           value={form.fullName}

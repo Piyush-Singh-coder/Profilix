@@ -18,7 +18,7 @@ export function Logo({ size = 120, className, priority = true }: LogoProps) {
   return (
     <Image
       loader={imageKitLoader}
-      src="profilix_Logo.png" // The loader will prepend the endpoint
+      src="profilix.png" // The loader will prepend the endpoint
       alt="Profilix Logo"
       width={size}
       height={size}

@@ -66,7 +66,7 @@ export default async function UserProfilePage({ params, searchParams }: PageProp
   const { mode } = await searchParams;
   const profile = await fetchPublicProfile(username, mode);
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profilix.qzz.io";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site";
   const ogUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://backend-profilix.onrender.com/api"}/u/${username}/og`;
 
   const personJsonLd = profile

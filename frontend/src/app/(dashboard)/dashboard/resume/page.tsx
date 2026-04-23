@@ -20,7 +20,6 @@ export default function ResumePage() {
     useResumeStore();
   const { user } = useAuthStore();
   const [dragActive, setDragActive] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [useAI, setUseAI] = useState(false);
@@ -35,6 +34,12 @@ export default function ResumePage() {
     fetchResume();
     fetchProfileCompleteness();
   }, [fetchResume, fetchProfileCompleteness]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (completeness) {
@@ -55,11 +60,10 @@ export default function ResumePage() {
   const handleUpload = async (file: File) => {
     const validationError = validateFile(file);
     if (validationError) {
-      setLocalError(validationError);
+      toast.error(validationError);
       return;
     }
 
-    setLocalError(null);
     try {
       await uploadResume(file);
       toast.success("Resume uploaded");
@@ -109,8 +113,6 @@ export default function ResumePage() {
     );
   }
 
-  const activeError = localError || error;
-
   return (
     <div className="animate-in space-y-8 pb-24">
       <div className="border-b border-border pb-5">
@@ -119,13 +121,6 @@ export default function ResumePage() {
           Generate a professional resume (PDF/DOCX) with multiple templates or upload your own.
         </p>
       </div>
-
-      {activeError ? (
-        <div className="flex items-start gap-3 rounded-[var(--radius-md)] border border-danger/30 bg-danger/10 p-4 text-sm text-danger">
-          <AlertCircle className="mt-0.5 h-4 w-4" />
-          <span>{activeError}</span>
-        </div>
-      ) : null}
 
       <Card variant="glass" className="relative z-10">
         <CardHeader>

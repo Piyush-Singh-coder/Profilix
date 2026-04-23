@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     "tech resume generator",
     "github stats card",
   ],
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://profilix.qzz.io"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site"),
   robots: {
     index: true,
     follow: true,
@@ -71,13 +71,10 @@ export const metadata: Metadata = {
       "Create beautiful, shareable portfolio cards with QR codes, GitHub stats, and ATS-ready resumes. Free for developers.",
     images: ["/og-default.png"],
   },
-  alternates: {
-    canonical: "/",
-  },
   icons: {
-    icon: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix_Logo.png",
-    shortcut: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix_Logo.png",
-    apple: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix_Logo.png",
+    icon: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
+    shortcut: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
+    apple: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
   },
 };
 
@@ -98,12 +95,14 @@ export default function RootLayout({
           richColors
           closeButton
           theme="dark"
-          position="top-right"
+          position="top-center"
           toastOptions={{
             style: {
               background: "var(--surface)",
               color: "var(--text-primary)",
               border: "1px solid var(--border)",
+              padding: "16px 24px",
+              fontSize: "15px",
             },
           }}
         />

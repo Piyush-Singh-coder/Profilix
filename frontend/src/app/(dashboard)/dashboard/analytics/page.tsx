@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import { Activity, AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAnalyticsStore } from "@/store/useAnalyticsStore";
 import { AnalyticsEventType } from "@/types";
@@ -38,6 +39,12 @@ export default function AnalyticsPage() {
   useEffect(() => {
     fetchAnalytics();
   }, [fetchAnalytics]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const total = useMemo(() => summary.reduce((acc, row) => acc + row.count, 0), [summary]);
 
@@ -80,13 +87,6 @@ export default function AnalyticsPage() {
         <h1 className="font-heading text-3xl font-bold">Analytics</h1>
         <p className="mt-1 text-sm text-text-secondary">Track profile engagement and interaction patterns.</p>
       </div>
-
-      {error ? (
-        <div className="flex items-start gap-3 rounded-[var(--radius-md)] border border-danger/30 bg-danger/10 p-4 text-sm text-danger">
-          <AlertCircle className="mt-0.5 h-4 w-4" />
-          <span>{error}</span>
-        </div>
-      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(Object.keys(EVENT_LABELS) as AnalyticsEventType[]).map((eventType) => (
