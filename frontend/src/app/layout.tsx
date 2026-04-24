@@ -72,9 +72,13 @@ export const metadata: Metadata = {
     images: ["/og-default.png"],
   },
   icons: {
-    icon: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
-    shortcut: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
-    apple: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
+    icon: [
+      { url: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png?tr=w-192,h-192", type: "image/png" },
+    ],
+    shortcut: ["https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png?tr=w-192,h-192"],
+    apple: [
+      { url: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png?tr=w-192,h-192", sizes: "192x192", type: "image/png" },
+    ],
   },
 };
 
