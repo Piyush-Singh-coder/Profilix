@@ -109,7 +109,7 @@ export function Navbar() {
                 <Link href="/login" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="ghost" className="w-full justify-start">Sign In</Button>
                 </Link>
-                <Link href="/signup" onClick={() => setIsMenuOpen(false)}>
+                <Link href="/register" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full justify-start gap-2">
                     <Sparkles className="h-4 w-4" />
                     Get Started
