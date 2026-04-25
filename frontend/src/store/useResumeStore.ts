@@ -24,7 +24,7 @@ interface ResumeState {
   }) => Promise<void>;
 }
 
-export const useResumeStore = create<ResumeState>((set) => ({
+export const useResumeStore = create<ResumeState>((set, get) => ({
   resume: null,
   isLoading: false,
   isUploading: false,
