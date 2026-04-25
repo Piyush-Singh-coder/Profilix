@@ -33,6 +33,8 @@ export const useEducationStore = create<EducationState>((set, get) => ({
   error: null,
 
   fetchEducations: async () => {
+    // Guard: skip if already fetching
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Education[]>>("/education");

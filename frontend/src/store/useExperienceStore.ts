@@ -33,6 +33,8 @@ export const useExperienceStore = create<ExperienceState>((set, get) => ({
   error: null,
 
   fetchExperiences: async () => {
+    // Guard: skip if already fetching
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Experience[]>>("/experience");

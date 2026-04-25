@@ -196,28 +196,29 @@ export default function AchievementsPage() {
 
     const previousOrder = achievementOrder;
     const nextOrder = arrayMove(achievementOrder, oldIndex, newIndex);
+    // Optimistic update immediately for instant UI response
     setAchievementOrder(nextOrder);
 
     try {
-      // Update displayOrder for all affected items
-      const updates = nextOrder.map((achievement, index) => ({
-        id: achievement.id,
-        displayOrder: index,
-      }));
-
-      // Update each item's displayOrder
-      for (const update of updates) {
-        const achievement = nextOrder.find(a => a.id === update.id);
-        if (achievement && achievement.displayOrder !== update.displayOrder) {
-          await updateAchievement(update.id, { displayOrder: update.displayOrder });
-        }
-      }
+      // Single batch API call instead of N sequential calls
+      const orderedIds = nextOrder.map((a, index) => ({ id: a.id, displayOrder: index }));
+      await Promise.all(
+        orderedIds
+          .filter((item) => {
+            const original = previousOrder.find((a) => a.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) =>
+            updateAchievement(id, { displayOrder })
+          )
+      );
       toast.success("Achievement order updated");
     } catch {
       setAchievementOrder(previousOrder);
       toast.error("Failed to reorder achievements");
     }
   };
+
 
   if (isLoading && achievementOrder.length === 0) {
     return (

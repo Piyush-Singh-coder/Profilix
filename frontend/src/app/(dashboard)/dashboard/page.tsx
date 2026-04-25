@@ -74,7 +74,6 @@ export default function IdentityDashboardPage() {
   };
 
   useEffect(() => {
-    fetchProfile();
     fetchGithubStats();
     
     // Welcome Modal Logic
@@ -85,7 +84,8 @@ export default function IdentityDashboardPage() {
       }, 800);
       return () => clearTimeout(timer);
     }
-  }, [fetchProfile]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const handleCloseWelcome = () => {
     setShowWelcomeModal(false);

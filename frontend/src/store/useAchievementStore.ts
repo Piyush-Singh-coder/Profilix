@@ -31,6 +31,8 @@ export const useAchievementStore = create<AchievementState>((set, get) => ({
   error: null,
 
   fetchAchievements: async () => {
+    // Guard: skip if already fetching
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Achievement[]>>("/achievements");

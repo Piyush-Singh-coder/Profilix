@@ -23,6 +23,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   error: null,
 
   fetchProjects: async () => {
+    // Guard: skip if already fetching
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Project[]>>("/projects");

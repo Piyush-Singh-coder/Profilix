@@ -31,6 +31,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   error: null,
 
   fetchTechStackOptions: async () => {
+    // Avoid double-fetching if already loaded
+    if (get().techStackOptions.length > 0) return;
     try {
       set({ isLoadingOptions: true });
       const { data } = await api.get<ApiSuccessResponse<TechStack[]>>("/profile/tech-stack/options");
@@ -41,12 +43,12 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
 
   fetchProfile: async () => {
+    // Avoid re-fetching if already in flight
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Profile>>("/profile");
       set({ profile: data.data, isLoading: false });
-      // Refresh completeness whenever profile is fetched/updated
-      get().fetchProfileCompleteness();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       set({ error: err.response?.data?.message || "Failed to fetch profile", isLoading: false });
@@ -55,6 +57,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   updateProfile: async (updates) => {
     const originalProfile = get().profile;
+    // Optimistic update - immediate UI response
     if (originalProfile) {
       set({ profile: { ...originalProfile, ...updates } });
     }
@@ -63,9 +66,11 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ isSaving: true, error: null });
       const { data } = await api.put<ApiSuccessResponse<Profile>>("/profile", updates);
       set({ profile: data.data, isSaving: false });
+      // Fire completeness check in background, don't await
       get().fetchProfileCompleteness();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
+      // Roll back optimistic update on failure
       if (originalProfile) set({ profile: originalProfile });
       set({ error: err.response?.data?.message || "Failed to update profile", isSaving: false });
       throw error;
@@ -74,6 +79,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   updateTheme: async (theme) => {
     const originalProfile = get().profile;
+    // Optimistic update - instant visual feedback
     if (originalProfile) {
       set({ profile: { ...originalProfile, theme } });
     }
@@ -82,7 +88,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ isSaving: true, error: null });
       const { data } = await api.put<ApiSuccessResponse<Profile>>("/profile", { theme });
       set({ profile: data.data, isSaving: false });
-      get().fetchProfileCompleteness();
+      // Theme change doesn't affect completeness - skip the check
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       if (originalProfile) set({ profile: originalProfile });
@@ -104,12 +110,18 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   },
   
   fetchProfileCompleteness: async () => {
+    // Guard: don't fire if already loading
+    if (get().isLoadingCompleteness) return;
     try {
       set({ isLoadingCompleteness: true });
       const { data } = await api.get("/profile/completeness");
       set({ completeness: data.data, isLoadingCompleteness: false });
-    } catch (error) {
-      console.error("[ProfileStore] fetchProfileCompleteness failed:", error);
+    } catch (error: unknown) {
+      const err = error as { response?: { status?: number } };
+      // Silently ignore 401 - user may not be authenticated yet
+      if (err.response?.status !== 401) {
+        console.error("[ProfileStore] fetchProfileCompleteness failed:", error);
+      }
       set({ isLoadingCompleteness: false });
     }
   }

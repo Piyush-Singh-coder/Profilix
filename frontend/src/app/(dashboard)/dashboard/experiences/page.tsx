@@ -180,28 +180,27 @@ export default function ExperiencesPage() {
 
     const previousOrder = experienceOrder;
     const nextOrder = arrayMove(experienceOrder, oldIndex, newIndex);
+    // Optimistic update immediately for instant UI response
     setExperienceOrder(nextOrder);
 
     try {
-      // Update displayOrder for all affected items
-      const updates = nextOrder.map((experience, index) => ({
-        id: experience.id,
-        displayOrder: index,
-      }));
-
-      // Update each item's displayOrder
-      for (const update of updates) {
-        const experience = nextOrder.find(e => e.id === update.id);
-        if (experience && experience.displayOrder !== update.displayOrder) {
-          await updateExperience(update.id, { displayOrder: update.displayOrder });
-        }
-      }
+      // Single parallel batch call instead of N sequential calls
+      const updates = nextOrder.map((exp, index) => ({ id: exp.id, displayOrder: index }));
+      await Promise.all(
+        updates
+          .filter((item) => {
+            const original = previousOrder.find((e) => e.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) => updateExperience(id, { displayOrder }))
+      );
       toast.success("Experience order updated");
     } catch {
       setExperienceOrder(previousOrder);
       toast.error("Failed to reorder experiences");
     }
   };
+
 
   if (isLoading && experienceOrder.length === 0) {
     return (

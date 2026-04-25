@@ -34,6 +34,8 @@ export const useResumeStore = create<ResumeState>((set) => ({
   uploadProgress: 0,
 
   fetchResume: async () => {
+    // Guard: skip if already fetching
+    if (get().isLoading) return;
     try {
       set({ isLoading: true, error: null });
       const { data } = await api.get<ApiSuccessResponse<Resume>>("/resume");
