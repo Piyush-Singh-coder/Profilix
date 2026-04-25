@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, Download, FileText, Info, Layout, FileStack, Loader2, Trash2, UploadCloud } from "lucide-react";
+import Link from "next/link";
+import { AlertCircle, Download, FileText, Info, Layout, FileStack, Loader2, Trash2, UploadCloud, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -116,7 +117,13 @@ export default function ResumePage() {
   return (
     <div className="animate-in space-y-8 pb-24">
       <div className="border-b border-border pb-5">
-        <h1 className="font-heading text-3xl font-bold">Resume</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="font-heading text-3xl font-bold">Resume</h1>
+          <Link href="/blog/ats-friendly-resume-best-practices" className="group flex items-center text-sm font-medium text-primary hover:text-primary-hover transition-colors">
+            <BookOpen className="mr-1.5 h-4 w-4" />
+            <span className="underline underline-offset-4 decoration-primary/30 group-hover:decoration-primary">Read Best Practices</span>
+          </Link>
+        </div>
         <p className="mt-1 text-sm text-text-secondary">
           Generate a professional resume (PDF/DOCX) with multiple templates or upload your own.
         </p>

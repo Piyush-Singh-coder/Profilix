@@ -51,9 +51,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Profilix – Modern Portfolio Creator for Developers",
+    title: "Profilix – Best ATS Resume Generator & Premium Portfolio QR Cards",
     description:
-      "Create beautiful, shareable portfolio cards with QR codes, GitHub stats, and ATS-ready resumes. Free for developers.",
+      "Generate the best ATS-friendly resumes and premium design portfolio cards with QR codes and GitHub stats. The easiest way to create a professional identity for developers and freelancers.",
     siteName: "Profilix",
     images: [
       {
@@ -66,9 +66,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Profilix – Modern Portfolio Creator for Developers",
+    title: "Profilix – Best ATS Resume Generator & Premium Portfolio QR Cards",
     description:
-      "Create beautiful, shareable portfolio cards with QR codes, GitHub stats, and ATS-ready resumes. Free for developers.",
+      "Generate the best ATS-friendly resumes and premium design portfolio cards with QR codes and GitHub stats. The easiest way to create a professional identity for developers and freelancers.",
     images: ["/og-default.png"],
   },
   icons: {

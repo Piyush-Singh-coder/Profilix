@@ -66,8 +66,41 @@ export default async function BlogPostPage({ params }: Props) {
     notFound();
   }
 
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site"}/blog/${slug}`;
+  const ogUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site"}/og-default.png`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    image: ogUrl,
+    datePublished: new Date(post.date).toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "Profilix",
+      url: process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Profilix",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": canonicalUrl,
+    },
+  };
+
   return (
     <main className="min-h-screen bg-background text-text-primary">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <article className="relative py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

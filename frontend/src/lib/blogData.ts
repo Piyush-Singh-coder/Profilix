@@ -9,6 +9,51 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "ats-friendly-resume-best-practices",
+    title: "Best practices to generate an ATS-friendly resume on Profilix",
+    description: "Discover the exact algorithms and best practices Profilix uses to generate premium ATS-friendly resumes that bypass automated filters and land you interviews.",
+    date: "April 25, 2026",
+    readTime: "5 min read",
+    content: `
+## What is an ATS?
+
+An Applicant Tracking System (ATS) is software used by 99% of Fortune 500 companies to filter resumes. If your resume has complex layouts, multi-column designs, or unreadable fonts, the ATS throws it out before a human ever sees it.
+
+Profilix’s ATS generator is meticulously engineered to pass these filters perfectly. Here are the built-in features and best practices you should leverage when building your profile:
+
+## 1. Let the algorithm balance Experience vs. Projects
+
+Profilix uses a smart-capping algorithm to ensure your resume never feels too crowded or too sparse. It automatically adjusts based on your career stage:
+- **0 Experiences:** The system automatically showcases your top **3** projects to prove your skills.
+- **1 Experience:** It balances your profile by showing your experience alongside **2** projects.
+- **2+ Experiences:** The focus shifts entirely to your career history, limiting projects to your **1** absolute best piece.
+
+**Best Practice:** Add all your projects to your Profilix profile, but make sure your highest-impact projects are listed first.
+
+## 2. Write exclusively in Bullet Points
+
+Lengthy paragraphs are the enemy of both ATS parsers and busy recruiters. 
+
+To guarantee maximum readability, Profilix enforces a strict **"bullets-only"** formatting rule across all ATS templates. Any paragraph-style descriptions attached to your Experiences, Projects, or Achievements are intentionally stripped out by our engine. 
+
+**Best Practice:** When filling out your profile, put all your effort into writing high-impact bullet points using the XYZ formula (Accomplished [X] as measured by [Y], by doing [Z]).
+
+## 3. Leverage the Smart Professional Summary
+
+If you are an entry-level developer with zero formal experience, a Professional Summary is critical. 
+
+Profilix automatically detects if you lack formal experience and dynamically inserts your Bio at the top of your resume. To prevent massive blocks of text, the system uses natural language processing to intelligently cap your summary to exactly the **first two complete sentences**—never cutting you off mid-word like standard character limits do.
+
+**Best Practice:** Make the first two sentences of your Profilix Bio incredibly punchy. State exactly who you are, what you build, and what value you bring.
+
+## 4. Ensure Links are Clickable and Clean
+
+Our ATS engine automatically formats your social links (GitHub, LinkedIn) and project URLs (Live Demos) with special non-wrapping structural tags. This guarantees that an ATS parser won't accidentally split a URL across two lines, ensuring your links never break when exported to PDF or DOCX.
+
+By understanding how Profilix formats your data, you can build a profile that is 100% machine-readable while looking clean and professional to human recruiters.
+    `,
+  },
+  {
     slug: "how-to-share-portfolio-qr",
     title: "How to share your portfolio using a QR code (The Ultimate Guide)",
     description: "Learn how to stand out at hackathons and tech meetups by sharing your developer portfolio instantly via a QR code.",

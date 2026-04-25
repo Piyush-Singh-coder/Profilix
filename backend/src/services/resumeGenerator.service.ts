@@ -37,6 +37,26 @@ function cleanUrl(url: string) {
     .replace(/\/$/, "");
 }
 
+/** Returns the first `maxSentences` complete sentences from a block of text. */
+function capToSentences(text: string, maxSentences = 2): string {
+  // Split on sentence-ending punctuation followed by whitespace or end-of-string
+  const sentenceEnds = /(?<=[.!?])\s+/g;
+  const parts: string[] = [];
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = sentenceEnds.exec(text)) !== null) {
+    parts.push(text.slice(last, match.index + 1).trim());
+    last = match.index + match[0].length;
+    if (parts.length >= maxSentences) break;
+  }
+  // If we haven't reached maxSentences yet, include the remainder (it may not end with punctuation)
+  if (parts.length < maxSentences && last < text.length) {
+    const remainder = text.slice(last).trim();
+    if (remainder) parts.push(remainder);
+  }
+  return parts.join(" ");
+}
+
 export async function getResumeData(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -193,23 +213,25 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
           <div class="m-left"><div class="m-title">${escapeHtml(exp.role)}</div><div class="m-subtitle">${escapeHtml(exp.company)}</div></div>
           <div class="m-right">${escapeHtml(range(exp.startDate, exp.endDate, exp.isCurrent))}</div>
         </div>
-        ${exp.description ? `<div class="m-desc">${escapeHtml(exp.description)}</div>` : ""}
         ${bullets.length ? `<ul>${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
       </div>
     `;
   }).join("");
 
-  const projectLimit = experiences.length > 0 ? 2 : 3;
+  // Smart project limit: 0 exp → 3, 1 exp → 2, 2+ exp → 1
+  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
   const projectsToShow = projects.slice(0, projectLimit);
   const projHtml = projectsToShow.map(p => {
     const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
-    const links = [p.liveUrl ? `Live: ${cleanUrl(p.liveUrl)}` : "", p.repoUrl ? `GitHub: ${cleanUrl(p.repoUrl)}` : ""].filter(Boolean).join(" · ");
+    const linkParts: string[] = [];
+    if (p.liveUrl) linkParts.push(`<strong>Live:</strong> <a href="${p.liveUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
+    if (p.repoUrl) linkParts.push(`<strong>GitHub:</strong> <a href="${p.repoUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
+    const links = linkParts.join(" · ");
     return `
       <div class="m-item">
         <div class="m-row">
-          <div class="m-left"><div class="m-title">${escapeHtml(p.title)}</div>${links ? `<div class="m-subtitle">${escapeHtml(links)}</div>` : ""}</div>
+          <div class="m-left"><div class="m-title">${escapeHtml(p.title)}</div>${links ? `<div class="m-subtitle">${links}</div>` : ""}</div>
         </div>
-        ${p.description ? `<div class="m-desc">${escapeHtml(p.description)}</div>` : ""}
         ${bullets.length ? `<ul>${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
       </div>
     `;
@@ -220,14 +242,15 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     return `<div class="s-label">${escapeHtml(edu.school)}</div>${degree ? `<div class="s-value">${escapeHtml(degree)}</div>` : ""}<div class="s-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>`;
   }).join("");
 
-  const achHtml = achievements.map(a => `
-    <div class="m-item">
-      <div class="m-row">
-        <div class="m-left"><div class="m-title">${escapeHtml(a.title)}</div>${a.description ? `<div class="m-desc">${escapeHtml(a.description)}</div>` : ""}</div>
-        <div class="m-right">${a.date ? monthYear(a.date.toISOString()) : ""}</div>
-      </div>
-    </div>
-  `).join("");
+  const achHtml = achievements.length ? `<ul>${achievements.map(a => {
+    const parts = [a.title, a.provider].filter(Boolean);
+    const dateHtml = a.date ? `<span style="float: right;">${escapeHtml(monthYear(a.date.toISOString()))}</span>` : "";
+    return `<li style="margin-bottom: 4px;">${dateHtml}${escapeHtml(parts.join(" | "))}</li>`;
+  }).join("")}</ul>` : "";
+
+  // Professional summary: only show when no experience; capped to first 2 sentences
+  const rawBio = user.profile?.bio || "";
+  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
 
   return `<!doctype html>
 <html>
@@ -345,7 +368,7 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
           ${skillsHtml ? `<div class="s-section">Skills</div>${skillsHtml}` : ""}
         </td>
         <td class="main">
-          ${user.profile?.bio ? `<div class="m-bio">${escapeHtml(user.profile.bio)}</div>` : ""}
+          ${summaryText ? `<div class="m-bio">${escapeHtml(summaryText)}</div>` : ""}
           ${experiences.length ? `<div class="m-section">Experience</div>${expHtml}` : ""}
           ${projectsToShow.length ? `<div class="m-section">Projects</div>${projHtml}` : ""}
           ${achievements.length ? `<div class="m-section">Achievements</div>${achHtml}` : ""}
@@ -360,17 +383,17 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
   const { user, socialLinks, experiences, projects, educations, achievements } = data;
   const profile = user.profile;
 
-  // Clean and format social links with clickable anchors
+  // Clean and format social links with clickable anchors (nowrap to prevent label breaking from link)
   const formattedSocials = socialLinks
     .map((s) => {
       const platform = s.platform.replace(/_/g, " ");
       const label = platform.charAt(0) + platform.slice(1).toLowerCase();
-      return `${label}: <a href="${s.url}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a>`;
+      return `<span style="white-space: nowrap;"><strong>${escapeHtml(label)}:</strong> <a href="${s.url}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a></span>`;
     });
 
   // Header links: Email | Socials | Portfolio (if any)
   const headerLinks = [
-    `<a href="mailto:${user.email}" style="color: inherit; text-decoration: none;">${escapeHtml(user.email)}</a>`,
+    `<span style="white-space: nowrap;"><a href="mailto:${user.email}" style="color: inherit; text-decoration: none;">${escapeHtml(user.email)}</a></span>`,
     ...formattedSocials
   ]
     .filter(Boolean)
@@ -426,7 +449,6 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
             </div>
             <div class="right">${escapeHtml(range(exp.startDate, exp.endDate, exp.isCurrent))}</div>
           </div>
-          ${exp.description ? `<div class="muted">${escapeHtml(exp.description)}</div>` : ""}
           ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
         </div>
       `;
@@ -446,24 +468,22 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
             </div>
             <div class="right">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>
           </div>
-          ${edu.description ? `<div class="muted">${escapeHtml(edu.description)}</div>` : ""}
           ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
         </div>
       `;
     })
     .join("");
 
-  // Projects logic: 2 if experience exists, else 3
-  const projectLimit = experiences.length > 0 ? 2 : 3;
+  // Smart project limit: 0 exp → 3, 1 exp → 2, 2+ exp → 1
+  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
   const projectsToShow = projects.slice(0, projectLimit);
   
   const projHtml = projectsToShow
     .map((p) => {
       const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
       const links = [];
-      if (p.liveUrl) links.push(`Live Demo: <a href="${p.liveUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
-      if (p.repoUrl) links.push(`GitHub: <a href="${p.repoUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
-      
+      if (p.liveUrl) links.push(`<strong>Live Demo:</strong> <a href="${p.liveUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
+      if (p.repoUrl) links.push(`<strong>GitHub:</strong> <a href="${p.repoUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
       return `
         <div class="item">
           <div class="row">
@@ -472,30 +492,21 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
               ${links.length ? `<div class="item-subtitle">${links.join(" | ")}</div>` : ""}
             </div>
           </div>
-          ${p.description ? `<div class="muted">${escapeHtml(p.description)}</div>` : ""}
           ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
         </div>
       `;
     })
     .join("");
 
-  const achHtml = achievements
-    .map((a) => {
-      const dateText = a.date ? monthYear(a.date.toISOString()) : "";
-      const left = [a.title, a.provider].filter(Boolean).join(" • ");
-      return `
-        <div class="item">
-          <div class="row">
-            <div class="left">
-              <div class="item-title">${escapeHtml(left)}</div>
-              ${a.description ? `<div class="muted">${escapeHtml(a.description)}</div>` : ""}
-            </div>
-            <div class="right">${escapeHtml(dateText)}</div>
-          </div>
-        </div>
-      `;
-    })
-    .join("");
+  const achHtml = achievements.length ? `<ul>${achievements.map((a) => {
+    const parts = [a.title, a.provider].filter(Boolean);
+    const dateHtml = a.date ? `<span style="float: right;">${escapeHtml(monthYear(a.date.toISOString()))}</span>` : "";
+    return `<li style="margin-bottom: 4px;">${dateHtml}${escapeHtml(parts.join(" | "))}</li>`;
+  }).join("")}</ul>` : "";
+
+  // Professional summary: only show when no experience; capped to first 2 sentences
+  const rawBio = profile?.bio || "";
+  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
 
   return `
   <!doctype html>
@@ -508,7 +519,7 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
         * { box-sizing: border-box; }
         body {
           font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-          font-size: 9.5pt;
+          font-size: 9pt;
           line-height: 1.25;
           color: #111;
           margin: 0;
@@ -554,6 +565,7 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
       <div class="contact">${headerLinks}</div>
       <div class="divider"></div>
       
+      ${summaryText ? section("Professional Summary", `<div class="muted">${escapeHtml(summaryText)}</div>`) : ""}
       ${experiences.length ? section("Experience", expHtml) : ""}
       ${educations.length ? section("Education", eduHtml) : ""}
       ${projectsToShow.length ? section("Projects", projHtml) : ""}
@@ -650,6 +662,14 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
 
   // Sections in specific order: Experience, Education, Projects, Skills, Achievements
 
+  // 0. Professional Summary (only when no experience; capped to first 2 sentences)
+  const docRawBio = profile?.bio || "";
+  const docSummary = experiences.length === 0 && docRawBio ? capToSentences(docRawBio) : "";
+  if (docSummary) {
+    addHeading("PROFESSIONAL SUMMARY");
+    children.push(new Paragraph({ children: [new TextRun({ text: docSummary, size: 18 })], spacing: { after: 60 } }));
+  }
+
   // 1. Experience
   if (experiences.length) {
     addHeading("EXPERIENCE");
@@ -704,8 +724,8 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
     });
   }
 
-  // 3. Projects (Logic: 2 if Exp exists, else 3)
-  const projectLimit = experiences.length > 0 ? 2 : 3;
+  // 3. Projects: 0 exp → 3, 1 exp → 2, 2+ exp → 1
+  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
   const projectsToShow = projects.slice(0, projectLimit);
   if (projectsToShow.length) {
     addHeading("PROJECTS");
@@ -739,7 +759,7 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       if (linkNodes.length) {
         children.push(new Paragraph({ children: linkNodes }));
       }
-
+      // No description — bullets only
       bullets.forEach((b) => {
         children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 } }));
       });
@@ -782,24 +802,22 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
     });
   }
 
-  // 5. Achievements
+  // 5. Achievements (rendered as bullets with right-aligned dates)
   if (achievements.length) {
     addHeading("ACHIEVEMENTS");
     achievements.forEach((a) => {
-      const subtitle = [a.provider, a.type].filter(Boolean).join(" • ");
+      const parts = [a.title, a.provider].filter(Boolean);
       children.push(
         new Paragraph({
-          spacing: { before: 80 },
           children: [
-            new TextRun({ text: a.title, bold: true, size: 20 }),
+            new TextRun({ text: parts.join(" | ") }),
             new TextRun({ text: `\t${a.date ? monthYear(a.date.toISOString()) : ""}` }),
           ],
+          bullet: { level: 0 },
+          spacing: { before: 20 },
           tabStops: [{ type: "right", position: 9000 }],
         })
       );
-      if (subtitle) {
-        children.push(new Paragraph({ children: [new TextRun({ text: subtitle, size: 18 })] }));
-      }
     });
   }
 

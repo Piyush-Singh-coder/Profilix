@@ -29,10 +29,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const sizes = {
-      sm: "h-9 px-4 text-sm rounded-[var(--radius-pill)]",
-      md: "h-11 px-6 text-base rounded-[var(--radius-pill)]",
-      lg: "h-14 px-8 text-lg rounded-[var(--radius-pill)]",
-      icon: "h-11 w-11 rounded-full",
+      sm: "h-9 px-4 text-sm rounded-[var(--radius-sm)]",
+      md: "h-11 px-6 text-base rounded-[var(--radius-sm)]",
+      lg: "h-14 px-8 text-lg rounded-[var(--radius-sm)]",
+      icon: "h-11 w-11 rounded-[var(--radius-sm)]",
     };
 
     return (

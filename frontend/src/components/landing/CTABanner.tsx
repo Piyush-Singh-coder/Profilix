@@ -6,13 +6,13 @@ export function CTABanner() {
   return (
     <section className="py-24 bg-background relative overflow-hidden">
       {/* Background decorations */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-primary/20 blur-[120px] pointer-events-none" />
       
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl relative z-10">
         <div className="rounded-3xl border border-primary/20 bg-surface/50 backdrop-blur-xl p-8 md:p-16 text-center shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-blue-500/10 pointer-events-none" />
           
-          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-2xl mb-6 text-primary ring-1 ring-primary/30 shadow-[0_0_20px_var(--color-primary-glow)]">
+          <div className="inline-flex items-center justify-center p-3 bg-primary/10 rounded-xl mb-6 text-primary ring-1 ring-primary/30 shadow-[0_0_20px_var(--color-primary-glow)]">
             <Sparkles className="h-8 w-8" />
           </div>
           
@@ -29,7 +29,7 @@ export function CTABanner() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/dashboard">
-              <Button variant="primary" size="lg" className="w-full sm:w-auto text-lg px-8 py-6 rounded-full group">
+              <Button variant="primary" size="lg" className="w-full sm:w-auto text-lg px-8 py-6 group">
                 Create Your Profile Free
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Button>

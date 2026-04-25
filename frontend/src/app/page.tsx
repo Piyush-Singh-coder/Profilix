@@ -1,8 +1,10 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { ActionSection } from "@/components/landing/ActionSection";
 import { TechMarquee } from "@/components/landing/TechMarquee";
 import { BentoGrid } from "@/components/landing/BentoGrid";
+import { TemplateSlider } from "@/components/landing/TemplateSlider";
 import { FeaturesBlog } from "@/components/landing/FeaturesBlog";
 import { FAQ } from "@/components/landing/FAQ";
 import { CTABanner } from "@/components/landing/CTABanner";
@@ -83,8 +85,10 @@ export default function Home() {
       <Navbar />
       <Hero />
       <HowItWorks />
+      <ActionSection />
       <TechMarquee />
       <BentoGrid />
+      <TemplateSlider />
       <FeaturesBlog />
       <FAQ />
       <CTABanner />
