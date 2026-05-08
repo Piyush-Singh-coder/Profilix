@@ -106,7 +106,7 @@ export const loginUser = async (input: LoginInput, res: Response) => {
     username: user.username,
     isVerified: user.isVerified,
     avatarUrl: user.avatarUrl,
-    selectedTheme: user.profile?.theme || "GLASS",
+    selectedTheme: user.profile?.theme || "DARK",
   };
 };
 
@@ -182,7 +182,7 @@ const handleOAuthLogin = async (
     username: user.username,
     isVerified: user.isVerified,
     avatarUrl: user.avatarUrl,
-    selectedTheme: user.profile?.theme || "GLASS",
+    selectedTheme: user.profile?.theme || "DARK",
   };
 };
 

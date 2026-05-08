@@ -6,8 +6,8 @@ export function FeaturesBlog() {
   const featuredPosts = BLOG_POSTS.slice(0, 3);
 
   return (
-    <section className="py-24 bg-surface-low border-b border-border/50">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+    <section className="py-10 bg-background border-b border-border/50">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-heading font-bold text-text-primary mb-4">
             Latest <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500">Insights & Guides</span>

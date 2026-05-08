@@ -62,9 +62,8 @@ export function OnboardingModal({ mode, open, onClose }: OnboardingModalProps) {
 
   // Determine card variant based on theme
   const getVariant = () => {
-    const theme = user?.selectedTheme || "SKEUOMORPHIC";
-    if (theme === "GLASS" || theme === "AURORA" || theme === "NEON") return "glass";
-    if (theme === "BRUTALISM") return "brutal";
+    const theme = user?.selectedTheme || "DARK";
+    if (theme === "DARK") return "glass";
     return "surface";
   };
 

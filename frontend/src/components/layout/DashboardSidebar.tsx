@@ -4,32 +4,22 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   User,
-  Code2,
-  FolderKanban,
-  Share2,
   FileText,
   BarChart3,
   Settings,
   LogOut,
-  Trophy,
-  Briefcase,
-  GraduationCap,
   IdCard,
+  QrCode,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Logo } from "@/components/ui/Logo";
 
 const NAV_ITEMS = [
-  { name: "Identity", path: "/dashboard", icon: User },
-  { name: "Education", path: "/dashboard/education", icon: GraduationCap },
-  { name: "Experiences", path: "/dashboard/experiences", icon: Briefcase },
-  { name: "Projects", path: "/dashboard/projects", icon: FolderKanban },
-  { name: "Skills", path: "/dashboard/tech", icon: Code2 },
-  { name: "Socials", path: "/dashboard/socials", icon: Share2 },
-  { name: "Achievements", path: "/dashboard/achievements", icon: Trophy },
+  { name: "Profile Editor", path: "/dashboard", icon: User },
   { name: "Resume", path: "/dashboard/resume", icon: FileText },
-  { name: "Profile Card", path: "/dashboard/qr", icon: IdCard },
+  { name: "Profile Card", path: "/dashboard/profile-card", icon: IdCard },
+  { name: "QR & Share", path: "/dashboard/qr", icon: QrCode },
   { name: "Analytics", path: "/dashboard/analytics", icon: BarChart3 },
   { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];

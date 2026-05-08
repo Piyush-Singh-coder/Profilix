@@ -65,13 +65,13 @@ export default function NotFound() {
           )}
           
           <div className="mt-8">
-            <Link 
-              href="javascript:history.back()"
-              className="text-sm font-medium text-text-secondary hover:text-primary transition-colors flex items-center justify-center gap-2 group"
+            <button 
+              onClick={() => window.history.back()}
+              className="text-sm font-medium text-text-secondary hover:text-primary transition-colors flex items-center justify-center gap-2 group w-full"
             >
               <MoveLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
               Go back to previous page
-            </Link>
+            </button>
           </div>
         </div>
       </div>

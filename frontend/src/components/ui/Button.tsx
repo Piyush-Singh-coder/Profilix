@@ -17,13 +17,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variants = {
       primary:
-        "bg-[var(--color-primary)] text-white shadow-[0_0_20px_var(--color-primary-glow)] hover:brightness-110 hover:shadow-[0_0_30px_var(--color-primary-glow)]",
+        "bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white shadow-md hover:scale-[1.02] hover:brightness-110 hover:shadow-lg active:from-[var(--color-tertiary)] active:to-[var(--color-primary)]",
       secondary:
-        "bg-[var(--color-secondary)] text-[var(--color-background)] hover:opacity-90",
+        "bg-[var(--color-surface-high)] text-[var(--color-text-primary)] hover:brightness-110 border border-[var(--color-border)] shadow-sm",
       ghost:
         "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-high)]",
       outline:
-        "border border-[var(--color-border)] bg-transparent text-[var(--color-text-primary)] hover:border-[var(--color-primary)] hover:shadow-[0_0_20px_var(--color-primary-glow)]",
+        "border border-[var(--color-border)] bg-transparent text-[var(--color-text-primary)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]",
       danger:
         "bg-[var(--color-danger)] text-white hover:brightness-110",
     };

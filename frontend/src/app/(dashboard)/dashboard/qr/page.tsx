@@ -13,30 +13,7 @@ import { useProfileStore } from "@/store/useProfileStore";
 import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 import type { CardTheme } from "@/types";
 
-const EXPORT_SIZES = ["1080x1080", "1200x628", "1200x675", "1920x1080"] as const;
-const SIZE_INFO: Record<string, { label: string; sub: string; ratio: number }> = {
-  "1080x1080": { label: "Instagram", sub: "Post / Square", ratio: 1 },
-  "1200x628": { label: "LinkedIn", sub: "Wide Banner", ratio: 1.91 },
-  "1200x675": { label: "Twitter (X)", sub: "Landscape Post", ratio: 1.77 },
-  "1920x1080": { label: "Full HD", sub: "Presentation", ratio: 1.77 },
-};
-const CARD_THEMES: CardTheme[] = ["GLASSMORPHISM", "NEOBRUTALISM", "APPLE"];
-
-type ExportSize = (typeof EXPORT_SIZES)[number];
-
-function RatioBox({ ratio, active }: { ratio: number; active: boolean }) {
-  return (
-    <div className={`relative flex h-8 w-10 items-center justify-center rounded-md border ${active ? "border-primary/50 bg-primary/20" : "border-border bg-surface-low"} transition-all duration-300`}>
-      <div 
-        className={`rounded-[1.5px] border-[1.5px] ${active ? "border-primary" : "border-text-secondary/50"} transition-all duration-300`} 
-        style={{ 
-          width: ratio >= 1 ? "18px" : `${18 * ratio}px`, 
-          height: ratio >= 1 ? `${18 / ratio}px` : "18px" 
-        }} 
-      />
-    </div>
-  );
-}
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export default function QRDashboardPage() {
   const { user } = useAuthStore();
@@ -46,10 +23,7 @@ export default function QRDashboardPage() {
   const [hasDismissedOnCurrentVisit, setHasDismissedOnCurrentVisit] = useState(false);
 
   const [copied, setCopied] = useState(false);
-  const [exportSize, setExportSize] = useState<ExportSize>("1080x1080");
-  const [cardTheme, setCardTheme] = useState<CardTheme>("GLASSMORPHISM");
   const [viewMode, setViewMode] = useState<"default" | "hire">("default");
-  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     fetchQR("STANDARD");
@@ -114,18 +88,7 @@ export default function QRDashboardPage() {
     }
   };
 
-  const exportCard = async () => {
-    if (!user?.username || isExporting) return;
-    try {
-      setIsExporting(true);
-      const modeQuery = viewMode === "hire" ? "&mode=hire" : "";
-      const themeQuery = `&theme=${cardTheme}`;
-      const exportUrl = `${API_BASE_URL}/u/${user.username}/card-export?size=${exportSize}${modeQuery}${themeQuery}`;
-      await downloadUrlAsFile(exportUrl, `profilix-card-${cardTheme.toLowerCase()}-${exportSize}.png`);
-    } finally {
-      setIsExporting(false);
-    }
-  };
+
 
   const openProfile = () => {
     if (profileUrl) window.open(profileUrl, "_blank", "noopener,noreferrer");
@@ -133,10 +96,12 @@ export default function QRDashboardPage() {
 
   return (
     <div className="animate-in space-y-8 pb-24">
-      <div className="border-b border-border pb-5">
-        <h1 className="font-heading text-3xl font-bold">Share & QR</h1>
-        <p className="mt-1 text-sm text-text-secondary">Copy your profile URL, download QR assets and export profile cards.</p>
-      </div>
+      <DashboardHeader 
+        title="QR & Share"
+        subtitle="Access your digital identity anywhere. Copy your profile URL, generate standard QR codes, or create beautiful lock screen wallpapers."
+        badge="Instant Sharing"
+        icon={QrCode}
+      />
 
       <Card variant="glass">
         <CardHeader>
@@ -176,74 +141,7 @@ export default function QRDashboardPage() {
         </CardContent>
       </Card>
 
-      <Card variant="glass">
-        <CardHeader>
-          <CardTitle>Profile Card Export</CardTitle>
-          <CardDescription>Generate a social-ready profile image from your current public data.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">Theme</p>
-            <div className="flex gap-2">
-              {CARD_THEMES.map((theme) => (
-                <button
-                  key={theme}
-                  type="button"
-                  onClick={() => setCardTheme(theme)}
-                  className={`rounded-[var(--radius-md)] border px-3 py-2 text-sm transition-colors ${
-                    cardTheme === theme
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-surface-low text-text-secondary"
-                  }`}
-                >
-                  {theme === "GLASSMORPHISM" ? "Glass" : theme === "NEOBRUTALISM" ? "Brutal" : theme}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-wider text-text-secondary">Export Size</p>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {EXPORT_SIZES.map((size) => {
-                const info = SIZE_INFO[size];
-                const active = exportSize === size;
-                return (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setExportSize(size)}
-                    className={`group flex items-center gap-3 rounded-xl border p-3 text-left transition-all duration-300 ${
-                      active 
-                        ? "border-primary bg-primary/10 shadow-sm shadow-primary/5" 
-                        : "border-border bg-surface-low hover:border-text-secondary/30 hover:bg-surface-medium"
-                    }`}
-                  >
-                    <RatioBox ratio={info.ratio} active={active} />
-                    <div className="flex flex-col">
-                      <span className={`text-sm font-bold transition-colors ${active ? "text-primary" : "text-text-primary group-hover:text-primary"}`}>
-                        {info.label}
-                      </span>
-                      <span className="text-[10px] font-medium text-text-tertiary">
-                        {info.sub}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={exportCard} disabled={isExporting}>
-              {isExporting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              {isExporting ? "Exporting..." : "Export Card"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card variant="surface">

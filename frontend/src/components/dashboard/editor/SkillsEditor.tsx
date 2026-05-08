@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/Input";
 import { useProfileStore } from "@/store/useProfileStore";
 
-export default function TechStackPage() {
+export function SkillsEditor() {
   const {
     profile,
     techStackOptions,
@@ -101,7 +101,7 @@ export default function TechStackPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="border-b border-border pb-5">
         <h1 className="font-heading text-3xl font-bold">Tech Stack</h1>
         <p className="mt-1 text-sm text-text-secondary">Select technologies to showcase on your public profile.</p>
@@ -164,7 +164,7 @@ export default function TechStackPage() {
               Object.entries(optionsByCategory).map(([category, options]) => (
                 <section key={category} className="space-y-3">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary">{category}</p>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
                     {options.map((tech) => {
                       const selected = selectedTechIds.has(tech.id);
                       return (
@@ -190,7 +190,7 @@ export default function TechStackPage() {
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-24 right-5 z-40 md:bottom-8 md:right-8">
+      <div className="mt-6 flex justify-end">
         <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}
           Save Stack

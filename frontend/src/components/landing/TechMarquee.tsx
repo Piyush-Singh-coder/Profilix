@@ -14,7 +14,7 @@ function TechTile({ tech }: { tech: string }) {
 
 export function TechMarquee() {
   return (
-    <section className="relative overflow-hidden py-24">
+    <section className="relative overflow-hidden py-16 bg-background">
       <div className="mx-auto mb-14 max-w-6xl px-6 text-center">
         <h2 className="font-heading text-4xl font-black text-text-primary sm:text-5xl">Built for the modern stack</h2>
         <p className="mt-3 text-sm text-text-secondary">React, cloud, databases and tooling your portfolio already uses.</p>

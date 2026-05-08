@@ -27,7 +27,7 @@ const PLATFORMS: Array<{ id: SocialPlatform; name: string; placeholder: string }
   { id: "OTHER", name: "Other", placeholder: "https://example.com" },
 ];
 
-export default function SocialsPage() {
+export function SocialsEditor() {
   const { links, isLoading, isSaving, fetchLinks, saveLink, deleteLink } = useSocialStore();
   const [draft, setDraft] = useState<Record<SocialPlatform, SocialDraft>>(() =>
     PLATFORMS.reduce(
@@ -119,7 +119,7 @@ export default function SocialsPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="border-b border-border pb-5">
         <h1 className="font-heading text-3xl font-bold">Socials</h1>
         <p className="mt-1 text-sm text-text-secondary">
@@ -170,7 +170,7 @@ export default function SocialsPage() {
         </CardContent>
       </Card>
 
-      <div className="fixed bottom-24 right-5 z-40 md:bottom-8 md:right-8">
+      <div className="mt-6 flex justify-end">
         <Button onClick={handleSave} disabled={!hasChanges || isSaving}>
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           Save Social Links

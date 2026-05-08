@@ -38,9 +38,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={cn(
-              "flex h-11 w-full rounded-[var(--radius-md)] border border-border bg-surface-low px-4 py-2 text-sm text-text-primary transition-all duration-300",
-              "placeholder:text-text-secondary",
-              "focus:border-primary/60 focus:outline-none focus:ring-4 focus:ring-primary/10 focus:shadow-[0_0_20px_var(--color-primary-glow)]",
+              "flex h-11 w-full rounded-[var(--radius-md)] border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-2 text-sm text-[var(--color-text-primary)] transition-all duration-300",
+              "placeholder:text-text-muted",
+              "focus:border-[var(--input-focus)] focus:outline-none focus:ring-4 focus:ring-[var(--input-focus)]/10 focus:shadow-[0_0_25px_var(--input-focus-glow)]",
               "disabled:cursor-not-allowed disabled:opacity-50",
               error && "border-red-500/50 focus:border-red-500/80 focus:ring-red-500/10",
               className

@@ -19,23 +19,15 @@ export const updateProfileSchema = z.object({
   isPublic: z.boolean().optional(),
   theme: z
     .enum([
-      "GLASS",
-      "BRUTALISM",
-      "CLAY",
-      "SKEUOMORPHIC",
-      "MINIMAL",
-      "NEON",
-      "RETRO",
-      "AURORA",
+      "LIGHT",
+      "DARK",
     ])
     .optional(),
   cardTheme: z
     .enum([
-      "GLASSMORPHISM",
-      "NEOBRUTALISM",
+      "GLASS",
+      "BRUTAL",
       "APPLE",
-      "CLAY",
-      "SKEUOMORPHIC",
     ])
     .optional(),
 });

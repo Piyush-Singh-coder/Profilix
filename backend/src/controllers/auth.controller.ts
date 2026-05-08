@@ -86,7 +86,7 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
     const { profile, ...user } = result;
     const finalUser = {
       ...user,
-      selectedTheme: profile?.theme || "GLASS",
+      selectedTheme: profile?.theme || "DARK",
     };
 
     sendSuccess(res, finalUser);

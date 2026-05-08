@@ -20,14 +20,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
     if (!mounted) return;
 
     // Default theme for visitors or if no theme selected
-    let activeTheme = "SKEUOMORPHIC";
+    let activeTheme = "DARK";
 
     if (isAuthenticated && user?.selectedTheme) {
-      activeTheme = user.selectedTheme;
+      activeTheme = user.selectedTheme === "LIGHT" ? "LIGHT" : "DARK";
     }
 
     // Apply to html element
-    document.documentElement.setAttribute("data-theme", activeTheme);
+    // For LIGHT theme, we remove data-theme to use :root variables
+    if (activeTheme === "LIGHT") {
+      document.documentElement.removeAttribute("data-theme");
+    } else {
+      document.documentElement.setAttribute("data-theme", "dark");
+    }
   }, [mounted, isAuthenticated, user?.selectedTheme]);
 
   return (

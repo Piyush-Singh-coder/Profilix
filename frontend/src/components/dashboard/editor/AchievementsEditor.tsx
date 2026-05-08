@@ -54,7 +54,7 @@ const ACHIEVEMENT_TYPES: Array<{ value: AchievementType; label: string }> = [
   { value: "OTHER", label: "Other" },
 ];
 
-export default function AchievementsPage() {
+export function AchievementsEditor() {
   const {
     achievements,
     isLoading,
@@ -229,7 +229,7 @@ export default function AchievementsPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="font-heading text-3xl font-bold">Achievements</h1>
@@ -280,92 +280,127 @@ export default function AchievementsPage() {
         title={editingAchievement ? "Edit Achievement" : "Create Achievement"}
         description="Add details about your accomplishment and optionally upload a certificate image."
       >
-        <div className="grid gap-4">
-          <Input
-            label="Title"
-            value={formState.title}
-            onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
-            placeholder="1st Place at Hackathon 2024"
-          />
-          <Input
-            label="Provider"
-            value={formState.provider}
-            onChange={(event) => setFormState((prev) => ({ ...prev, provider: event.target.value }))}
-            placeholder="TechCrunch, Google, etc."
-          />
-          <Select
-            label="Type"
-            value={formState.type}
-            onChange={(value) => setFormState((prev) => ({ ...prev, type: value as AchievementType }))}
-            options={ACHIEVEMENT_TYPES}
-          />
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-8 py-2">
+          {/* Section: Achievement Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Achievement Details</h4>
+            </div>
             <Input
-              label="Date"
-              type="date"
-              value={formState.date}
-              onChange={(event) => setFormState((prev) => ({ ...prev, date: event.target.value }))}
+              label="Title"
+              value={formState.title}
+              onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
+              placeholder="1st Place at Hackathon 2024"
+              required
             />
-            <Input
-              label="URL"
-              value={formState.url}
-              onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
-              placeholder="https://..."
-            />
-          </div>
-          <Textarea
-            label="Description"
-            value={formState.description}
-            onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-            rows={3}
-            placeholder="Brief description of your achievement."
-          />
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-text-primary">Certificate Image</label>
-            <div className="flex items-start gap-4">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Certificate preview"
-                    className="h-24 w-24 rounded-md object-cover border border-border"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute -right-2 -top-2 rounded-full bg-danger p-1 text-white hover:bg-danger/80"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-dashed border-border hover:border-primary/50 transition-colors"
-                >
-                  <Upload className="h-6 w-6 text-text-secondary" />
-                  <span className="mt-1 text-xs text-text-secondary">Upload</span>
-                </button>
-              )}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Provider / Organization"
+                value={formState.provider}
+                onChange={(event) => setFormState((prev) => ({ ...prev, provider: event.target.value }))}
+                placeholder="TechCrunch, Google, etc."
               />
-              <p className="text-xs text-text-secondary">
-                Upload a certificate or badge image. Max 5MB.
-              </p>
+              <Select
+                label="Achievement Category"
+                value={formState.type}
+                onChange={(value) => setFormState((prev) => ({ ...prev, type: value as AchievementType }))}
+                options={ACHIEVEMENT_TYPES}
+              />
             </div>
           </div>
-          <div className="mt-2 flex items-center justify-end gap-2">
+
+          {/* Section: Date & Link */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Date & Evidence</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Date Received"
+                type="date"
+                value={formState.date}
+                onChange={(event) => setFormState((prev) => ({ ...prev, date: event.target.value }))}
+              />
+              <Input
+                label="Verification Link"
+                value={formState.url}
+                onChange={(event) => setFormState((prev) => ({ ...prev, url: event.target.value }))}
+                placeholder="https://..."
+                info="Link to a certificate, badge, or announcement."
+              />
+            </div>
+          </div>
+
+          {/* Section: Visuals & Description */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Visuals & Story</h4>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-[120px_1fr]">
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase text-text-secondary tracking-widest">Certificate</label>
+                <div className="relative group">
+                  {imagePreview ? (
+                    <div className="relative h-[120px] w-[120px] overflow-hidden rounded-2xl border border-border shadow-inner bg-surface-low">
+                      <img
+                        src={imagePreview}
+                        alt="Certificate preview"
+                        className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                      />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute right-2 top-2 rounded-full bg-danger p-1.5 text-white shadow-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex h-[120px] w-[120px] flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 bg-surface-low hover:border-primary/50 hover:bg-primary/5 transition-all group"
+                    >
+                      <Upload className="h-6 w-6 text-text-secondary group-hover:text-primary transition-colors" />
+                      <span className="mt-2 text-[10px] font-bold uppercase tracking-tighter text-text-secondary group-hover:text-primary">Upload</span>
+                    </button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+              
+              <Textarea
+                label="What did you achieve?"
+                value={formState.description}
+                onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
+                rows={4}
+                placeholder="Brief description of your accomplishment and its significance."
+                info="Keep it punchy. What was the impact?"
+              />
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/50">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} isLoading={isSaving}>
-              {editingAchievement ? "Update Achievement" : "Create Achievement"}
+            <Button 
+              onClick={handleSubmit} 
+              isLoading={isSaving}
+              className="min-w-[140px] shadow-lg shadow-primary/20"
+            >
+              {editingAchievement ? "Save Changes" : "Create Achievement"}
             </Button>
           </div>
         </div>

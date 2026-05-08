@@ -35,72 +35,6 @@ type ThemeToken = {
   badge: string;
 };
 
-const PUBLIC_THEMES: Record<string, ThemeToken> = {
-  GLASS: {
-    root: "bg-[#070c19] text-white",
-    canvas: "from-[#1a2a4a66] via-[#121d33] to-[#0a101f]",
-    card: "glass-panel",
-    muted: "text-[#a8b6d8]",
-    accent: "text-[#78d4ff]",
-    badge: "bg-[#78d4ff]/15 text-[#78d4ff]",
-  },
-  BRUTALISM: {
-    root: "bg-[#f9f7f0] text-[#111111]",
-    canvas: "from-[#f6f2e8] via-[#faf8f2] to-[#f1ece0]",
-    card: "theme-brutal-card bg-white",
-    muted: "text-[#2f2f2f]",
-    accent: "text-[#111111]",
-    badge: "bg-[#ffd84c] text-[#111111]",
-  },
-  CLAY: {
-    root: "bg-[#f6f2ea] text-[#2e241f]",
-    canvas: "from-[#f4eadc] via-[#f6f2ea] to-[#efe6da]",
-    card: "bg-[#fff9ef] border border-[#ddcdbb] rounded-[28px] shadow-[0_18px_35px_rgba(104,79,57,0.18)]",
-    muted: "text-[#6f5f58]",
-    accent: "text-[#d56b46]",
-    badge: "bg-[#e76d4720] text-[#b55334]",
-  },
-  MINIMAL: {
-    root: "bg-[#f7f7f7] text-[#141414]",
-    canvas: "from-[#ffffff] via-[#f7f7f7] to-[#efefef]",
-    card: "bg-white border border-[#d8d8d8] rounded-2xl",
-    muted: "text-[#666666]",
-    accent: "text-[#202020]",
-    badge: "bg-[#14141412] text-[#141414]",
-  },
-  NEON: {
-    root: "bg-[#0a0014] text-white",
-    canvas: "from-[#1a0038] via-[#0f0020] to-[#050008]",
-    card: "bg-[#1a0038]/60 border border-[#ff00ff30] rounded-2xl shadow-[0_0_30px_rgba(255,0,255,0.08)] backdrop-blur-sm",
-    muted: "text-[#c084fc]",
-    accent: "text-[#e879f9]",
-    badge: "bg-[#e879f920] text-[#e879f9]",
-  },
-  RETRO: {
-    root: "bg-[#0d0d0d] text-[#00ff41]",
-    canvas: "from-[#0a0a0a] via-[#0d0d0d] to-[#111111]",
-    card: "bg-[#111111] border border-[#00ff4130] rounded-lg shadow-[0_0_15px_rgba(0,255,65,0.06)]",
-    muted: "text-[#00cc33]",
-    accent: "text-[#00ff41]",
-    badge: "bg-[#00ff4115] text-[#00ff41]",
-  },
-  AURORA: {
-    root: "bg-[#0a1628] text-white",
-    canvas: "from-[#0d3b66] via-[#0a2540] to-[#061522]",
-    card: "bg-[#0d2b4e]/70 border border-[#2dd4bf20] rounded-2xl shadow-[0_0_25px_rgba(45,212,191,0.06)] backdrop-blur-sm",
-    muted: "text-[#67b8d4]",
-    accent: "text-[#2dd4bf]",
-    badge: "bg-[#2dd4bf18] text-[#2dd4bf]",
-  },
-  SKEUOMORPHIC: {
-    root: "bg-[#12141d] text-[#f2f2f7]",
-    canvas: "from-[#1a1c25] via-[#12141d] to-[#0c0d12]",
-    card: "bg-gradient-to-b from-[#1c1f2b] to-[#161822] border border-[#ffffff0a] rounded-2xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_10px_30px_rgba(0,0,0,0.4)]",
-    muted: "text-[#a1a1aa]",
-    accent: "text-[#c3a069]",
-    badge: "bg-[#c3a06920] text-[#c3a069]",
-  },
-};
 
 function formatMonthYear(date?: string | null) {
   if (!date) return "Present";
@@ -111,17 +45,59 @@ function formatMonthYear(date?: string | null) {
 
 export default function ProfileContent({ initialUsername, initialProfile }: ProfileContentProps) {
   useEffect(() => {
-    if (!initialProfile?.profile?.theme) return;
+    // Respect the user's saved global theme preference (LIGHT/DARK)
+    const userPreferredTheme = initialProfile?.profile?.theme?.toLowerCase() || "dark";
+    
     const previousTheme = document.documentElement.getAttribute("data-theme");
-    document.documentElement.setAttribute("data-theme", initialProfile.profile.theme);
+    document.documentElement.setAttribute("data-theme", userPreferredTheme);
+
     return () => {
       if (previousTheme) {
         document.documentElement.setAttribute("data-theme", previousTheme);
       } else {
-        document.documentElement.setAttribute("data-theme", "GLASS");
+        document.documentElement.removeAttribute("data-theme");
       }
     };
   }, [initialProfile?.profile?.theme]);
+
+  // Dynamic Theme Generation based on both cardTheme and global theme
+  const theme = useMemo(() => {
+    const cardTheme = initialProfile?.profile?.cardTheme || "GLASS";
+    const isDark = initialProfile?.profile?.theme === "DARK";
+
+    const themes: Record<string, ThemeToken> = {
+      GLASS: {
+        root: isDark ? "bg-background text-text-primary" : "bg-slate-50 text-slate-900",
+        canvas: isDark 
+          ? "from-[#0B0F1A] via-[#0F172A] to-[#0B0F1A]" 
+          : "from-slate-50 via-slate-100 to-slate-50",
+        card: isDark 
+          ? "glass-panel border-white/10" 
+          : "bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-xl shadow-slate-200/50",
+        muted: isDark ? "text-text-secondary" : "text-slate-500",
+        accent: "text-primary",
+        badge: isDark ? "bg-primary/20 text-primary" : "bg-primary/10 text-primary",
+      },
+      BRUTAL: {
+        root: "bg-background text-text-primary",
+        canvas: isDark ? "from-background via-surface-low to-background" : "from-[#FCFAF7] via-[#F3EEE4] to-[#FCFAF7]",
+        card: "theme-brutal-card bg-surface border-text-primary",
+        muted: "text-text-secondary",
+        accent: "text-text-primary",
+        badge: "bg-primary/10 text-primary",
+      },
+      APPLE: {
+        root: "bg-background text-text-primary",
+        canvas: isDark ? "from-background via-surface-low to-background" : "from-[#FFFFFF] via-[#FBF9F4] to-[#FFFFFF]",
+        card: "bg-surface border border-border rounded-3xl shadow-sm",
+        muted: "text-text-secondary",
+        accent: "text-text-primary",
+        badge: "bg-surface-high text-text-primary",
+      },
+    };
+
+    return themes[cardTheme] || themes.GLASS;
+  }, [initialProfile?.profile?.cardTheme, initialProfile?.profile?.theme]);
 
   const contributionCells = useMemo(() => {
     const days = initialProfile?.githubStats?.contributions?.weeks?.flatMap((week) => week.contributionDays) ?? [];
@@ -153,7 +129,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
   const displayFullName = profile?.displayName || fullName;
 
 
-  const theme = PUBLIC_THEMES[profile.theme] || PUBLIC_THEMES.GLASS;
+
 
 
   return (
@@ -181,7 +157,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                 className={`mb-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${theme.badge}`}
               >
                 <Sparkles className="h-3.5 w-3.5" />
-                {profile.theme} Theme
+                {profile.cardTheme || "GLASS"} Theme
               </p>
               <h1 className="font-heading text-4xl font-black sm:text-5xl">{displayFullName}</h1>
               <p className={`mt-2 text-sm ${theme.muted}`}>@{initialUsername}</p>

@@ -50,7 +50,7 @@ const EMPTY_FORM: ExperienceFormState = {
   bullets: "",
 };
 
-export default function ExperiencesPage() {
+export function ExperienceEditor() {
   const {
     experiences,
     isLoading,
@@ -211,7 +211,7 @@ export default function ExperiencesPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="font-heading text-3xl font-bold">Experiences</h1>
@@ -262,77 +262,114 @@ export default function ExperiencesPage() {
         title={editingExperience ? "Edit Experience" : "Create Experience"}
         description="Add details about your role, responsibilities, and achievements."
       >
-        <div className="grid gap-4">
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-8 py-2">
+          {/* Section: Basic Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Basic Information</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Company Name"
+                value={formState.company}
+                onChange={(event) => setFormState((prev) => ({ ...prev, company: event.target.value }))}
+                placeholder="Google, Microsoft, etc."
+                required
+              />
+              <Input
+                label="Your Role"
+                value={formState.role}
+                onChange={(event) => setFormState((prev) => ({ ...prev, role: event.target.value }))}
+                placeholder="Senior Software Engineer"
+                info="E.g., Senior Software Engineer. Be specific to stand out."
+                required
+              />
+            </div>
             <Input
-              label="Company"
-              value={formState.company}
-              onChange={(event) => setFormState((prev) => ({ ...prev, company: event.target.value }))}
-              placeholder="Google, Microsoft, etc."
-            />
-            <Input
-              label="Role"
-              value={formState.role}
-              onChange={(event) => setFormState((prev) => ({ ...prev, role: event.target.value }))}
-              placeholder="Senior Software Engineer"
-              info="E.g., Senior Software Engineer. Be specific to stand out on your resume."
-            />
-          </div>
-          <Input
-            label="Location"
-            value={formState.location}
-            onChange={(event) => setFormState((prev) => ({ ...prev, location: event.target.value }))}
-            placeholder="San Francisco, CA (Remote)"
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            <Input
-              label="Start Date"
-              type="date"
-              value={formState.startDate}
-              onChange={(event) => setFormState((prev) => ({ ...prev, startDate: event.target.value }))}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={formState.endDate}
-              onChange={(event) => setFormState((prev) => ({ ...prev, endDate: event.target.value }))}
-              disabled={formState.isCurrent}
+              label="Location"
+              value={formState.location}
+              onChange={(event) => setFormState((prev) => ({ ...prev, location: event.target.value }))}
+              placeholder="San Francisco, CA (Remote)"
             />
           </div>
-          <Switch
-            checked={formState.isCurrent}
-            onCheckedChange={(checked) =>
-              setFormState((prev) => ({
-                ...prev,
-                isCurrent: checked,
-                endDate: checked ? "" : prev.endDate,
-              }))
-            }
-            label="Current Position"
-          />
-          <Textarea
-            label="Description"
-            value={formState.description}
-            onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-            rows={3}
-            placeholder="Brief description of your role and responsibilities."
-            info="A high level overview. Leave the detailed accomplishments for your bullets."
-          />
-          <Textarea
-            label="Bullet Points"
-            value={formState.bullets}
-            onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
-            rows={4}
-            helperText="One bullet per line. Max 10 bullets."
-            placeholder={"Led a team of 5 engineers\nImproved system performance by 40%\nShipped 3 major features"}
-            info="Recommended max 3 bullets for optimal resume and card rendering. Start with action verbs and quantify impact."
-          />
-          <div className="mt-2 flex items-center justify-end gap-2">
+
+          {/* Section: Timeline */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Timeline</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Start Date"
+                type="date"
+                value={formState.startDate}
+                onChange={(event) => setFormState((prev) => ({ ...prev, startDate: event.target.value }))}
+                required
+              />
+              <Input
+                label="End Date"
+                type="date"
+                value={formState.endDate}
+                onChange={(event) => setFormState((prev) => ({ ...prev, endDate: event.target.value }))}
+                disabled={formState.isCurrent}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-border/50 bg-surface-low p-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-text-primary">Current Position</p>
+                <p className="text-xs text-text-secondary">Mark this if you are still working here.</p>
+              </div>
+              <Switch
+                checked={formState.isCurrent}
+                onCheckedChange={(checked) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    isCurrent: checked,
+                    endDate: checked ? "" : prev.endDate,
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          {/* Section: Details */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Impact & Details</h4>
+            </div>
+            <Textarea
+              label="High-level Description"
+              value={formState.description}
+              onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
+              rows={3}
+              placeholder="Brief description of your role and responsibilities."
+              info="A high level overview. Focus on the 'what'."
+            />
+            <Textarea
+              label="Key Achievements (Bullets)"
+              value={formState.bullets}
+              onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
+              rows={5}
+              placeholder={"Led a team of 5 engineers\nImproved system performance by 40%\nShipped 3 major features"}
+              helperText="One bullet per line. Max 10 bullets."
+              info="Quantify your impact where possible. E.g., 'Reduced costs by 20% by optimizing infra'."
+            />
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/50">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} isLoading={isSaving}>
-              {editingExperience ? "Update Experience" : "Create Experience"}
+            <Button 
+              onClick={handleSubmit} 
+              isLoading={isSaving}
+              className="min-w-[140px] shadow-lg shadow-primary/20"
+            >
+              {editingExperience ? "Save Changes" : "Create Experience"}
             </Button>
           </div>
         </div>

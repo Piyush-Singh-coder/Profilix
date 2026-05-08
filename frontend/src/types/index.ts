@@ -1,8 +1,8 @@
 export type AuthProvider = "EMAIL" | "GITHUB" | "GOOGLE";
 export type ProfileStatus = "LOOKING_FOR_ROLES" | "OPEN_TO_HACKATHONS" | "BUILDING_SOMETHING" | "AVAILABLE_FOR_FREELANCE" | "NOT_AVAILABLE" | "CUSTOM";
 export type TechCategory = "LANGUAGE" | "FRAMEWORK" | "DATABASE" | "DEVOPS" | "TOOL" | "CLOUD" | "OTHER";
-export type ProfileTheme = "GLASS" | "BRUTALISM" | "CLAY" | "SKEUOMORPHIC" | "MINIMAL" | "NEON" | "RETRO" | "AURORA";
-export type CardTheme = "GLASSMORPHISM" | "NEOBRUTALISM" | "APPLE" | "CLAY" | "SKEUOMORPHIC";
+export type ProfileTheme = "LIGHT" | "DARK";
+export type CardTheme = "GLASS" | "BRUTAL" | "APPLE";
 export type SocialPlatform = "GITHUB" | "LINKEDIN" | "TWITTER" | "LEETCODE" | "HACKERRANK" | "PERSONAL_WEBSITE" | "OTHER";
 export type AnalyticsEventType = "PROFILE_VIEW" | "RESUME_DOWNLOAD" | "SOCIAL_LINK_CLICK" | "QR_SCAN" | "OG_IMAGE_RENDER";
 export type AchievementType = "HACKATHON" | "COMPETITION" | "CERTIFICATE" | "AWARD" | "OTHER";

@@ -45,7 +45,7 @@ const EMPTY_FORM: EducationFormState = {
   bullets: "",
 };
 
-export default function EducationPage() {
+export function EducationEditor() {
   const { educations, isLoading, isSaving, fetchEducations, createEducation, updateEducation, deleteEducation } =
     useEducationStore();
 
@@ -183,7 +183,7 @@ export default function EducationPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="font-heading text-3xl font-bold">Education</h1>
@@ -230,74 +230,110 @@ export default function EducationPage() {
         title={editingEducation ? "Edit Education" : "Create Education"}
         description="Add your academic background, coursework highlights, or honors."
       >
-        <div className="grid gap-4">
-          <Input
-            label="School"
-            value={formState.school}
-            onChange={(event) => setFormState((prev) => ({ ...prev, school: event.target.value }))}
-            placeholder="University of Example"
-          />
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-8 py-2">
+          {/* Section: Academic Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Academic Details</h4>
+            </div>
             <Input
-              label="Degree"
-              value={formState.degree}
-              onChange={(event) => setFormState((prev) => ({ ...prev, degree: event.target.value }))}
-              placeholder="B.S."
+              label="School / University"
+              value={formState.school}
+              onChange={(event) => setFormState((prev) => ({ ...prev, school: event.target.value }))}
+              placeholder="Stanford University, IIT Bombay, etc."
+              required
             />
-            <Input
-              label="Field of Study"
-              value={formState.fieldOfStudy}
-              onChange={(event) => setFormState((prev) => ({ ...prev, fieldOfStudy: event.target.value }))}
-              placeholder="Computer Science"
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Degree"
+                value={formState.degree}
+                onChange={(event) => setFormState((prev) => ({ ...prev, degree: event.target.value }))}
+                placeholder="B.Tech, M.S., etc."
+              />
+              <Input
+                label="Field of Study"
+                value={formState.fieldOfStudy}
+                onChange={(event) => setFormState((prev) => ({ ...prev, fieldOfStudy: event.target.value }))}
+                placeholder="Computer Science"
+              />
+            </div>
+          </div>
+
+          {/* Section: Timeline */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Timeline</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Start Date"
+                type="date"
+                value={formState.startDate}
+                onChange={(event) => setFormState((prev) => ({ ...prev, startDate: event.target.value }))}
+                required
+              />
+              <Input
+                label="End Date"
+                type="date"
+                value={formState.endDate}
+                onChange={(event) => setFormState((prev) => ({ ...prev, endDate: event.target.value }))}
+                disabled={formState.isCurrent}
+              />
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-border/50 bg-surface-low p-4">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium text-text-primary">Currently Enrolled</p>
+                <p className="text-xs text-text-secondary">Mark this if you are still studying here.</p>
+              </div>
+              <Switch
+                checked={formState.isCurrent}
+                onCheckedChange={(checked) =>
+                  setFormState((prev) => ({
+                    ...prev,
+                    isCurrent: checked,
+                    endDate: checked ? "" : prev.endDate,
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          {/* Section: Extra Info */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Achievements & Details</h4>
+            </div>
+            <Textarea
+              label="Brief Summary"
+              value={formState.description}
+              onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
+              rows={3}
+              placeholder="GPA, Honors, Minor, or high-level coursework."
+            />
+            <Textarea
+              label="Specific Highlights (Bullets)"
+              value={formState.bullets}
+              onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
+              rows={4}
+              placeholder={"Dean's List (3 semesters)\nRelevant coursework: Distributed Systems, ML\nTeaching Assistant for Data Structures"}
+              helperText="One bullet per line. Max 10 bullets."
             />
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <Input
-              label="Start Date"
-              type="date"
-              value={formState.startDate}
-              onChange={(event) => setFormState((prev) => ({ ...prev, startDate: event.target.value }))}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={formState.endDate}
-              onChange={(event) => setFormState((prev) => ({ ...prev, endDate: event.target.value }))}
-              disabled={formState.isCurrent}
-            />
-          </div>
-          <Switch
-            checked={formState.isCurrent}
-            onCheckedChange={(checked) =>
-              setFormState((prev) => ({
-                ...prev,
-                isCurrent: checked,
-                endDate: checked ? "" : prev.endDate,
-              }))
-            }
-            label="Currently Enrolled"
-          />
-          <Textarea
-            label="Description"
-            value={formState.description}
-            onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-            rows={3}
-            placeholder="Brief summary (GPA, honors, relevant coursework, etc.)"
-          />
-          <Textarea
-            label="Bullet Points"
-            value={formState.bullets}
-            onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
-            rows={4}
-            helperText="One bullet per line. Max 10 bullets."
-            placeholder={"Dean's List (3 semesters)\nRelevant coursework: Distributed Systems, ML\nTeaching Assistant for Data Structures"}
-          />
-          <div className="mt-2 flex items-center justify-end gap-2">
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/50">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} isLoading={isSaving}>
-              {editingEducation ? "Update Education" : "Create Education"}
+            <Button 
+              onClick={handleSubmit} 
+              isLoading={isSaving}
+              className="min-w-[140px] shadow-lg shadow-primary/20"
+            >
+              {editingEducation ? "Save Changes" : "Create Education"}
             </Button>
           </div>
         </div>

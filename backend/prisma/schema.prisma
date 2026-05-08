@@ -45,8 +45,8 @@ model Profile {
   statusCustomText String?            @map("status_custom_text") @db.VarChar(100)
   location         String?            @db.VarChar(100)
   isPublic         Boolean            @default(true) @map("is_public")
-  theme            ProfileTheme       @default(SKEUOMORPHIC)
-  cardTheme        CardTheme          @default(GLASSMORPHISM) @map("card_theme")
+  theme            ProfileTheme       @default(DARK)
+  cardTheme        CardTheme          @default(GLASS) @map("card_theme")
   createdAt        DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
   techStacks       ProfileTechStack[]
@@ -295,22 +295,14 @@ enum AnalyticsEventType {
 }
 
 enum ProfileTheme {
-  GLASS
-  BRUTALISM
-  CLAY
-  SKEUOMORPHIC
-  MINIMAL
-  NEON
-  RETRO
-  AURORA
+  LIGHT
+  DARK
 }
 
 enum CardTheme {
-  GLASSMORPHISM
-  NEOBRUTALISM
+  GLASS
+  BRUTAL
   APPLE
-  CLAY
-  SKEUOMORPHIC
 }
 
 enum AchievementType {

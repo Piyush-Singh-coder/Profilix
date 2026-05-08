@@ -26,4 +26,11 @@ pnpm-debug.log*
 
 .kiro
 
+.agents
+
+graphify-out
+DESIGN.md
+
+
+
 

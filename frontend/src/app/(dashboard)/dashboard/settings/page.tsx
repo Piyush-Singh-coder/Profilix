@@ -13,6 +13,8 @@ import {
   Image as ImageIcon,
   Upload,
   CreditCard,
+  Sparkles,
+  LogOut,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
@@ -26,33 +28,11 @@ import { useProfileStore } from "@/store/useProfileStore";
 import { cn } from "@/lib/utils";
 
 
-// ─── Card theme options ────────────────────────────────────────────────────
-const CARD_THEMES = [
-  {
-    value: "GLASSMORPHISM",
-    label: "Glassmorphism",
-    desc: "Dark glass with blue glow",
-    preview: "from-slate-900 via-blue-950 to-slate-900",
-    dot: "bg-blue-400",
-  },
-  {
-    value: "NEOBRUTALISM",
-    label: "NeoBrutalism",
-    desc: "Bold borders & cream tones",
-    preview: "bg-amber-50 border-black border-2",
-    dot: "bg-amber-400",
-  },
-  {
-    value: "APPLE",
-    label: "Apple / Minimal",
-    desc: "Clean white system design",
-    preview: "bg-gray-50 border border-gray-200",
-    dot: "bg-blue-600",
-  },
-] as const;
 
-type CardThemeValue = (typeof CARD_THEMES)[number]["value"];
 
+
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Settings as SettingsIcon } from "lucide-react";
 
 // ─── Section wrapper ───────────────────────────────────────────────────────
 function Section({
@@ -83,14 +63,14 @@ function Section({
 // ─── Main Page ─────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const { logout, user, uploadAvatar } = useAuthStore();
-  const { profile, isLoading, isSaving, fetchProfile, updateProfile } = useProfileStore();
+  const { profile, isLoading, isSaving, fetchProfile, updateProfile, updateTheme } = useProfileStore();
   const [deleting, setDeleting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   // Form state — mirrors profile fields
   const [form, setForm] = useState({
-    cardTheme: "GLASSMORPHISM" as CardThemeValue,
+    appTheme: (user?.selectedTheme === "LIGHT" ? "LIGHT" : "DARK") as "LIGHT" | "DARK",
   });
 
   // Populate form when profile loads
@@ -100,11 +80,12 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (profile) {
-      setForm({
-        cardTheme:        (profile.cardTheme   as CardThemeValue)  || "GLASSMORPHISM",
-      });
+      setForm((prev) => ({
+        ...prev,
+        appTheme: (user?.selectedTheme === "LIGHT" ? "LIGHT" : "DARK"),
+      }));
     }
-  }, [profile]);
+  }, [profile, user?.selectedTheme]);
 
   const set = <T extends keyof typeof form>(key: T) => (value: (typeof form)[T]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -112,14 +93,18 @@ export default function SettingsPage() {
   // ── Save profile info ────────────────────────────────────────────────────
   const handleSave = async () => {
     try {
-      await updateProfile({
-        cardTheme:        form.cardTheme        || undefined,
-      } as Parameters<typeof updateProfile>[0]);
+      // 2. Update Auth & Profile Theme (App Theme)
+      const { updateSelectedTheme } = useAuthStore.getState();
+      updateSelectedTheme(form.appTheme);
+      
+      // Update profile theme in store and backend
+      await updateTheme(form.appTheme);
+
       setSaved(true);
-      toast.success("Profile updated successfully!");
+      toast.success("Settings updated successfully!");
       setTimeout(() => setSaved(false), 2500);
     } catch {
-      toast.error("Failed to save profile.");
+      toast.error("Failed to save settings.");
     }
   };
 
@@ -160,13 +145,46 @@ export default function SettingsPage() {
 
   return (
     <div className="animate-in space-y-8 pb-24">
-      {/* Page header */}
-      <div className="border-b border-border pb-5">
-        <h1 className="font-heading text-3xl font-bold">Settings</h1>
-        <p className="mt-1 text-sm text-text-secondary">
-          Manage your account controls, card themes, and profile photo.
-        </p>
-      </div>
+      <DashboardHeader 
+        title="Settings"
+        subtitle="Manage your account controls, appearance preferences, and profile visibility. Customize your experience to suit your professional needs."
+        badge="Account Controls"
+        icon={SettingsIcon}
+      />
+
+      {/* ── App Theme ───────────────────────────────────────────────────── */}
+      <Section
+        icon={Sparkles}
+        title="Application Appearance"
+        description="Toggle between Light and Dark mode for the dashboard and landing page."
+      >
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => set("appTheme")("LIGHT")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-xl border-2 py-4 font-semibold transition-all",
+              form.appTheme === "LIGHT"
+                ? "border-primary bg-primary/5 text-primary"
+                : "border-border text-text-secondary hover:border-primary/40"
+            )}
+          >
+            Light Mode (Cream)
+          </button>
+          <button
+            type="button"
+            onClick={() => set("appTheme")("DARK")}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 rounded-xl border-2 py-4 font-semibold transition-all",
+              form.appTheme === "DARK"
+                ? "border-primary bg-primary/5 text-primary"
+                : "border-border text-text-secondary hover:border-primary/40"
+            )}
+          >
+            Dark Mode (Glass)
+          </button>
+        </div>
+      </Section>
 
       {/* ── Profile Photo ─────────────────────────────────────────────────── */}
       <Section icon={ImageIcon} title="Profile Photo" description="Update your avatar for your portfolio card and public presence.">
@@ -198,8 +216,8 @@ export default function SettingsPage() {
                 }
               }}
             />
-            <Button
-              variant="outline"
+            <button
+              className="inline-flex h-10 items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-surface-low disabled:opacity-50"
               disabled={isUploading}
               onClick={() => document.getElementById("avatar-upload")?.click()}
             >
@@ -209,7 +227,7 @@ export default function SettingsPage() {
                 <Upload className="mr-2 h-4 w-4" />
               )}
               {isUploading ? "Uploading..." : "Upload New Photo"}
-            </Button>
+            </button>
             <p className="text-xs text-text-secondary">
               Recommended: 400x400px. Max 5MB.
             </p>
@@ -218,39 +236,7 @@ export default function SettingsPage() {
       </Section>
 
 
-      {/* ── Card Theme ───────────────────────────────────────────────────── */}
-      <Section
-        icon={CreditCard}
-        title="Profile Card Theme"
-        description="Style of the downloadable card generated from your profile."
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {CARD_THEMES.map((t) => (
-            <button
-              key={t.value}
-              type="button"
-              onClick={() => set("cardTheme")(t.value)}
-              className={cn(
-                "group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all duration-200",
-                form.cardTheme === t.value
-                  ? "border-primary ring-2 ring-primary/20"
-                  : "border-border hover:border-primary/40"
-              )}
-            >
-              {/* Mini preview bar */}
-              <div className={cn("mb-3 h-16 w-full rounded-lg bg-gradient-to-br", t.preview)} />
-              <div className="flex items-center gap-2">
-                <span className={cn("h-2.5 w-2.5 rounded-full", t.dot)} />
-                <span className="text-sm font-semibold text-text-primary">{t.label}</span>
-              </div>
-              <p className="mt-0.5 text-xs text-text-secondary">{t.desc}</p>
-              {form.cardTheme === t.value && (
-                <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-primary" />
-              )}
-            </button>
-          ))}
-        </div>
-      </Section>
+
 
       {/* ── Privacy ──────────────────────────────────────────────────────── */}
       <Section
@@ -277,6 +263,17 @@ export default function SettingsPage() {
         <p className="mr-auto text-xs text-text-secondary hidden sm:block">
           Changes to your card theme are correctly preserved across visits.
         </p>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            await logout();
+            window.location.href = "/";
+          }}
+          className="min-w-[120px]"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Log Out
+        </Button>
         <Button
           variant="primary"
           onClick={handleSave}

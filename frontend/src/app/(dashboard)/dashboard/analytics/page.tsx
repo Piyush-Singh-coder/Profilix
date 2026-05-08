@@ -33,6 +33,9 @@ function timeAgo(isoDate: string) {
   return `${Math.floor(diffSeconds / 86400)}d ago`;
 }
 
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { BarChart3 } from "lucide-react";
+
 export default function AnalyticsPage() {
   const { summary, recentEvents, isLoading, error, fetchAnalytics } = useAnalyticsStore();
 
@@ -83,10 +86,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="animate-in space-y-8 pb-24">
-      <div className="border-b border-border pb-5">
-        <h1 className="font-heading text-3xl font-bold">Analytics</h1>
-        <p className="mt-1 text-sm text-text-secondary">Track profile engagement and interaction patterns.</p>
-      </div>
+      <DashboardHeader 
+        title="Analytics"
+        subtitle="Track profile engagement and interaction patterns. Gain insights into how recruiters and peers interact with your professional brand."
+        badge="Real-time Stats"
+        icon={BarChart3}
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {(Object.keys(EVENT_LABELS) as AnalyticsEventType[]).map((eventType) => (

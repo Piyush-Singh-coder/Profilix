@@ -1,91 +1,82 @@
 import Link from "next/link";
-import { QrCode, FileText, Palette, ShieldCheck, ArrowRight } from "lucide-react";
-import { FaGithub } from "react-icons/fa";
-import { cn } from "@/lib/utils";
+import { FileText, IdCard, QrCode, BarChart3, Sparkles, LayoutTemplate, ArrowRight } from "lucide-react";
 
 const features = [
   {
-    title: "ATS-Optimization Engine",
-    description: "Smart keyword analysis and formatting ensure your resume gets shortlisted.",
-    icon: <FileText className="h-6 w-6 text-green-500" />,
+    title: "ATS-Friendly Resumes",
+    description: "Create resumes that pass ATS scanners and get you noticed.",
+    icon: <FileText className="h-5 w-5 text-primary" />,
     href: "/ats-resume-generator",
-    actionText: "Generate Resume",
-    hoverColor: "hover:border-green-500/50",
-    textColor: "text-green-500",
-    groupHoverText: "group-hover:text-green-500",
-    iconBg: "bg-green-500/10",
   },
   {
-    title: "Live Profile Card",
-    description: "Share a beautiful, mobile-friendly profile card with a unique link.",
-    icon: <FaGithub className="h-6 w-6 text-primary" />,
+    title: "Professional Profile Cards",
+    description: "Beautiful digital cards to share your professional identity.",
+    icon: <IdCard className="h-5 w-5 text-primary" />,
     href: "/github-portfolio-card",
-    actionText: "View Cards",
-    hoverColor: "hover:border-primary/50",
-    textColor: "text-primary",
-    groupHoverText: "group-hover:text-primary",
-    iconBg: "bg-primary/10",
   },
   {
-    title: "Customizable Themes",
-    description: "Choose from multiple themes and make it truly yours.",
-    icon: <Palette className="h-6 w-6 text-pink-500" />,
+    title: "QR Code Profile",
+    description: "Generate a QR code that leads to your profile page.",
+    icon: <QrCode className="h-5 w-5 text-primary" />,
     href: "/dashboard",
-    actionText: "Explore Themes",
-    hoverColor: "hover:border-pink-500/50",
-    textColor: "text-pink-500",
-    groupHoverText: "group-hover:text-pink-500",
-    iconBg: "bg-pink-500/10",
   },
   {
-    title: "Privacy First",
-    description: "Your data is secure and private. You're in control.",
-    icon: <ShieldCheck className="h-6 w-6 text-purple-500" />,
-    href: "/privacy",
-    actionText: "Learn More",
-    hoverColor: "hover:border-purple-500/50",
-    textColor: "text-purple-500",
-    groupHoverText: "group-hover:text-purple-500",
-    iconBg: "bg-purple-500/10",
+    title: "Analytics Dashboard",
+    description: "Track profile views and engagement in real-time.",
+    icon: <BarChart3 className="h-5 w-5 text-primary" />,
+    href: "/dashboard",
+  },
+  {
+    title: "AI Content Assistant",
+    description: "Get AI suggestions to write better, faster.",
+    icon: <Sparkles className="h-5 w-5 text-primary" />,
+    href: "/dashboard",
+  },
+  {
+    title: "Multiple Templates",
+    description: "Choose from modern, professional templates for any role.",
+    icon: <LayoutTemplate className="h-5 w-5 text-primary" />,
+    href: "/dashboard/resume",
   },
 ];
 
 export function BentoGrid() {
   return (
-    <section className="py-24 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-heading font-bold text-text-primary mb-4">
-            Powerful Features for Your Career
+    <section className="py-10 bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-widest text-primary">
+            FEATURES
+          </div>
+          <h2 className="text-4xl md:text-5xl font-heading font-medium text-text-primary mb-6">
+            Everything you need <br className="hidden md:block" />
+            to grow your career
           </h2>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
-            Stop juggling Linktree, Vercel deployments, and Google Docs. Profilix is your all-in-one developer identity platform.
+          <p className="text-text-secondary text-base max-w-xl mx-auto">
+            Powerful tools that help you create, share and grow your professional presence.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 auto-rows-max">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((feature, i) => (
             <Link key={i} href={feature.href} className="group block h-full">
-              <div
-                className={cn(
-                  "relative overflow-hidden rounded-3xl border border-border/50 bg-surface/50 p-8 transition-colors duration-300 h-full flex flex-col justify-between hover:bg-surface",
-                  feature.hoverColor
-                )}
-              >
-                <div className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100 shadow-[inset_0_0_20px_rgba(255,255,255,0.05)]" />
-                <div>
-                  <div className={cn("mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl shadow-inner", feature.iconBg)}>
+              <div className="bg-background border border-border/50 rounded-2xl p-8 hover:border-primary/50 transition-colors h-full flex flex-col relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-16 -mt-16 transition-transform group-hover:scale-110" />
+                
+                <div className="relative z-10">
+                  <div className="mb-6 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
                     {feature.icon}
                   </div>
-                  <h3 className={cn("mb-3 text-2xl font-bold font-heading tracking-tight text-text-primary transition-colors", feature.groupHoverText)}>
+                  <h3 className="mb-3 text-lg font-bold font-heading text-text-primary group-hover:text-primary transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-text-secondary leading-relaxed mb-8">
+                  <p className="text-text-secondary text-sm leading-relaxed mb-8">
                     {feature.description}
                   </p>
                 </div>
-                <div className={cn("font-semibold flex items-center", feature.textColor)}>
-                  {feature.actionText} <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
+
+                <div className="relative z-10 text-primary text-sm font-semibold flex items-center mt-auto">
+                  Explore feature <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                 </div>
               </div>
             </Link>

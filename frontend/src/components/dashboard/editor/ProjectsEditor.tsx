@@ -45,7 +45,7 @@ const EMPTY_FORM: ProjectFormState = {
   bullets: "",
 };
 
-export default function ProjectsPage() {
+export function ProjectsEditor() {
   const {
     projects,
     isLoading,
@@ -182,7 +182,7 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="animate-in space-y-8 pb-24">
+    <div className="animate-in space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-5">
         <div>
           <h1 className="font-heading text-3xl font-bold">Projects</h1>
@@ -234,55 +234,86 @@ export default function ProjectsPage() {
         title={editingProject ? "Edit Project" : "Create Project"}
         description="Provide links, context, and bullet points that explain impact."
       >
-        <div className="grid gap-4">
-          <Input
-            label="Title"
-            value={formState.title}
-            onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
-            placeholder="Realtime Issue Tracker"
-          />
-          <Textarea
-            label="Description"
-            value={formState.description}
-            onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-            rows={3}
-            placeholder="One to two lines explaining this project."
-          />
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-8 py-2">
+          {/* Section: Basic Info */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Project Identity</h4>
+            </div>
             <Input
-              label="Repository URL"
-              value={formState.repoUrl}
-              onChange={(event) => setFormState((prev) => ({ ...prev, repoUrl: event.target.value }))}
-              placeholder="https://github.com/org/repo"
+              label="Project Title"
+              value={formState.title}
+              onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
+              placeholder="Realtime Issue Tracker"
+              required
             />
-            <Input
-              label="Live URL"
-              value={formState.liveUrl}
-              onChange={(event) => setFormState((prev) => ({ ...prev, liveUrl: event.target.value }))}
-              placeholder="https://app.example.com"
+            <Textarea
+              label="Tagline / Short Description"
+              value={formState.description}
+              onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
+              rows={2}
+              placeholder="A brief one-liner explaining what this project does."
             />
           </div>
-          <Input
-            label="Demo Video URL"
-            value={formState.videoUrl}
-            onChange={(event) => setFormState((prev) => ({ ...prev, videoUrl: event.target.value }))}
-            placeholder="https://youtube.com/watch?v=..."
-          />
-          <Textarea
-            label="Bullet Points"
-            value={formState.bullets}
-            onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
-            rows={4}
-            helperText="One bullet per line."
-            placeholder={"Reduced API latency by 42%\nHandled 10k concurrent websocket users"}
-            info="Recommended max 3 bullets. Detail specific technical challenges, integrations, or measurable impact."
-          />
-          <div className="mt-2 flex items-center justify-end gap-2">
+
+          {/* Section: Links */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Links & Media</h4>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Input
+                label="Repository URL"
+                value={formState.repoUrl}
+                onChange={(event) => setFormState((prev) => ({ ...prev, repoUrl: event.target.value }))}
+                placeholder="https://github.com/org/repo"
+              />
+              <Input
+                label="Live Demo URL"
+                value={formState.liveUrl}
+                onChange={(event) => setFormState((prev) => ({ ...prev, liveUrl: event.target.value }))}
+                placeholder="https://app.example.com"
+              />
+            </div>
+            <Input
+              label="Demo Video URL"
+              value={formState.videoUrl}
+              onChange={(event) => setFormState((prev) => ({ ...prev, videoUrl: event.target.value }))}
+              placeholder="https://youtube.com/watch?v=..."
+              info="A short Loom or YouTube demo video makes a huge difference."
+            />
+          </div>
+
+          {/* Section: Technical Details */}
+          <div className="space-y-4 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-2 text-primary">
+              <Plus className="h-4 w-4" />
+              <h4 className="text-sm font-bold uppercase tracking-wider">Technical Highlights</h4>
+            </div>
+            <Textarea
+              label="Key Achievements (Bullets)"
+              value={formState.bullets}
+              onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
+              rows={5}
+              placeholder={"Reduced API latency by 42%\nHandled 10k concurrent websocket users\nImplemented end-to-end encryption"}
+              helperText="One bullet per line."
+              info="Detail specific technical challenges or measurable impact."
+            />
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-6 border-t border-border/50">
             <Button variant="ghost" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSubmit} isLoading={isSaving}>
-              {editingProject ? "Update Project" : "Create Project"}
+            <Button 
+              onClick={handleSubmit} 
+              isLoading={isSaving}
+              className="min-w-[140px] shadow-lg shadow-primary/20"
+            >
+              {editingProject ? "Save Changes" : "Create Project"}
             </Button>
           </div>
         </div>

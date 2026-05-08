@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+
+const CATEGORIES = ["All", "Modern", "Minimal", "Executive", "Creative"];
 
 const TEMPLATES = [
   {
@@ -9,58 +13,63 @@ const TEMPLATES = [
     name: "ATS-Optimized",
     description: "Clean, parsable structure",
     image: "https://ik.imagekit.io/v6xwevpjp/Profilix/ats-resume-template.png",
-    type: "Resume",
+    type: "Minimal",
   },
   {
     id: "resume-premium",
     name: "Premium Executive",
     description: "Bold and impactful",
     image: "https://ik.imagekit.io/v6xwevpjp/Profilix/premium-design-template.png",
-    type: "Resume",
+    type: "Executive",
   },
   {
     id: "profile-glass",
     name: "Glassmorphism",
     description: "Modern frosted glass",
     image: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix-card-glass-template.png",
-    type: "Profile",
-  },
-  {
-    id: "profile-apple",
-    name: "Apple Minimal",
-    description: "Clean and structured",
-    image: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix-card-apple-template.png",
-    type: "Profile",
-  },
-  {
-    id: "profile-brutal",
-    name: "Brutalism",
-    description: "Raw and expressive",
-    image: "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix-card-brutalism-template.png",
-    type: "Profile",
+    type: "Modern",
   },
 ];
 
 export function TemplateSlider() {
-  return (
-    <section className="relative py-24 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          className="mx-auto mb-16 max-w-2xl text-center"
-        >
-          <h2 className="font-heading text-3xl font-black text-text-primary sm:text-4xl">
-            Beautiful Templates for Every Professional
-          </h2>
-          <p className="mt-4 text-text-secondary">
-            Choose from a variety of professionally designed templates.
-          </p>
-        </motion.div>
+  const [activeCategory, setActiveCategory] = useState("All");
 
-        {/* CSS grid for 5 items. Stacks on mobile, scrolls horizontally or wraps on larger screens. Here we'll use a responsive flex wrap or grid. */}
-        <div className="flex overflow-x-auto pb-8 snap-x snap-mandatory gap-6 md:grid md:grid-cols-5 md:overflow-visible md:pb-0 hide-scrollbar">
+  return (
+    <section className="relative py-10 bg-background border-t border-border/50">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center rounded-full border border-border/50 bg-surface-high px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+            TEMPLATES
+          </div>
+          <h2 className="font-heading text-4xl font-medium text-text-primary sm:text-5xl mb-4">
+            Professional templates<br />
+            for every industry
+          </h2>
+          <p className="text-text-secondary text-base">
+            Choose a template that best represents you.
+          </p>
+        </div>
+
+        {/* Pill Toggles */}
+        <div className="flex flex-wrap justify-center gap-2 mb-16">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={cn(
+                "px-5 py-2 text-sm font-medium rounded-full transition-colors",
+                activeCategory === cat
+                  ? "bg-primary text-white"
+                  : "bg-surface-high text-text-secondary hover:text-text-primary"
+              )}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Template Grid (3 items) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {TEMPLATES.map((template, i) => (
             <motion.div
               key={template.id}
@@ -68,26 +77,24 @@ export function TemplateSlider() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ delay: i * 0.1 }}
-              className="group min-w-[280px] snap-center flex flex-col relative transition-all duration-300 hover:z-50 hover:scale-105"
+              className="group cursor-pointer"
             >
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-border bg-surface-low transition-all duration-300 group-hover:border-primary/50 group-hover:shadow-lg group-hover:-translate-y-1">
+              <div className="relative aspect-[3/4] w-full overflow-hidden rounded-[24px] border border-border bg-surface shadow-lg transition-transform duration-500 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:border-border/80">
                 <Image
                   src={template.image}
                   alt={template.name}
                   fill
-                  className="object-cover opacity-80 transition-opacity group-hover:opacity-100"
+                  className="object-cover opacity-90 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-60" />
-                <div className="absolute top-4 left-4 rounded-full bg-surface-high/80 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-text-primary backdrop-blur-md border border-border/50">
-                  {template.type}
-                </div>
-              </div>
-              <div className="mt-4">
-                <h3 className="font-heading text-base font-bold text-text-primary">{template.name}</h3>
-                <p className="text-sm text-text-secondary mt-1">{template.description}</p>
               </div>
             </motion.div>
           ))}
+        </div>
+        
+        <div className="mt-12 text-center">
+           <button className="text-sm font-medium text-text-secondary hover:text-primary transition-colors flex items-center justify-center mx-auto gap-2">
+             View All Templates <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+           </button>
         </div>
       </div>
     </section>

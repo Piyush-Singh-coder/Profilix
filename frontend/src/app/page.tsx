@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
+import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { ActionSection } from "@/components/landing/ActionSection";
 import { TechMarquee } from "@/components/landing/TechMarquee";
 import { BentoGrid } from "@/components/landing/BentoGrid";
@@ -85,6 +86,7 @@ export default function Home() {
       <Navbar />
       <Hero />
       <HowItWorks />
+      <VideoShowcase />
       <ActionSection />
       <TechMarquee />
       <BentoGrid />
