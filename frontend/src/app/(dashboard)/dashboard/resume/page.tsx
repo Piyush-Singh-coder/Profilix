@@ -322,7 +322,7 @@ export default function ResumePage() {
             </div>
             <ResumeLivePreview templateType={templateType} />
             <p className="text-center text-xs text-text-secondary mt-6">
-              Preview matches ATS output. Premium template adds sidebars and colors on export.
+              This preview illustrates the layout and content hierarchy. The final export is dynamically optimized to fit a standard one-page format for maximum recruiter impact.
             </p>
           </div>
         </div>
