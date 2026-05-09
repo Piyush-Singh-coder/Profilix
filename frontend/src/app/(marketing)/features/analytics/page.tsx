@@ -146,46 +146,46 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative mt-10 lg:mt-0">
               {/* Premium Dashboard Mockup */}
-              <div className="glass-panel overflow-hidden rounded-[40px] border border-border/50 bg-surface p-8 shadow-2xl space-y-6">
+              <div className="glass-panel overflow-hidden rounded-[32px] md:rounded-[40px] border border-border/50 bg-surface p-6 sm:p-8 shadow-2xl space-y-6">
                 <div className="flex justify-between items-end">
                    <div>
-                      <p className="text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">Total Views</p>
-                      <h4 className="text-4xl font-bold text-text-primary">1,284</h4>
+                      <p className="text-[10px] sm:text-xs font-bold text-text-tertiary uppercase tracking-widest mb-1">Total Views</p>
+                      <h4 className="text-3xl sm:text-4xl font-bold text-text-primary">1,284</h4>
                    </div>
-                   <div className="text-success text-sm font-bold flex items-center gap-1 bg-success/10 px-2 py-1 rounded-full">
-                      <TrendingUp className="h-4 w-4" /> +24%
+                   <div className="text-success text-[10px] sm:text-sm font-bold flex items-center gap-1 bg-success/10 px-2 py-1 rounded-full">
+                      <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" /> +24%
                    </div>
                 </div>
                 
                 {/* Visual Chart Mockup */}
-                <div className="h-48 w-full flex items-end gap-2 px-2 border-b border-border/50 pb-2">
+                <div className="h-32 sm:h-48 w-full flex items-end gap-1 sm:gap-2 px-1 sm:px-2 border-b border-border/50 pb-2">
                    {[40, 60, 30, 80, 95, 70, 85].map((h, i) => (
-                      <div key={i} className="flex-1 bg-primary/20 rounded-t-lg transition-all hover:bg-primary" style={{ height: `${h}%` }} />
+                      <div key={i} className="flex-1 bg-primary/20 rounded-t-sm sm:rounded-t-lg transition-all hover:bg-primary" style={{ height: `${h}%` }} />
                    ))}
                 </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="p-4 rounded-2xl bg-surface-low border border-border/50">
-                      <p className="text-[10px] font-bold text-text-tertiary uppercase mb-2">Top Location</p>
-                      <p className="text-sm font-bold text-text-primary flex items-center gap-2">
+ 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                   <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-low border border-border/50">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-text-tertiary uppercase mb-1 sm:mb-2">Top Location</p>
+                      <p className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-2">
                         🇺🇸 San Francisco
                       </p>
                    </div>
-                   <div className="p-4 rounded-2xl bg-surface-low border border-border/50">
-                      <p className="text-[10px] font-bold text-text-tertiary uppercase mb-2">Avg. Duration</p>
-                      <p className="text-sm font-bold text-text-primary flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-primary" /> 2m 45s
+                   <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-surface-low border border-border/50">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-text-tertiary uppercase mb-1 sm:mb-2">Avg. Duration</p>
+                      <p className="text-xs sm:text-sm font-bold text-text-primary flex items-center gap-2">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-primary" /> 2m 45s
                       </p>
                    </div>
                 </div>
               </div>
-
+ 
               {/* Floating Badge Decoration */}
-              <div className="absolute -top-6 -right-6 rounded-2xl bg-primary px-4 py-3 text-white shadow-xl flex items-center gap-2">
-                <MousePointer2 className="h-4 w-4" />
-                <p className="text-xs font-bold">New view recorded</p>
+              <div className="absolute -top-4 -right-4 sm:-top-6 sm:-right-6 rounded-xl sm:rounded-2xl bg-primary px-3 py-2 sm:px-4 sm:py-3 text-white shadow-xl flex items-center gap-2 z-20">
+                <MousePointer2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                <p className="text-[10px] sm:text-xs font-bold">New view recorded</p>
               </div>
             </div>
           </div>

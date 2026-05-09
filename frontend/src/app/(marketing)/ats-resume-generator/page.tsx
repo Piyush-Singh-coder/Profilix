@@ -272,14 +272,14 @@ export default function ATSResumeGeneratorPage() {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="glass-panel overflow-hidden rounded-[32px] border border-border/50 bg-surface p-4 shadow-2xl">
-                <div className="aspect-[4/5] w-full rounded-2xl bg-surface-low border border-border p-8 animate-pulse-subtle">
-                  <div className="h-8 w-48 rounded bg-border mb-6" />
+            <div className="relative mt-8 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-[32px] border border-border/50 bg-surface p-5 sm:p-8 shadow-2xl">
+                <div className="aspect-[4/5] w-full rounded-2xl bg-surface-low border border-border p-6 sm:p-8 animate-pulse-subtle">
+                  <div className="h-8 w-40 sm:w-48 rounded bg-border mb-6" />
                   <div className="h-4 w-full rounded bg-border mb-3 opacity-60" />
                   <div className="h-4 w-2/3 rounded bg-border mb-12 opacity-40" />
                   
-                  <div className="h-6 w-32 rounded bg-primary/20 mb-6" />
+                  <div className="h-6 w-24 sm:w-32 rounded bg-primary/20 mb-6" />
                   <div className="space-y-4">
                     <div className="h-4 w-full rounded bg-border opacity-20" />
                     <div className="h-4 w-full rounded bg-border opacity-20" />
@@ -288,9 +288,9 @@ export default function ATSResumeGeneratorPage() {
                 </div>
               </div>
               {/* Floating Badge */}
-              <div className="absolute -bottom-6 -right-6 rounded-2xl bg-primary px-6 py-4 text-white shadow-xl">
-                <p className="text-xl font-bold">100/100</p>
-                <p className="text-xs opacity-80 uppercase tracking-widest font-bold">ATS Score</p>
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 rounded-2xl bg-primary px-5 py-3 sm:px-6 sm:py-4 text-white shadow-xl z-20">
+                <p className="text-lg sm:text-xl font-bold">100/100</p>
+                <p className="text-[10px] sm:text-xs opacity-80 uppercase tracking-widest font-bold">ATS Score</p>
               </div>
             </div>
           </div>

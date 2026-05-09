@@ -161,50 +161,50 @@ export default function ProfileCardsPage() {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="glass-panel overflow-hidden rounded-[40px] border border-border/50 bg-surface p-6 shadow-2xl relative">
+            <div className="relative mt-10 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-[32px] md:rounded-[40px] border border-border/50 bg-surface p-4 sm:p-6 shadow-2xl relative">
                 {/* Mock Card Preview */}
-                <div className="aspect-[3/4] w-full rounded-[24px] bg-white border border-border p-8 shadow-inner overflow-hidden relative group">
+                <div className="aspect-[3/4] w-full rounded-[24px] bg-white border border-border p-6 sm:p-8 shadow-inner overflow-hidden relative group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-purple-500/5" />
                   
                   {/* Card Header */}
-                  <div className="relative flex flex-col items-center mb-8">
-                    <div className="h-24 w-24 rounded-full border-4 border-white bg-slate-100 shadow-md mb-4 flex items-center justify-center overflow-hidden">
+                  <div className="relative flex flex-col items-center mb-6 sm:mb-8">
+                    <div className="h-20 w-20 sm:h-24 sm:w-24 rounded-full border-4 border-white bg-slate-100 shadow-md mb-4 flex items-center justify-center overflow-hidden">
                        <div className="h-full w-full bg-gradient-to-br from-primary/20 to-secondary/20 animate-pulse" />
                     </div>
-                    <div className="h-6 w-32 rounded bg-slate-100 mb-2" />
-                    <div className="h-3 w-24 rounded bg-slate-50" />
+                    <div className="h-5 sm:h-6 w-28 sm:w-32 rounded bg-slate-100 mb-2" />
+                    <div className="h-3 w-20 sm:w-24 rounded bg-slate-50" />
                   </div>
-
+ 
                   {/* Stats Bar */}
-                  <div className="relative grid grid-cols-3 gap-2 mb-8">
+                  <div className="relative grid grid-cols-3 gap-2 mb-6 sm:mb-8">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className="h-12 rounded-xl bg-slate-50 flex flex-col items-center justify-center gap-1">
-                        <div className="h-3 w-8 rounded bg-primary/20" />
-                        <div className="h-2 w-6 rounded bg-slate-200" />
+                      <div key={i} className="h-10 sm:h-12 rounded-xl bg-slate-50 flex flex-col items-center justify-center gap-1">
+                        <div className="h-2.5 sm:h-3 w-6 sm:w-8 rounded bg-primary/20" />
+                        <div className="h-1.5 sm:h-2 w-5 sm:w-6 rounded bg-slate-200" />
                       </div>
                     ))}
                   </div>
-
+ 
                   {/* Socials */}
                   <div className="relative flex justify-center gap-3">
                     {[FaXTwitter, FaGithub, FaLinkedinIn].map((Icon, i) => (
-                      <div key={i} className="h-10 w-10 rounded-full border border-border bg-white flex items-center justify-center text-text-tertiary transition-colors hover:text-primary">
-                        <Icon className="h-4 w-4" />
+                      <div key={i} className="h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-border bg-white flex items-center justify-center text-text-tertiary transition-colors hover:text-primary">
+                        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </div>
                     ))}
                   </div>
-
+ 
                   {/* QR Floating Overlay */}
-                  <div className="absolute bottom-6 right-6 h-12 w-12 rounded-xl bg-white border border-border shadow-lg flex items-center justify-center transition-transform group-hover:scale-110">
-                    <QrCode className="h-6 w-6 text-primary" />
+                  <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-white border border-border shadow-lg flex items-center justify-center transition-transform group-hover:scale-110">
+                    <QrCode className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                   </div>
                 </div>
               </div>
-
+ 
               {/* Floating Decoration */}
-              <div className="absolute -top-6 -left-6 rounded-2xl bg-primary px-4 py-3 text-white shadow-xl animate-bounce-subtle">
-                <p className="text-sm font-bold">Theme: Glass</p>
+              <div className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 rounded-xl sm:rounded-2xl bg-primary px-3 py-2 sm:px-4 sm:py-3 text-white shadow-xl animate-bounce-subtle z-20">
+                <p className="text-xs sm:text-sm font-bold">Theme: Glass</p>
               </div>
             </div>
           </div>

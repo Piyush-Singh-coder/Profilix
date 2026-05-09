@@ -159,55 +159,55 @@ export default function FeaturesPage() {
                 ))}
               </div>
 
-              <div className="mt-12 flex gap-4">
-                <Link href="/dashboard">
-                  <Button size="lg" className="rounded-full px-10">
+              <div className="mt-12 flex flex-col sm:flex-row gap-4">
+                <Link href="/dashboard" className="w-full sm:w-auto">
+                  <Button size="lg" className="rounded-full px-10 w-full sm:w-auto">
                     Get Started Now
                   </Button>
                 </Link>
-                <Link href="/ats-resume-generator">
-                  <Button size="lg" variant="outline" className="rounded-full px-10">
+                <Link href="/ats-resume-generator" className="w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="rounded-full px-10 w-full sm:w-auto">
                     Learn More
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="relative">
-              <div className="glass-panel overflow-hidden rounded-[48px] border border-border/50 bg-surface p-10 shadow-2xl">
-                <div className="relative aspect-[4/3] w-full rounded-3xl bg-surface-low border border-border p-10 overflow-hidden group">
+            <div className="relative mt-8 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-[32px] md:rounded-[48px] border border-border/50 bg-surface p-5 sm:p-10 shadow-2xl">
+                <div className="relative aspect-[4/3] w-full rounded-2xl md:rounded-3xl bg-surface-low border border-border p-5 sm:p-10 overflow-hidden group">
                   {/* Dynamic background effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-50 transition-opacity group-hover:opacity-100" />
                   
-                  <div className="relative z-10 space-y-8">
+                  <div className="relative z-10 space-y-6 md:space-y-8">
                     <div className="flex items-center justify-between">
-                       <ShieldCheck className="h-12 w-12 text-success" />
-                       <Zap className="h-12 w-12 text-primary animate-pulse" />
+                       <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-success" />
+                       <Zap className="h-10 w-10 md:h-12 md:w-12 text-primary animate-pulse" />
                     </div>
                     
-                    <div className="space-y-4">
-                      <div className="h-5 w-48 rounded-full bg-text-primary/10" />
-                      <div className="h-3 w-full rounded-full bg-border/40" />
-                      <div className="h-3 w-[90%] rounded-full bg-border/40" />
-                      <div className="h-3 w-[80%] rounded-full bg-border/40" />
+                    <div className="space-y-3 md:space-y-4">
+                      <div className="h-4 md:h-5 w-40 md:w-48 rounded-full bg-text-primary/10" />
+                      <div className="h-2 md:h-3 w-full rounded-full bg-border/40" />
+                      <div className="h-2 md:h-3 w-[90%] rounded-full bg-border/40" />
+                      <div className="h-2 md:h-3 w-[80%] rounded-full bg-border/40" />
                     </div>
 
-                    <div className="pt-8 flex gap-4">
-                      <div className="h-16 w-16 rounded-2xl bg-white shadow-lg flex items-center justify-center">
-                         <QrCode className="h-8 w-8 text-primary" />
+                    <div className="pt-6 md:pt-8 flex gap-3 md:gap-4">
+                      <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-white shadow-lg flex items-center justify-center">
+                         <QrCode className="h-7 w-7 md:h-8 md:w-8 text-primary" />
                       </div>
-                      <div className="flex-1 h-16 rounded-2xl bg-white shadow-lg px-6 flex items-center">
-                         <div className="h-4 w-32 rounded bg-slate-100" />
+                      <div className="flex-1 h-14 md:h-16 rounded-xl md:rounded-2xl bg-white shadow-lg px-4 md:px-6 flex items-center">
+                         <div className="h-3 md:h-4 w-24 md:w-32 rounded bg-slate-100" />
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Floating Badge */}
-              <div className="absolute -bottom-8 -right-8 rounded-[32px] bg-success px-10 py-6 text-white shadow-2xl transform hover:scale-105 transition-transform cursor-default">
-                <p className="text-3xl font-black">FREE</p>
-                <p className="text-sm opacity-90 uppercase tracking-widest font-bold">No Hidden Fees</p>
+              {/* Floating Badge - Made responsive */}
+              <div className="absolute -bottom-4 -right-4 md:-bottom-8 md:-right-8 rounded-2xl md:rounded-[32px] bg-success px-6 md:px-10 py-4 md:py-6 text-white shadow-2xl transform hover:scale-105 transition-transform cursor-default z-20">
+                <p className="text-xl md:text-3xl font-black">FREE</p>
+                <p className="text-[10px] md:text-sm opacity-90 uppercase tracking-widest font-bold">No Hidden Fees</p>
               </div>
             </div>
           </div>

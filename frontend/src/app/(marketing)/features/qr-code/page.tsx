@@ -158,11 +158,11 @@ export default function QRCodePage() {
               </div>
             </div>
 
-            <div className="relative group">
-              <div className="glass-panel overflow-hidden rounded-[40px] border border-border/50 bg-surface p-12 shadow-2xl relative flex flex-col items-center">
+            <div className="relative group mt-10 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-[32px] md:rounded-[40px] border border-border/50 bg-surface p-6 sm:p-12 shadow-2xl relative flex flex-col items-center">
                 {/* Premium QR Mockup */}
-                <div className="relative p-6 bg-white rounded-3xl shadow-xl border border-border/50 transition-transform group-hover:scale-105 duration-500">
-                  <div className="aspect-square w-48 relative">
+                <div className="relative p-4 sm:p-6 bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-border/50 transition-transform group-hover:scale-105 duration-500">
+                  <div className="aspect-square w-32 sm:w-48 relative">
                     <QrCode className="h-full w-full text-text-primary" />
                     
                     {/* Scanning Animation Overlay */}
@@ -171,16 +171,16 @@ export default function QRCodePage() {
                   </div>
                 </div>
                 
-                <div className="mt-8 text-center">
-                  <p className="text-text-primary font-bold text-lg mb-1">Scan Me</p>
-                  <p className="text-text-tertiary text-sm">To see live profile card</p>
+                <div className="mt-6 sm:mt-8 text-center">
+                   <p className="text-text-primary font-bold text-base sm:text-lg mb-1">Scan Me</p>
+                   <p className="text-text-tertiary text-xs sm:text-sm">To see live profile card</p>
                 </div>
               </div>
-
+ 
               {/* Floating Badge */}
-              <div className="absolute -top-6 -left-6 rounded-2xl bg-primary px-6 py-4 text-white shadow-xl animate-bounce-subtle">
-                <p className="text-sm font-bold uppercase tracking-widest">High Res</p>
-                <p className="text-xs opacity-80">SVG & PNG</p>
+              <div className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 rounded-xl sm:rounded-2xl bg-primary px-4 py-3 sm:px-6 sm:py-4 text-white shadow-xl animate-bounce-subtle z-20">
+                <p className="text-xs sm:text-sm font-bold uppercase tracking-widest">High Res</p>
+                <p className="text-[10px] sm:text-xs opacity-80">SVG & PNG</p>
               </div>
             </div>
           </div>

@@ -194,16 +194,16 @@ export default function TemplatesPage() {
                     </div>
                     
                     {/* Content area */}
-                    <div className="p-10 flex-1 flex flex-col">
+                    <div className="p-6 sm:p-10 flex-1 flex flex-col">
                       <div className="flex justify-between items-start mb-4">
-                        <h3 className="font-heading text-3xl font-bold text-text-primary group-hover:text-primary transition-colors">{template.name}</h3>
+                        <h3 className="font-heading text-2xl sm:text-3xl font-bold text-text-primary group-hover:text-primary transition-colors">{template.name}</h3>
                         <div className="flex gap-2 mt-1">
                           {template.formats.map(f => (
                             <span key={f} className="text-[10px] font-black text-text-tertiary border-2 border-border/50 rounded-md px-2 py-0.5 uppercase tracking-tighter">{f}</span>
                           ))}
                         </div>
                       </div>
-                      <p className="text-text-secondary leading-relaxed mb-8 text-lg flex-1">{template.description}</p>
+                      <p className="text-text-secondary leading-relaxed mb-8 text-base sm:text-lg flex-1">{template.description}</p>
                       <div className="flex items-center gap-3 text-primary font-bold transition-all group-hover:translate-x-1">
                         Create Resume <ArrowRight className="h-5 w-5" />
                       </div>
@@ -259,16 +259,16 @@ export default function TemplatesPage() {
                     </div>
                     
                     {/* Content area */}
-                    <div className="p-8 flex-1 flex flex-col">
+                    <div className="p-6 sm:p-8 flex-1 flex flex-col">
                       <div className="flex justify-between items-start mb-3">
-                        <h3 className="font-heading text-2xl font-bold text-text-primary group-hover:text-secondary transition-colors">{card.name}</h3>
+                        <h3 className="font-heading text-xl sm:text-2xl font-bold text-text-primary group-hover:text-secondary transition-colors">{card.name}</h3>
                         <div className="flex gap-2 mt-1">
                           {card.formats.map(f => (
                             <span key={f} className="text-[9px] font-black text-text-tertiary border-2 border-border/50 rounded-md px-1.5 py-0.5 uppercase tracking-tighter">{f}</span>
                           ))}
                         </div>
                       </div>
-                      <p className="text-text-secondary leading-relaxed mb-6 text-md flex-1">{card.description}</p>
+                      <p className="text-text-secondary leading-relaxed mb-6 text-sm sm:text-md flex-1">{card.description}</p>
                       <div className="flex items-center gap-2 text-secondary font-bold transition-all group-hover:translate-x-1">
                         Design Card <ArrowRight className="h-4 w-4" />
                       </div>
@@ -309,40 +309,40 @@ export default function TemplatesPage() {
               </div>
             </div>
 
-            <div className="relative">
-              <div className="glass-panel overflow-hidden rounded-2xl border border-border/50 bg-surface p-8 shadow-2xl">
-                <div className="relative aspect-square w-full rounded-2xl bg-surface-low border border-border p-8 overflow-hidden">
+            <div className="relative mt-10 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-2xl border border-border/50 bg-surface p-5 sm:p-8 shadow-2xl">
+                <div className="relative aspect-square w-full rounded-xl sm:rounded-2xl bg-surface-low border border-border p-5 sm:p-8 overflow-hidden">
                   {/* Dynamic background effect */}
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
                   
-                  <div className="relative z-10 space-y-6">
+                  <div className="relative z-10 space-y-4 sm:space-y-6">
                     <div className="flex items-center gap-4">
-                      <div className="h-12 w-12 rounded-xl bg-primary/20 animate-pulse" />
+                      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-primary/20 animate-pulse" />
                       <div className="space-y-2">
-                        <div className="h-4 w-32 rounded bg-text-primary/10" />
-                        <div className="h-3 w-20 rounded bg-text-primary/5" />
+                        <div className="h-3.5 w-24 sm:w-32 rounded bg-text-primary/10" />
+                        <div className="h-2.5 w-16 sm:w-20 rounded bg-text-primary/5" />
                       </div>
                     </div>
                     
-                    <div className="space-y-3">
+                    <div className="space-y-2.5 sm:space-y-3">
                       {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="h-3 w-full rounded bg-border/40" style={{ width: `${100 - i*5}%` }} />
+                        <div key={i} className="h-2.5 sm:h-3 w-full rounded bg-border/40" style={{ width: `${100 - i*5}%` }} />
                       ))}
                     </div>
                     
-                    <div className="pt-4 grid grid-cols-3 gap-3">
-                      <div className="h-20 rounded-xl border-2 border-primary/20 bg-primary/5" />
-                      <div className="h-20 rounded-xl border-2 border-border bg-surface" />
-                      <div className="h-20 rounded-xl border-2 border-border bg-surface" />
+                    <div className="pt-3 sm:pt-4 grid grid-cols-3 gap-2 sm:gap-3">
+                      <div className="h-16 sm:h-20 rounded-lg sm:rounded-xl border-2 border-primary/20 bg-primary/5" />
+                      <div className="h-16 sm:h-20 rounded-lg sm:rounded-xl border-2 border-border bg-surface" />
+                      <div className="h-16 sm:h-20 rounded-lg sm:rounded-xl border-2 border-border bg-surface" />
                     </div>
                   </div>
                 </div>
               </div>
               
               {/* Floating Success Badge */}
-              <div className="absolute -bottom-6 -right-6 rounded-2xl bg-success px-6 py-4 text-white shadow-xl">
-                <p className="text-xl font-bold">100%</p>
-                <p className="text-xs opacity-80 font-bold">Readability</p>
+              <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 rounded-xl sm:rounded-2xl bg-success px-5 py-3 sm:px-6 sm:py-4 text-white shadow-xl z-20">
+                <p className="text-lg sm:text-xl font-bold">100%</p>
+                <p className="text-[10px] sm:text-xs opacity-80 font-bold">Readability</p>
               </div>
             </div>
           </div>

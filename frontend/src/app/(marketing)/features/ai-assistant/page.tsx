@@ -147,10 +147,10 @@ export default function AIAssistantPage() {
               </div>
             </div>
 
-            <div className="relative group">
-              <div className="glass-panel overflow-hidden rounded-[40px] border border-border/50 bg-surface p-8 shadow-2xl space-y-8">
+            <div className="relative group mt-10 lg:mt-0">
+              <div className="glass-panel overflow-hidden rounded-[32px] md:rounded-[40px] border border-border/50 bg-surface p-5 sm:p-8 shadow-2xl space-y-6 md:space-y-8">
                 {/* Before Card */}
-                <div className="rounded-2xl border border-border bg-slate-50 p-6 relative opacity-60 transition-all group-hover:opacity-100">
+                <div className="rounded-2xl border border-border bg-slate-50 p-4 sm:p-6 relative opacity-60 transition-all group-hover:opacity-100">
                   <span className="absolute -top-3 left-6 rounded-full bg-slate-400 px-3 py-1 text-[10px] font-bold text-white">BEFORE</span>
                   <p className="text-sm text-text-secondary italic">"Responsible for building a web application and managing the team."</p>
                 </div>
@@ -161,18 +161,18 @@ export default function AIAssistantPage() {
                       <Wand2 className="h-5 w-5" />
                    </div>
                 </div>
-
+ 
                 {/* After Card */}
-                <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-6 relative shadow-lg shadow-primary/5">
+                <div className="rounded-2xl border-2 border-primary/20 bg-primary/5 p-4 sm:p-6 relative shadow-lg shadow-primary/5">
                   <span className="absolute -top-3 left-6 rounded-full bg-primary px-3 py-1 text-[10px] font-bold text-white uppercase tracking-widest">AI Optimized</span>
                   <p className="text-sm text-text-primary font-medium">"Spearheaded the development of a scalable React application, increasing user engagement by 45% while managing a cross-functional team of 5 engineers."</p>
                 </div>
               </div>
-
+ 
               {/* Floating Badge */}
-              <div className="absolute -bottom-6 -right-6 rounded-2xl bg-success px-6 py-4 text-white shadow-xl animate-pulse">
-                <p className="text-xl font-bold">45%</p>
-                <p className="text-xs opacity-80 font-bold">Boost in Impact</p>
+              <div className="absolute -bottom-4 -right-4 md:-bottom-6 md:-right-6 rounded-2xl bg-success px-5 md:px-6 py-3 md:py-4 text-white shadow-xl animate-pulse z-20">
+                <p className="text-lg md:text-xl font-bold">45%</p>
+                <p className="text-[10px] md:text-xs opacity-80 font-bold">Boost in Impact</p>
               </div>
             </div>
           </div>
