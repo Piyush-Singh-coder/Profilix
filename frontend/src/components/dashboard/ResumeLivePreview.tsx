@@ -8,7 +8,7 @@ import { useEducationStore } from "@/store/useEducationStore";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
 
-type ResumeTemplate = "ATS" | "DESIGN";
+type ResumeTemplate = "ATS" | "DESIGN" | "MODERN" | "ENHANCV";
 
 interface ResumeLivePreviewProps {
   templateType: ResumeTemplate;
@@ -90,13 +90,13 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           {/* Sidebar */}
           <div className="flex-none bg-[#0f172a] text-[#e2e8f0] p-6" style={{ width: '32%' }}>
             <h1 className="text-xl font-black text-white leading-tight tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[9px] font-bold uppercase tracking-wider mb-6 pb-4 border-b border-[#1e3a5f]" style={{ color: primaryColor }}>
+            <div className="text-[9px] font-bold uppercase tracking-wider mb-6 pb-4 border-b border-[#1e3a5f] text-[#38bdf8]">
               {profile?.headline || "Professional Title"}
             </div>
 
             <div className="text-[9px] font-bold uppercase tracking-widest text-[#64748b] mt-4 mb-2">Contact</div>
             <div className="text-[9px] font-semibold text-[#94a3b8] mb-0.5">Email</div>
-            <div className="text-[9px] mb-3 truncate" style={{ color: primaryColor }}>{user?.email}</div>
+            <div className="text-[9px] mb-3 truncate text-[#38bdf8]">{user?.email}</div>
             
             {links.filter(l => l.visibleInDefault).map(link => {
               const platform = link.platform.replace(/_/g, " ");
@@ -104,7 +104,7 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
               return (
                 <div key={link.id} className="mb-3">
                   <div className="text-[9px] font-semibold text-[#94a3b8] mb-0.5">{label}</div>
-                  <div className="text-[9px] truncate" style={{ color: primaryColor }}>{cleanUrl(link.url)}</div>
+                  <div className="text-[9px] truncate text-[#38bdf8]">{cleanUrl(link.url)}</div>
                 </div>
               );
             })}
@@ -250,6 +250,148 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
             (Projects & Achievements not fully rendered in this miniature preview)
           </div>
 
+        </div>
+      )}
+      {/* -------------------- MODERN TEMPLATE (serif, clean) -------------------- */}
+      {templateType === "MODERN" && (
+        <div className="absolute inset-0 p-8 md:p-10 flex flex-col gap-5 text-[#1a1a1a] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '10px', fontFamily: 'Georgia, serif' }}>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            <div className="text-[9px] text-[#444] flex flex-wrap justify-center items-center gap-x-2">
+              <span>{user?.email}</span>
+              {links.filter(l => l.visibleInDefault).map(link => (
+                <span key={link.id}>| {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}</span>
+              ))}
+            </div>
+          </div>
+          <div className="border-t-2 border-[#1a1a1a] mb-2" />
+
+          {sortedExperiences.length > 0 && (
+            <div className="mb-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-3" style={{ fontFamily: 'Arial, sans-serif' }}>Experience</div>
+              {sortedExperiences.map(exp => (
+                <div key={exp.id} className="mb-4">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{exp.company}</span>
+                    <span className="text-[9px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{range(exp.startDate, exp.endDate, exp.isCurrent)}</span>
+                  </div>
+                  <div className="text-[10px] italic text-[#333]">{exp.role}{exp.location ? ` · ${exp.location}` : ""}</div>
+                  {exp.bullets && exp.bullets.length > 0 && (
+                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[9.5px] text-[#333] leading-relaxed">
+                      {exp.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sortedEducations.length > 0 && (
+            <div className="mb-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-4" style={{ fontFamily: 'Arial, sans-serif' }}>Education</div>
+              {sortedEducations.map(edu => (
+                <div key={edu.id} className="mb-3">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{edu.school}</span>
+                    <span className="text-[9px] text-[#555]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</span>
+                  </div>
+                  <div className="text-[10px] italic text-[#444]">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {Object.keys(groupedSkills).length > 0 && (
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Technical Skills</div>
+              {Object.entries(groupedSkills).map(([label, names]) => (
+                <div key={label} className="text-[10px] mb-0.5">
+                  <strong style={{ fontFamily: 'Arial, sans-serif' }}>{label}:</strong> <span className="text-[#444]">{names.join(", ")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* -------------------- ENHANCV TEMPLATE (two-column colored) -------------------- */}
+      {templateType === "ENHANCV" && (
+        <div className="absolute inset-0 flex text-black bg-white overflow-hidden" style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif' }}>
+          {/* Left */}
+          <div className="flex-none bg-white p-6 border-r border-[#e5e7eb]" style={{ width: '62%' }}>
+            <h1 className="text-2xl font-black text-[#0f172a] leading-tight tracking-tight">{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            {profile?.headline && <div className="text-[9.5px] font-bold uppercase tracking-wider mt-1 mb-2" style={{ color: primaryColor }}>{profile.headline}</div>}
+            <div className="h-[3px] w-full mb-3 rounded" style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }} />
+
+            {profile?.bio && (
+              <div className="mb-3">
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Summary</div>
+                <div className="text-[9px] text-[#475569] leading-relaxed">{profile.bio.slice(0, 200)}...</div>
+              </div>
+            )}
+
+            {sortedExperiences.length > 0 && (
+              <div className="mb-3">
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Experience</div>
+                {sortedExperiences.map(exp => (
+                  <div key={exp.id} className="mb-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="text-[10.5px] font-bold text-[#0f172a]">{exp.role}</div>
+                        <div className="text-[9px] font-semibold mt-0.5" style={{ color: primaryColor }}>{exp.company}</div>
+                      </div>
+                      <div className="text-[8.5px] text-[#64748b] whitespace-nowrap">{range(exp.startDate, exp.endDate, exp.isCurrent)}</div>
+                    </div>
+                    {exp.bullets && exp.bullets.length > 0 && (
+                      <ul className="list-disc pl-3 mt-1 space-y-0.5 text-[9px] text-[#374151]">
+                        {exp.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right */}
+          <div className="flex-1 bg-[#f9fafb] p-5">
+            <div className="mb-3">
+              <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Contact</div>
+              <div className="text-[8.5px] text-[#374151] mb-1">✉ {user?.email}</div>
+              {links.filter(l => l.visibleInDefault).map(link => (
+                <div key={link.id} className="text-[8.5px] text-[#374151] mb-1">
+                  ↗ {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}
+                </div>
+              ))}
+            </div>
+
+            {Object.keys(groupedSkills).length > 0 && (
+              <div className="mb-3">
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Skills</div>
+                {Object.entries(groupedSkills).map(([label, names]) => (
+                  <div key={label} className="mb-2">
+                    <div className="text-[7.5px] font-bold text-[#64748b] uppercase mb-1">{label}</div>
+                    <div className="flex flex-wrap gap-1">
+                      {names.map(n => <span key={n} className="text-[7.5px] font-semibold bg-[#e0e7ff] text-[#1e3a8a] px-1.5 py-0.5 rounded">{n}</span>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {sortedEducations.length > 0 && (
+              <div>
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Education</div>
+                {sortedEducations.map(edu => (
+                  <div key={edu.id} className="mb-2">
+                    <div className="text-[9px] font-bold text-[#0f172a]">{edu.school}</div>
+                    <div className="text-[8px] text-[#374151]">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")}</div>
+                    <div className="text-[7.5px] italic text-[#64748b]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

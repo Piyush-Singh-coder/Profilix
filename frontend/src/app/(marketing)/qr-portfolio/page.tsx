@@ -7,31 +7,40 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "Developer Portfolio QR Code Generator – Share at Hackathons & Job Fairs",
+  title: "QR Code Portfolio Generator – Share Your Digital Profile Instantly | Profilix",
   description:
-    "Share your full digital portfolio via a QR code at hackathons, tech meetups, and job fairs. Let recruiters scan your GitHub stats, resume, and top projects instantly. No app needed.",
+    "Generate a QR code for your professional portfolio. Share your resume, GitHub stats, projects, and profile card at hackathons, job fairs, and networking events. Free digital business card with QR code.",
   keywords: [
-    "developer portfolio QR code",
+    "QR code portfolio",
     "portfolio QR code generator",
+    "digital business card QR code",
+    "share resume with QR code",
+    "developer QR code portfolio",
+    "digital portfolio QR",
     "share portfolio via QR code",
     "hackathon portfolio card",
     "digital business card developer",
     "QR code portfolio link",
     "tech meetup networking card",
+    "free QR code portfolio",
+    "professional digital business card",
+    "QR code resume sharing",
+    "developer digital card",
   ],
   alternates: { canonical: "/qr-portfolio" },
   openGraph: {
-    title: "Developer Portfolio QR Code Generator – Share at Hackathons & Job Fairs",
+    title: "QR Code Portfolio Generator – Share Your Digital Profile Instantly | Profilix",
     description:
-      "Let recruiters scan your GitHub stats, resume, and projects instantly at hackathons and job fairs. No app installation required.",
+      "Generate a QR code for your professional portfolio. Share your resume, GitHub stats, and profile card at hackathons, job fairs, and networking events. Free.",
     url: "/qr-portfolio",
     type: "website",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Developer Portfolio QR Code Generator" }],
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Profilix QR Code Portfolio Generator" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Developer Portfolio QR Code Generator",
-    description: "Share your portfolio at hackathons and job fairs via QR code. No app needed.",
+    site: "@profilix_site",
+    title: "QR Code Portfolio Generator – Share Your Digital Profile Instantly | Profilix",
+    description: "Generate a free QR code for your portfolio. Share at hackathons and job fairs instantly.",
     images: ["/og-default.png"],
   },
 };

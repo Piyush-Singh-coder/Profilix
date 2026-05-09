@@ -7,30 +7,53 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
-  title: "ATS Resume Generator – Build Resumes that Land Interviews",
+  title: "Free ATS Resume Generator – Build ATS-Friendly Resumes That Land Interviews",
   description:
-    "Generate ATS-optimized resumes in seconds. Use AI to tailor your bullet points, choose from professional templates, and export in PDF or DOCX. The ultimate tool for developer job hunting.",
+    "The best free ATS resume generator for developers and job seekers. Build ATS-optimized resumes in minutes with AI-powered bullet points, professional templates, and PDF/DOCX export. 100% free, no credit card required.",
   keywords: [
-    "ats resume generator",
-    "developer resume builder",
-    "ats friendly resume",
-    "resume tailoring ai",
-    "software engineer resume",
-    "tech resume templates",
+    "free ATS resume generator",
+    "ATS resume builder free",
+    "ATS friendly resume",
+    "ATS resume generator",
+    "best free resume builder",
+    "ATS resume maker",
+    "free resume builder no signup",
+    "AI resume generator free",
+    "resume that passes ATS",
+    "ATS optimized resume",
+    "developer resume generator",
+    "software engineer resume builder",
+    "tech resume builder free",
+    "resume builder for developers",
+    "free resume builder 2025",
+    "ATS resume checker free",
+    "resume builder with AI",
+    "how to make ATS friendly resume",
+    "pass ATS screening resume",
+    "free professional resume builder",
+    "modern resume template free",
+    "two column resume template free",
+    "resume builder multiple templates",
+    "serif resume template free",
+    "Enhancv style resume free",
+    "Harvard style resume template",
+    "resume template for software engineer",
+    "free resume templates download",
   ],
   alternates: { canonical: "/ats-resume-generator" },
   openGraph: {
-    title: "ATS Resume Generator – Build Resumes that Land Interviews",
+    title: "Free ATS Resume Generator – Build Resumes That Land Interviews | Profilix",
     description:
-      "Generate ATS-optimized resumes in seconds. Use AI to tailor your bullet points, choose from professional templates, and export in PDF or DOCX.",
+      "Build ATS-optimized resumes in minutes. AI-powered bullet points, professional templates, PDF/DOCX export. 100% free, no credit card required.",
     url: "/ats-resume-generator",
     type: "website",
-    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Profilix ATS Resume Generator" }],
+    images: [{ url: "/og-default.png", width: 1200, height: 630, alt: "Profilix Free ATS Resume Generator" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ATS Resume Generator – Build Resumes that Land Interviews",
-    description: "Generate ATS-optimized resumes in seconds. Export in PDF or DOCX.",
+    site: "@profilix_site",
+    title: "Free ATS Resume Generator – Build Resumes That Land Interviews | Profilix",
+    description: "Build ATS-optimized resumes in minutes. AI-powered, professional templates, PDF/DOCX export. 100% free.",
     images: ["/og-default.png"],
   },
 };
@@ -59,8 +82,96 @@ const STEPS = [
 ];
 
 export default function ATSResumeGeneratorPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "HowTo",
+        "name": "How to Build a Free ATS-Friendly Resume with Profilix",
+        "description": "Step-by-step guide to creating an ATS-optimized resume that passes applicant tracking systems and lands interviews.",
+        "totalTime": "PT5M",
+        "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "0" },
+        "step": [
+          {
+            "@type": "HowToStep",
+            "name": "Fill Your Details",
+            "text": "Enter your personal information, education, work experience, projects, skills, and achievements on Profilix.",
+            "position": 1,
+          },
+          {
+            "@type": "HowToStep",
+            "name": "AI Tailoring",
+            "text": "Paste the job description and let Profilix's AI optimize your bullet points to match the keywords recruiters and ATS systems scan for.",
+            "position": 2,
+          },
+          {
+            "@type": "HowToStep",
+            "name": "ATS Validation",
+            "text": "Your resume is automatically structured in a clean, single-column layout that all major ATS systems can parse correctly.",
+            "position": 3,
+          },
+          {
+            "@type": "HowToStep",
+            "name": "Download Free",
+            "text": "Export your ATS-optimized resume as a PDF or DOCX. 100% free, no credit card required.",
+            "position": 4,
+          },
+        ],
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Profilix's ATS resume generator free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, Profilix is 100% free. You can build, customize, and download ATS-optimized resumes with no credit card required.",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "What is an ATS-friendly resume?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "An ATS-friendly resume is formatted to be readable by Applicant Tracking Systems (ATS) — software used by 99% of Fortune 500 companies to filter candidates. It uses a clean single-column layout, standard fonts, and avoids complex tables, graphics, or headers that ATS parsers cannot read.",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "What makes Profilix better than other free resume builders?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Profilix is purpose-built for ATS compatibility and offers 4 professional templates: ATS Friendly (single-column, PDF+DOCX), Modern Classic (serif style, PDF+DOCX), Premium Dark (two-column dark sidebar, PDF), and Premium Two-Column (Enhancv-style with accent colors, PDF). It uses AI to tailor bullet points to specific job descriptions, and also offers professional profile cards with GitHub stats and QR code portfolio sharing — all in one free platform.",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "Can I download my resume as a PDF?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Profilix lets you export your resume as both PDF and DOCX formats. The ATS Friendly and Modern Classic templates support both PDF and DOCX. The Premium Dark and Premium Two-Column templates export as PDF only.",
+            },
+          },
+          {
+            "@type": "Question",
+            "name": "What resume template styles does Profilix offer?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Profilix offers 4 resume templates: (1) ATS Friendly — clean single-column layout, best for passing applicant tracking systems; (2) Modern Classic — serif Georgia-style resume with centered name header and minimal section dividers, similar to Harvard or classic professional resumes; (3) Premium Dark — two-column resume with a dark navy sidebar, accent colors, and professional typography; (4) Premium Two-Column — Enhancv-style layout with a light sidebar, chip-style skill tags, and color accents tied to your profile theme. All are free.",
+            },
+          },
+        ],
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-background text-text-primary">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       
       {/* Hero Section */}

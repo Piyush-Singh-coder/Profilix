@@ -6,7 +6,7 @@ import { tailorBulletsToJob, batchTailorBullets } from "./ai.service";
 import { BadRequestError } from "../utils/errors";
 
 type ResumeFormat = "pdf" | "docx";
-type ResumeTemplate = "ATS" | "DESIGN";
+type ResumeTemplate = "ATS" | "DESIGN" | "MODERN" | "ENHANCV";
 
 const THEME_COLOR_MAP: Record<string, string> = {
   GLASS: "#34b4ff",
@@ -286,7 +286,7 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
       }
       .s-headline {
         font-size: 8.5pt;
-        color: ${primaryColor};
+        color: #38bdf8;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -304,7 +304,7 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
       }
       .s-label { font-size: 8pt; color: #94a3b8; font-weight: 600; margin-bottom: 2px; }
       .s-value { font-size: 8.5pt; color: #e2e8f0; margin-bottom: 10px; }
-      .s-link { font-size: 8.5pt; color: ${primaryColor}; text-decoration: none; word-break: break-all; display: block; margin-bottom: 10px; }
+      .s-link { font-size: 8.5pt; color: #38bdf8; text-decoration: none; word-break: break-all; display: block; margin-bottom: 10px; }
       .s-date { font-size: 7.5pt; color: #475569; font-style: italic; margin-top: 1px; }
       /* ---- Main ---- */
       .m-name {
@@ -574,6 +574,334 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     </body>
   </html>
   `;
+}
+
+/** ─────────────────────────────────────────────────────────────────────────
+ *  TEMPLATE: MODERN  (single-column, clean, Ritu-Gupta style)
+ * ───────────────────────────────────────────────────────────────────────── */
+function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
+  const { user, socialLinks, experiences, projects, educations, achievements } = data;
+  const profile = user.profile;
+
+  // Condensed category labels matching standard resume skill sections
+  const categoryLabels: Record<string, string> = {
+    LANGUAGE: "Programming Languages",
+    FRONTEND: "Frontend",
+    BACKEND: "Backend",
+    DATABASE: "Databases",
+    DEVOPS: "Cloud & DevOps",
+    TOOL: "Developer Tools",
+    CLOUD: "Cloud & DevOps",
+    CS_CORE: "Computer Science Fundamentals",
+    OTHER: "Other",
+  };
+
+  const techStacks = profile?.techStacks || [];
+  // Merge duplicates (DEVOPS + CLOUD both map to "Cloud & DevOps")
+  const groupedSkills: Record<string, string[]> = {};
+  techStacks.forEach((ps) => {
+    const label = categoryLabels[ps.tech.category] || "Other";
+    if (!groupedSkills[label]) groupedSkills[label] = [];
+    if (!groupedSkills[label].includes(ps.tech.name)) groupedSkills[label].push(ps.tech.name);
+  });
+
+  // Skills rendered as a compact inline list — one row per category
+  const skillsHtml = Object.entries(groupedSkills)
+    .map(([label, names]) => `<div class="skill-row"><span class="skill-label">${escapeHtml(label)}:</span> ${escapeHtml(names.join(", "))}</div>`)
+    .join("");
+
+  // Header links bar
+  const socialParts = socialLinks.map((s) => {
+    const platform = s.platform.replace(/_/g, " ");
+    const label = platform.charAt(0) + platform.slice(1).toLowerCase();
+    return `<a href="${s.url}" class="hlink">${escapeHtml(label)}: ${escapeHtml(cleanUrl(s.url))}</a>`;
+  });
+  const headerLinks = [
+    `<a href="mailto:${user.email}" class="hlink">${escapeHtml(user.email)}</a>`,
+    ...socialParts,
+  ].join(" &nbsp;|&nbsp; ");
+
+  const sec = (title: string, body: string) =>
+    `<div class="sec"><div class="sec-title">${escapeHtml(title)}</div><div class="sec-body">${body}</div></div>`;
+
+  const expHtml = experiences.map((exp) => {
+    const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
+    return `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-company">${escapeHtml(exp.company)}</span>
+          <span class="item-date">${escapeHtml(range(exp.startDate, exp.endDate, exp.isCurrent))}</span>
+        </div>
+        <div class="item-role">${escapeHtml(exp.role)}${exp.location ? ` &middot; <span class="item-loc">${escapeHtml(exp.location)}</span>` : ""}</div>
+        ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
+      </div>`;
+  }).join("");
+
+  const eduHtml = educations.map((edu) => {
+    const subtitle = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ");
+    return `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-company">${escapeHtml(edu.school)}</span>
+          <span class="item-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</span>
+        </div>
+        ${subtitle ? `<div class="item-role">${escapeHtml(subtitle)}</div>` : ""}
+      </div>`;
+  }).join("");
+
+  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
+  const projHtml = projects.slice(0, projectLimit).map((p) => {
+    const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
+    const linkParts: string[] = [];
+    if (p.liveUrl) linkParts.push(`Live: <a href="${p.liveUrl}" class="inline-link">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
+    if (p.repoUrl) linkParts.push(`GitHub: <a href="${p.repoUrl}" class="inline-link">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
+    return `
+      <div class="item">
+        <div class="item-header">
+          <span class="item-company">${escapeHtml(p.title)}</span>
+        </div>
+        ${linkParts.length ? `<div class="item-links">${linkParts.join(" &nbsp;|&nbsp; ")}</div>` : ""}
+        ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
+      </div>`;
+  }).join("");
+
+  const achHtml = achievements.length
+    ? `<ul>${achievements.map((a) => {
+        const parts = [a.title, a.provider].filter(Boolean);
+        const dateStr = a.date ? monthYear(a.date.toISOString()) : "";
+        return `<li><span class="ach-title">${escapeHtml(parts.join(" — "))}</span>${dateStr ? ` <span class="ach-date">(${escapeHtml(dateStr)})</span>` : ""}</li>`;
+      }).join("")}</ul>`
+    : "";
+
+  const rawBio = profile?.bio || "";
+  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    @page { size: Letter; margin: 0.3in 0.45in; }
+    * { box-sizing: border-box; }
+    body { font-family: "Georgia", "Times New Roman", serif; font-size: 9pt; color: #1a1a1a; margin: 0; line-height: 1.25; }
+    .name { font-size: 21pt; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 2px 0; text-align: center; font-family: Arial, Helvetica, sans-serif; }
+    .contact-bar { text-align: center; font-size: 8pt; color: #444; margin-bottom: 12px; font-family: Arial, sans-serif; }
+    .hlink { color: #1a1a1a; text-decoration: none; }
+    .top-rule { border: none; border-top: 2px solid #1a1a1a; margin: 0 0 16px 0; }
+    .sec { margin-bottom: 16px; }
+    .sec-title { font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid #aaa; padding-bottom: 1px; margin-bottom: 6px; }
+    .item { margin-bottom: 10px; }
+    .item-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .item-company { font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: 700; }
+    .item-date { font-family: Arial, sans-serif; font-size: 8pt; color: #555; white-space: nowrap; margin-left: 8px; }
+    .item-role { font-style: italic; font-size: 8.5pt; color: #333; margin-top: 0px; }
+    .item-loc { font-style: normal; color: #666; }
+    .item-links { font-family: Arial, sans-serif; font-size: 7.5pt; color: #444; margin-top: 1px; }
+    ul { margin: 3px 0 0 0; padding-left: 15px; }
+    li { margin-bottom: 1px; font-size: 8.5pt; line-height: 1.3; }
+    .skill-row { margin-bottom: 2px; font-size: 8.5pt; font-family: Arial, sans-serif; line-height: 1.3; }
+    .skill-label { font-weight: 700; }
+    .inline-link { color: #333; text-decoration: underline; }
+    .ach-title { font-weight: 600; font-size: 8.5pt; font-family: Arial, sans-serif; }
+    .ach-date { color: #666; font-size: 8pt; }
+    .summary-text { font-size: 8.5pt; color: #333; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="name">${escapeHtml(profile?.displayName || user.fullName)}</div>
+  <div class="contact-bar">${headerLinks}</div>
+  <hr class="top-rule"/>
+  ${summaryText ? sec("Professional Summary", `<div class="summary-text">${escapeHtml(summaryText)}</div>`) : ""}
+  ${experiences.length ? sec("Experience", expHtml) : ""}
+  ${educations.length ? sec("Education", eduHtml) : ""}
+  ${projects.length ? sec("Projects", projHtml) : ""}
+  ${Object.keys(groupedSkills).length ? sec("Technical Skills", skillsHtml) : ""}
+  ${achievements.length ? sec("Achievements", achHtml) : ""}
+</body>
+</html>`;
+}
+
+/** ─────────────────────────────────────────────────────────────────────────
+ *  TEMPLATE: ENHANCV  (two-column, premium, image-style with accent color)
+ * ───────────────────────────────────────────────────────────────────────── */
+function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, themeName: string) {
+  const { user, socialLinks, experiences, projects, educations, achievements } = data;
+  const profile = user.profile;
+  const accentColor = THEME_COLOR_MAP[themeName] || "#2563EB";
+
+  const categoryLabels: Record<string, string> = {
+    LANGUAGE: "Languages",
+    FRONTEND: "Frontend",
+    BACKEND: "Backend",
+    DATABASE: "Database",
+    DEVOPS: "DevOps & Tools",
+    TOOL: "Tools",
+    CLOUD: "Cloud",
+    CS_CORE: "CS Core",
+    OTHER: "Other",
+  };
+
+  const techStacks = profile?.techStacks || [];
+  const groupedSkills: Record<string, string[]> = {};
+  techStacks.forEach((ps) => {
+    const label = categoryLabels[ps.tech.category] || "Other";
+    if (!groupedSkills[label]) groupedSkills[label] = [];
+    groupedSkills[label].push(ps.tech.name);
+  });
+
+  // Skills as tag chips grouped by category
+  const skillsHtml = Object.entries(groupedSkills).map(([label, names]) => `
+    <div class="r-skill-group">
+      <div class="r-skill-cat">${escapeHtml(label)}</div>
+      <div class="r-chips">${names.map(n => `<span class="r-chip">${escapeHtml(n)}</span>`).join("")}</div>
+    </div>`).join("");
+
+  // Contact sidebar items
+  const contactHtml = [
+    `<div class="r-contact-item"><span class="r-contact-icon">✉</span><span>${escapeHtml(user.email)}</span></div>`,
+    ...socialLinks.map(s => {
+      const platform = s.platform.replace(/_/g, " ");
+      const label = platform.charAt(0) + platform.slice(1).toLowerCase();
+      return `<div class="r-contact-item"><span class="r-contact-icon">↗</span><span>${escapeHtml(label)}: ${escapeHtml(cleanUrl(s.url))}</span></div>`;
+    })
+  ].join("");
+
+  // Education (right column)
+  const eduRightHtml = educations.map(edu => {
+    const degree = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ");
+    return `<div class="r-edu-item">
+      <div class="r-edu-school">${escapeHtml(edu.school)}</div>
+      ${degree ? `<div class="r-edu-degree">${escapeHtml(degree)}</div>` : ""}
+      <div class="r-edu-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>
+    </div>`;
+  }).join("");
+
+  // Achievements right column — icon style
+  const achRightHtml = achievements.length ? achievements.map(a => {
+    const parts = [a.title, a.provider].filter(Boolean);
+    const dateStr = a.date ? monthYear(a.date.toISOString()) : "";
+    return `<div class="r-ach-item">
+      <div class="r-ach-icon" style="color:${accentColor}">★</div>
+      <div>
+        <div class="r-ach-title">${escapeHtml(parts.join(" — "))}</div>
+        ${dateStr ? `<div class="r-ach-date">${escapeHtml(dateStr)}</div>` : ""}
+      </div>
+    </div>`;
+  }).join("") : "";
+
+  // Experience (left main column)
+  const expHtml = experiences.map(exp => {
+    const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
+    return `<div class="l-item">
+      <div class="l-item-header">
+        <div>
+          <div class="l-item-role">${escapeHtml(exp.role)}</div>
+          <div class="l-item-company" style="color:${accentColor}">${escapeHtml(exp.company)}${exp.location ? ` &middot; ${escapeHtml(exp.location)}` : ""}</div>
+        </div>
+        <div class="l-item-date">${escapeHtml(range(exp.startDate, exp.endDate, exp.isCurrent))}</div>
+      </div>
+      ${bullets.length ? `<ul class="l-bullets">${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
+    </div>`;
+  }).join("");
+
+  // Projects (left column) — links placed below title to avoid wrapping in flex row
+  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
+  const projHtml = projects.slice(0, projectLimit).map(p => {
+    const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
+    const linkParts: string[] = [];
+    if (p.liveUrl) linkParts.push(`<a href="${p.liveUrl}" style="color:${accentColor};text-decoration:none;">Live: ${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
+    if (p.repoUrl) linkParts.push(`<a href="${p.repoUrl}" style="color:${accentColor};text-decoration:none;">GitHub: ${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
+    return `<div class="l-item">
+      <div class="l-item-role">${escapeHtml(p.title)}</div>
+      ${linkParts.length ? `<div style="font-size:7.5pt;color:#64748b;margin-top:1px;">${linkParts.join(" &nbsp;·&nbsp; ")}</div>` : ""}
+      ${bullets.length ? `<ul class="l-bullets">${bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
+    </div>`;
+  }).join("");
+
+  const rawBio = profile?.bio || "";
+  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : rawBio ? capToSentences(rawBio, 3) : "";
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <style>
+    @page { size: Letter; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+    /* ── Layout ── */
+    .wrapper { display: table; width: 100%; min-height: 11in; border-collapse: collapse; }
+    .left-col { display: table-cell; width: 62%; vertical-align: top; padding: 40px 36px 40px 44px; background: #fff; border-right: 1px solid #e5e7eb; }
+    .right-col { display: table-cell; width: 38%; vertical-align: top; padding: 40px 28px 40px 28px; background: #f9fafb; }
+
+    /* ── Name / Header ── */
+    .l-name { font-size: 22pt; font-weight: 900; letter-spacing: -0.5px; line-height: 1.05; color: #0f172a; }
+    .l-headline { font-size: 9.5pt; color: ${accentColor}; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 3px; margin-bottom: 4px; }
+    .l-name-underline { height: 3px; width: 100%; background: linear-gradient(to right, ${accentColor}, transparent); border: none; margin-bottom: 14px; }
+
+    /* ── Left sections ── */
+    .l-section { margin-bottom: 16px; }
+    .l-section-title { font-size: 9pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; border-bottom: 2px solid ${accentColor}; padding-bottom: 3px; margin-bottom: 10px; }
+    .l-summary { font-size: 8.5pt; color: #475569; line-height: 1.5; }
+    .l-item { margin-bottom: 12px; }
+    .l-item-header { display: table; width: 100%; }
+    .l-item-role { font-size: 10pt; font-weight: 700; color: #0f172a; }
+    .l-item-company { font-size: 8.5pt; font-weight: 600; margin-top: 1px; }
+    .l-item-date { display: table-cell; text-align: right; font-size: 8pt; color: #64748b; white-space: nowrap; vertical-align: top; padding-left: 8px; }
+    .l-bullets { margin: 5px 0 0 0; padding-left: 15px; }
+    .l-bullets li { font-size: 8.5pt; color: #374151; margin-bottom: 2px; line-height: 1.4; }
+
+    /* ── Right sections ── */
+    .r-section { margin-bottom: 18px; }
+    .r-section-title { font-size: 9pt; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #0f172a; border-bottom: 2px solid ${accentColor}; padding-bottom: 3px; margin-bottom: 10px; }
+
+    /* Contact */
+    .r-contact-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 5px; font-size: 8pt; color: #374151; word-break: break-all; }
+    .r-contact-icon { color: ${accentColor}; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
+
+    /* Skills */
+    .r-skill-group { margin-bottom: 8px; }
+    .r-skill-cat { font-size: 7.5pt; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+    .r-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+    .r-chip { background: #e0e7ff; color: #1e3a8a; font-size: 7.5pt; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
+
+    /* Education */
+    .r-edu-item { margin-bottom: 10px; }
+    .r-edu-school { font-size: 9pt; font-weight: 700; color: #0f172a; }
+    .r-edu-degree { font-size: 8pt; color: #374151; margin-top: 1px; }
+    .r-edu-date { font-size: 7.5pt; color: #64748b; margin-top: 1px; font-style: italic; }
+
+    /* Achievements */
+    .r-ach-item { display: flex; gap: 6px; align-items: flex-start; margin-bottom: 8px; }
+    .r-ach-icon { font-size: 11pt; flex-shrink: 0; line-height: 1; }
+    .r-ach-title { font-size: 8.5pt; font-weight: 600; color: #0f172a; line-height: 1.3; }
+    .r-ach-date { font-size: 7.5pt; color: #64748b; margin-top: 1px; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- LEFT COLUMN -->
+    <div class="left-col">
+      <div class="l-name">${escapeHtml(profile?.displayName || user.fullName)}</div>
+      ${profile?.headline ? `<div class="l-headline">${escapeHtml(profile.headline)}</div>` : ""}
+      <hr class="l-name-underline"/>
+
+      ${summaryText ? `<div class="l-section"><div class="l-section-title">Summary</div><div class="l-summary">${escapeHtml(summaryText)}</div></div>` : ""}
+      ${experiences.length ? `<div class="l-section"><div class="l-section-title">Experience</div>${expHtml}</div>` : ""}
+      ${projects.length ? `<div class="l-section"><div class="l-section-title">Projects</div>${projHtml}</div>` : ""}
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="right-col">
+      ${contactHtml ? `<div class="r-section"><div class="r-section-title">Contact</div>${contactHtml}</div>` : ""}
+      ${Object.keys(groupedSkills).length ? `<div class="r-section"><div class="r-section-title">Skills</div>${skillsHtml}</div>` : ""}
+      ${educations.length ? `<div class="r-section"><div class="r-section-title">Education</div>${eduRightHtml}</div>` : ""}
+      ${achievements.length ? `<div class="r-section"><div class="r-section-title">Achievements</div>${achRightHtml}</div>` : ""}
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 async function renderPdfFromHtml(html: string) {
@@ -853,12 +1181,32 @@ export async function generateResumeFile(args: {
   });
 
   if (args.format === "pdf") {
-    const isDesign = String(args.templateType).toUpperCase() === "DESIGN";
-    const html = isDesign 
-      ? buildDesignResumeHtml(data, args.activeTheme || "SKEUOMORPHIC")
-      : buildResumeHtml(data);
+    const template = String(args.templateType).toUpperCase();
+    let html: string;
+    let filename: string;
+
+    switch (template) {
+      case "DESIGN":
+        html = buildDesignResumeHtml(data, args.activeTheme || "SKEUOMORPHIC");
+        filename = "design-resume.pdf";
+        break;
+      case "MODERN":
+        html = buildModernResumeHtml(data);
+        filename = "modern-resume.pdf";
+        break;
+      case "ENHANCV":
+        html = buildEnhancvResumeHtml(data, args.activeTheme || "GLASS");
+        filename = "premium-resume.pdf";
+        break;
+      case "ATS":
+      default:
+        html = buildResumeHtml(data);
+        filename = "resume.pdf";
+        break;
+    }
+
     const buffer = await renderPdfFromHtml(html);
-    return { buffer, filename: isDesign ? "design-resume.pdf" : "resume.pdf", contentType: "application/pdf" };
+    return { buffer, filename, contentType: "application/pdf" };
   }
 
   const buffer = await renderDocx(data);

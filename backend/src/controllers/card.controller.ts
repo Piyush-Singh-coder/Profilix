@@ -2,14 +2,14 @@ import { Request, Response, NextFunction } from "express";
 import { generateProfileCard } from "../services/card.service";
 
 type CardSize = "1080x1080" | "1200x628" | "1200x675" | "1920x1080";
-type CardTheme = "GLASSMORPHISM" | "NEOBRUTALISM" | "APPLE";
+type CardTheme = "GLASS" | "BRUTAL" | "APPLE" | "GLASSMORPHISM" | "NEOBRUTALISM";
 
 const isValidSize = (value: string): value is CardSize => {
   return ["1080x1080", "1200x628", "1200x675", "1920x1080"].includes(value);
 };
 
 const isValidTheme = (value: string): value is CardTheme => {
-  return ["GLASSMORPHISM", "NEOBRUTALISM", "APPLE"].includes(value);
+  return ["GLASS", "BRUTAL", "APPLE", "GLASSMORPHISM", "NEOBRUTALISM"].includes(value);
 };
 
 export const exportCard = async (

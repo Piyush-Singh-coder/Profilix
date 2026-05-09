@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, FileText, Loader2, Layout, BookOpen, PenTool, Edit3, Settings } from "lucide-react";
+import { Download, FileText, Loader2, Layout, BookOpen, Columns, PenTool, Edit3, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -32,7 +32,7 @@ export default function ResumePage() {
   const [jobDescription, setJobDescription] = useState("");
   const [useAI, setUseAI] = useState(false);
   const [format, setFormat] = useState<"pdf" | "docx">("pdf");
-  const [templateType, setTemplateType] = useState<"ATS" | "DESIGN">("ATS");
+  const [templateType, setTemplateType] = useState<"ATS" | "DESIGN" | "MODERN" | "ENHANCV">("ATS");
 
   useEffect(() => {
     fetchProfile();
@@ -145,12 +145,13 @@ export default function ResumePage() {
                 <CardDescription>Choose how your resume is presented.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {/* ATS */}
                   <button
                     type="button"
                     onClick={() => setTemplateType("ATS")}
                     className={cn(
-                      "relative flex flex-col items-center gap-3 rounded-xl border-2 p-4 text-center transition-all",
+                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
                       templateType === "ATS"
                         ? "border-primary bg-primary/5 shadow-md"
                         : "border-border bg-surface-low hover:border-primary/40"
@@ -160,22 +161,20 @@ export default function ResumePage() {
                       <FileText className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-text-primary">ATS Friendly</h3>
-                      <p className="mt-1 text-xs text-text-secondary">Single-column</p>
+                      <h3 className="font-semibold text-text-primary text-sm">ATS Friendly</h3>
+                      <p className="mt-0.5 text-xs text-text-secondary">Clean single-column</p>
                     </div>
+                    {templateType === "ATS" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
                   </button>
 
+                  {/* DESIGN – dark sidebar */}
                   <button
                     type="button"
-                    onClick={() => {
-                      if (format === "pdf") setTemplateType("DESIGN");
-                    }}
+                    onClick={() => { if (format === "pdf") setTemplateType("DESIGN"); }}
                     disabled={format === "docx"}
                     className={cn(
-                      "relative flex flex-col items-center gap-3 rounded-xl border-2 p-4 text-center transition-all",
-                      templateType === "DESIGN"
-                        ? "border-primary bg-primary/5 shadow-md"
-                        : "border-border bg-surface-low hover:border-primary/40",
+                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
+                      templateType === "DESIGN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
                       format === "docx" && "opacity-50 cursor-not-allowed"
                     )}
                   >
@@ -183,9 +182,50 @@ export default function ResumePage() {
                       <Layout className="h-6 w-6" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-text-primary">Premium</h3>
-                      <p className="mt-1 text-xs text-text-secondary">2-column design</p>
+                      <h3 className="font-semibold text-text-primary text-sm">Premium Dark</h3>
+                      <p className="mt-0.5 text-xs text-text-secondary">Dark sidebar design</p>
                     </div>
+                    {templateType === "DESIGN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                  </button>
+
+                  {/* MODERN – serif classic */}
+                  <button
+                    type="button"
+                    onClick={() => setTemplateType("MODERN")}
+                    className={cn(
+                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
+                      templateType === "MODERN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40"
+                    )}
+                  >
+                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                      <BookOpen className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-text-primary text-sm">Modern Classic</h3>
+                      <p className="mt-0.5 text-xs text-text-secondary">Serif · PDF & DOCX</p>
+                    </div>
+                    {templateType === "MODERN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                  </button>
+
+                  {/* ENHANCV – two-col colored */}
+                  <button
+                    type="button"
+                    onClick={() => { if (format === "pdf") setTemplateType("ENHANCV"); }}
+                    disabled={format === "docx"}
+                    className={cn(
+                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
+                      templateType === "ENHANCV" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
+                      format === "docx" && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                      <Columns className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-text-primary text-sm">Premium Two-Col</h3>
+                      <p className="mt-0.5 text-xs text-text-secondary">Accent · chip skills</p>
+                    </div>
+                    {templateType === "ENHANCV" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
                   </button>
                 </div>
 
@@ -196,7 +236,10 @@ export default function ResumePage() {
                     onChange={(value) => {
                       const nextFormat = value as "pdf" | "docx";
                       setFormat(nextFormat);
-                      if (nextFormat === "docx") setTemplateType("ATS");
+                      // DESIGN and ENHANCV are PDF-only; reset to ATS if switching to docx
+                      if (nextFormat === "docx" && (templateType === "DESIGN" || templateType === "ENHANCV")) {
+                        setTemplateType("ATS");
+                      }
                     }}
                     options={[
                       { value: "pdf", label: "PDF Document (.pdf)" },
@@ -204,7 +247,7 @@ export default function ResumePage() {
                     ]}
                   />
                   {format === "docx" && (
-                    <p className="text-xs text-danger">Premium template is not available in DOCX format.</p>
+                    <p className="text-xs text-danger">Premium Dark and Two-Col templates are PDF only.</p>
                   )}
                 </div>
               </CardContent>
@@ -250,7 +293,7 @@ export default function ResumePage() {
                   className="w-full h-12 text-lg shadow-xl shadow-primary/20"
                 >
                   <Download className="mr-2 h-5 w-5" />
-                  Download {templateType} Resume
+                  Download {templateType === "ATS" ? "ATS" : templateType === "DESIGN" ? "Premium Dark" : templateType === "MODERN" ? "Modern" : "Premium Two-Col"} Resume
                 </Button>
               </CardContent>
             </Card>

@@ -12,31 +12,31 @@ const features = [
     title: "Professional Profile Cards",
     description: "Beautiful digital cards to share your professional identity.",
     icon: <IdCard className="h-5 w-5 text-primary" />,
-    href: "/github-portfolio-card",
+    href: "/features/profile-cards",
   },
   {
     title: "QR Code Profile",
     description: "Generate a QR code that leads to your profile page.",
     icon: <QrCode className="h-5 w-5 text-primary" />,
-    href: "/dashboard",
+    href: "/features/qr-code",
   },
   {
-    title: "Analytics Dashboard",
-    description: "Track profile views and engagement in real-time.",
+    title: "Analytics Insights",
+    description: "Track profile views and identify where your traffic is coming from.",
     icon: <BarChart3 className="h-5 w-5 text-primary" />,
-    href: "/dashboard",
+    href: "/features/analytics",
   },
   {
     title: "AI Content Assistant",
     description: "Get AI suggestions to write better, faster.",
     icon: <Sparkles className="h-5 w-5 text-primary" />,
-    href: "/dashboard",
+    href: "/features/ai-assistant",
   },
   {
     title: "Multiple Templates",
     description: "Choose from modern, professional templates for any role.",
     icon: <LayoutTemplate className="h-5 w-5 text-primary" />,
-    href: "/dashboard/resume",
+    href: "/features/templates",
   },
 ];
 

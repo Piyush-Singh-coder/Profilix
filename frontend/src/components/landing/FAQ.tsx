@@ -7,23 +7,31 @@ import { cn } from "@/lib/utils";
 const FAQS = [
   {
     question: "Is Profilix completely free?",
-    answer: "Yes, the core features of Profilix including GitHub sync, portfolio generation, and ATS resume exports are completely free to use. Premium themes and advanced analytics may be introduced in the future.",
+    answer: "Yes, the core features of Profilix including GitHub sync, portfolio generation, and ATS resume exports are completely free to use. No hidden subscriptions or credit cards required.",
+  },
+  {
+    question: "How many templates are available?",
+    answer: "Currently, we offer 4 professional resume templates (ATS-Friendly, Modern Classic, Premium Dark, and Premium Two-Column) and 3 premium profile card themes (Glass, Brutal, and Apple). More designs are added monthly.",
   },
   {
     question: "How does the GitHub Sync work?",
-    answer: "When you link your GitHub username, our servers fetch your public repositories, star counts, programming languages, and your 26-week contribution graph. All of this is neatly bundled into your public card.",
+    answer: "When you link your GitHub username, our servers fetch your public repositories, star counts, programming languages, and your contribution graph. All of this is neatly bundled into your public card and portfolio.",
   },
   {
-    question: "Will my resume beat the ATS (Applicant Tracking Systems)?",
-    answer: "Yes! Our DOCX and PDF resume exports are specifically structured without complex columns or unreadable SVGs, ensuring ATS parsers can perfectly read your text, skills, and experience.",
+    question: "Will my resume beat the ATS?",
+    answer: "Yes! Our ATS-Friendly and Modern Classic templates are specifically structured for 100% parser compatibility, ensuring hiring systems can perfectly read your skills and experience.",
+  },
+  {
+    question: "What formats can I export in?",
+    answer: "Resumes can be exported as high-quality PDF or editable DOCX (Word) formats. Profile cards are exported as high-resolution PNG images optimized for social media sharing.",
+  },
+  {
+    question: "Can I use AI to write my resume?",
+    answer: "Absolutely. Our AI Content Engine analyzes your target job description and suggests impact-focused bullet points and summaries tailored to your specific industry.",
   },
   {
     question: "Can I use my own domain?",
-    answer: "Currently, profiles are hosted on our high-speed domains (e.g. profilix.site/yourname). Custom domain support is on our roadmap for Q3.",
-  },
-  {
-    question: "What happens if I make my profile private?",
-    answer: "If you toggle 'Private Profile' in your settings, your public share link will instantly return a 404 error to visitors. Only you will be able to see your dashboard data.",
+    answer: "By default, your profile is hosted at profilix.site/yourname. Custom domain support (mapping your-name.com to your Profilix profile) is coming soon.",
   },
 ];
 

@@ -17,7 +17,7 @@ interface ResumeState {
   deleteResume: () => Promise<void>;
   generateResume: (args: { 
     format: "pdf" | "docx"; 
-    templateType: "ATS" | "DESIGN";
+    templateType: "ATS" | "DESIGN" | "MODERN" | "ENHANCV";
     activeTheme?: string;
     jobDescription?: string; 
     useAI?: boolean 

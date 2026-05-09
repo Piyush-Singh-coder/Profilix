@@ -7,7 +7,7 @@ import { Logo } from "@/components/ui/Logo";
 
 export function VideoShowcase() {
   const videoThumbnail = "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix-yt-thumbnail.png?updatedAt=1777139598329";
-  const youtubeUrl = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+  const youtubeUrl = "https://youtu.be/tQZGDThIg8k";
 
   return (
     <section className="py-24 bg-background overflow-hidden">

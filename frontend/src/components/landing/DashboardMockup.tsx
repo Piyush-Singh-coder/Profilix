@@ -175,9 +175,9 @@ export function DashboardMockup() {
               <Check className="h-6 w-6" />
            </div>
            <div>
-              <p className="text-[10px] font-bold text-text-primary">ATS Score: 98%</p>
+              <p className="text-[10px] font-bold text-text-primary">Profile Ready: 95%</p>
               <div className="mt-1.5 h-1.5 w-24 rounded-full bg-border/40 overflow-hidden">
-                 <div className="h-full w-[98%] bg-success" />
+                 <div className="h-full w-[95%] bg-success" />
               </div>
            </div>
         </div>

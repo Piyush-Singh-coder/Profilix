@@ -35,7 +35,7 @@ export function Dialog({
     window.addEventListener("keydown", onEsc);
     return () => {
       document.body.style.overflow = "unset";
-      window.removeEventListener("keydon own", onEsc);
+      window.removeEventListener("keydown", onEsc);
     };
   }, [open, onOpenChange]);
 

@@ -55,6 +55,14 @@ const faqJsonLd = {
         text: "If you toggle 'Private Profile' in your settings, your public share link will instantly return a 404 error to visitors. Only you will be able to see your dashboard data.",
       },
     },
+    {
+      "@type": "Question",
+      name: "How many resume templates does Profilix offer?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Profilix offers 4 professional resume templates: (1) ATS Friendly — a clean single-column layout that passes all Applicant Tracking Systems, available as PDF and DOCX; (2) Modern Classic — a serif Georgia-style design with centered header and clean section dividers, available as PDF and DOCX; (3) Premium Dark — an elegant two-column layout with a dark sidebar, PDF only; (4) Premium Two-Column — an Enhancv-style design with accent colors and chip-style skills, PDF only. All templates are 100% free.",
+      },
+    },
   ],
 };
 

@@ -1374,15 +1374,15 @@ async function buildApple(
 export const generateProfileCard = async (
   username: string,
   size: string = "1080x1080",
-  forcedTheme?: "GLASSMORPHISM" | "NEOBRUTALISM" | "APPLE",
+  forcedTheme?: "GLASS" | "BRUTAL" | "APPLE" | "GLASSMORPHISM" | "NEOBRUTALISM",
 ): Promise<Buffer> => {
   const sz = SIZES[size] || SIZES["1080x1080"];
   const user = await fetchCardData(username);
   const profileUrl = `${env.FRONTEND_URL}/u/${username}`;
-  const theme = forcedTheme || user.profile!.cardTheme || "GLASSMORPHISM";
+  const theme = forcedTheme || user.profile!.cardTheme || "GLASS";
 
   let svg: string;
-  if (theme === "NEOBRUTALISM") svg = await buildNeo(user, sz, profileUrl);
+  if (theme === "NEOBRUTALISM" || theme === "BRUTAL") svg = await buildNeo(user, sz, profileUrl);
   else if (theme === "APPLE") svg = await buildApple(user, sz, profileUrl);
   else svg = await buildGlass(user, sz, profileUrl);
 

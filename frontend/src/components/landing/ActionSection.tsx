@@ -38,7 +38,7 @@ export function ActionSection() {
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                Real-time ATS score & feedback
+                GitHub & Performance Sync
               </li>
             </ul>
 
@@ -62,25 +62,25 @@ export function ActionSection() {
               </div>
 
               <div className="mt-8">
-                <p className="text-sm font-medium text-text-secondary mb-8">ATS Score</p>
+                <p className="text-sm font-medium text-text-secondary mb-8">Profile Strength</p>
                 <div className="flex items-center justify-between">
                   {/* Circular Progress */}
                   <div className="relative h-40 w-40 flex items-center justify-center shrink-0">
                     <svg className="absolute inset-0 h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
                       <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" className="text-border" />
-                      <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray="282.7" strokeDashoffset="22.6" className="text-success" />
+                      <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray="282.7" strokeDashoffset="28" className="text-success" />
                       {/* Gradient outline segment */}
                       <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="8" strokeDasharray="282.7" strokeDashoffset="260" className="text-primary transform rotate-[300deg] origin-center" />
                     </svg>
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-text-primary font-heading">92</div>
-                      <div className="text-xs text-text-secondary mt-1">Excellent</div>
+                      <div className="text-4xl font-bold text-text-primary font-heading">95%</div>
+                      <div className="text-xs text-text-secondary mt-1">Ready to apply</div>
                     </div>
                   </div>
 
                   {/* Checklist */}
                   <div className="space-y-4 pl-8 border-l border-border/50">
-                    {["Contact Info", "Work Experience", "Skills", "Education", "Keywords"].map((item, i) => (
+                    {["GitHub Linked", "Resume Exported", "Projects Synced", "Skills Verified", "Public Link Active"].map((item, i) => (
                       <div key={i} className="flex items-center gap-3 text-sm text-text-primary">
                         <svg className="h-4 w-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                         {item}

@@ -45,18 +45,30 @@ function formatMonthYear(date?: string | null) {
 
 export default function ProfileContent({ initialUsername, initialProfile }: ProfileContentProps) {
   useEffect(() => {
-    // Respect the user's saved global theme preference (LIGHT/DARK)
+    // Apply the profile owner's global theme preference on public profile
     const userPreferredTheme = initialProfile?.profile?.theme?.toLowerCase() || "dark";
-    
-    const previousTheme = document.documentElement.getAttribute("data-theme");
+    const THEME_STORAGE_KEY = "profilix-theme";
+
+    // Apply the profile's theme to the document
     document.documentElement.setAttribute("data-theme", userPreferredTheme);
 
-    return () => {
-      if (previousTheme) {
-        document.documentElement.setAttribute("data-theme", previousTheme);
-      } else {
+    // Restore the global app theme when the user navigates away
+    // We listen to `pagehide` for bfcache back-navigation (history.back())
+    const restoreGlobalTheme = () => {
+      const globalTheme = localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+      if (globalTheme === "light") {
         document.documentElement.removeAttribute("data-theme");
+      } else {
+        document.documentElement.setAttribute("data-theme", "dark");
       }
+    };
+
+    window.addEventListener("pagehide", restoreGlobalTheme);
+
+    // Cleanup: runs when React unmounts (standard SPA navigation away)
+    return () => {
+      window.removeEventListener("pagehide", restoreGlobalTheme);
+      restoreGlobalTheme();
     };
   }, [initialProfile?.profile?.theme]);
 
