@@ -35,7 +35,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] w-full overflow-hidden pb-10 pt-24">
+    <section className="relative min-h-[85vh] w-full overflow-hidden pb-0 md:pb-10 pt-20 md:pt-24">
       <div className="pointer-events-none absolute inset-0 z-0 hidden">
         {/* Removed giant glowing blobs to match strict dark background mockup */}
       </div>
@@ -49,7 +49,7 @@ export function Hero() {
           <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
             Built for professionals. Designed to get you hired.
           </div>
-          <h1 className="mt-7 font-heading text-6xl font-black leading-[1.03] tracking-tight text-text-primary sm:text-7xl lg:text-[80px]">
+          <h1 className="mt-4 md:mt-7 font-heading text-4xl font-black leading-[1.1] tracking-tight text-text-primary sm:text-7xl lg:text-[80px]">
             Your Professional
             <br />
             Identity, <span className="animated-gradient-text">Reimagined.</span>
@@ -58,7 +58,7 @@ export function Hero() {
             Turn your bio, experience, and projects into stunning profile cards and ATS-friendly resumes in minutes.
           </p>
 
-          <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <div className="mt-6 md:mt-10 flex flex-col gap-4 sm:flex-row">
             {isAuthenticated ? (
               <>
                 <Link href={`/u/${user?.username}`}>
@@ -86,7 +86,7 @@ export function Hero() {
             )}
           </div>
 
-          <div className="mt-12 flex items-center gap-4">
+          <div className="mt-8 md:mt-12 flex items-center gap-4">
             <div className="flex -space-x-3">
               <Image className="h-10 w-10 rounded-full border-2 border-background" src="https://api.dicebear.com/7.x/notionists/svg?seed=1" alt="User 1" width={40} height={40} />
               <Image className="h-10 w-10 rounded-full border-2 border-background" src="https://api.dicebear.com/7.x/notionists/svg?seed=2" alt="User 2" width={40} height={40} />

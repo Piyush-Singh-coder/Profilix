@@ -94,31 +94,31 @@ export function TemplateSlider() {
   );
 
   return (
-    <section className="relative py-24 bg-background overflow-hidden">
+    <section className="relative py-10 md:py-24 bg-background overflow-hidden">
       {/* Background Ornaments */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="container mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8 md:mb-16">
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-6 text-xs font-bold uppercase tracking-widest text-primary"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 mb-4 md:mb-6 text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary"
           >
             <Sparkles className="h-3 w-3" /> Explore Designs
           </motion.div>
-          <h2 className="font-heading text-4xl font-black text-text-primary sm:text-5xl mb-6 tracking-tight">
+          <h2 className="font-heading text-2xl md:text-5xl font-black text-text-primary mb-4 md:mb-6 tracking-tight leading-tight">
             Professional templates<br />
             for every industry
           </h2>
-          <p className="text-text-secondary text-lg max-w-2xl mx-auto">
+          <p className="text-text-secondary text-sm md:text-lg max-w-2xl mx-auto px-4 md:px-0">
             Choose a template that best represents you. From high-parser compatibility to stunning visual cards.
           </p>
         </div>
 
         {/* Main Mode Toggle */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8 md:mb-12">
           <div className="inline-flex p-1 bg-surface-low border border-border/50 rounded-2xl shadow-inner">
             <button
               onClick={() => { setActiveType("RESUME"); setActiveCategory("All"); }}
@@ -142,7 +142,7 @@ export function TemplateSlider() {
         </div>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mb-16">
+        <div className="flex flex-wrap justify-center gap-2 mb-8 md:mb-16">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -169,7 +169,7 @@ export function TemplateSlider() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
               className={cn(
-                "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-center",
+                "grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 justify-center px-2 md:px-0",
                 filteredTemplates.length < 4 && "lg:flex lg:justify-center"
               )}
             >
@@ -214,11 +214,11 @@ export function TemplateSlider() {
                         )}
                       </div>
                       
-                      <div className="mt-6 px-2">
-                        <h3 className="text-lg font-bold text-text-primary group-hover:text-primary transition-colors">{template.name}</h3>
-                        <p className="mt-2 text-sm text-text-secondary line-clamp-2 leading-relaxed">{template.description}</p>
-                        <div className="mt-4 flex items-center text-xs font-bold text-primary transition-all group-hover:translate-x-1">
-                          Get Started <ArrowRight className="ml-2 h-3 w-3" />
+                      <div className="mt-3 md:mt-6 px-1 md:px-2">
+                        <h3 className="text-sm md:text-lg font-bold text-text-primary group-hover:text-primary transition-colors line-clamp-1">{template.name}</h3>
+                        <p className="mt-1 md:mt-2 text-[10px] md:text-sm text-text-secondary line-clamp-2 leading-tight md:leading-relaxed">{template.description}</p>
+                        <div className="mt-2 md:mt-4 flex items-center text-[10px] md:text-xs font-bold text-primary transition-all group-hover:translate-x-1">
+                          Get Started <ArrowRight className="ml-2 h-2 w-2 md:h-3 md:w-3" />
                         </div>
                       </div>
                     </Link>

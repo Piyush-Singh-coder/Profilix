@@ -10,7 +10,7 @@ export function VideoShowcase() {
   const youtubeUrl = "https://youtu.be/tQZGDThIg8k";
 
   return (
-    <section className="py-24 bg-background overflow-hidden">
+    <section className="py-10 md:py-24 bg-background overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="text-center mb-16">
           <motion.div 

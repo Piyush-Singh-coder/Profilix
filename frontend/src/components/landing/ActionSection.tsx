@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/Button";
 
 export function ActionSection() {
   return (
-    <section className="relative py-10 bg-background">
+    <section className="relative py-6 md:py-10 bg-background">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-16">
           {/* Left Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -19,7 +19,7 @@ export function ActionSection() {
             <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-widest text-primary">
               4X FASTER THAN TYPING
             </div>
-            <h2 className="font-heading text-4xl font-black text-text-primary sm:text-5xl leading-tight tracking-tight mb-6">
+            <h2 className="font-heading text-3xl md:text-5xl font-black text-text-primary leading-tight tracking-tight mb-4 md:mb-6">
               Build in minutes.<br />
               Impress for years.
             </h2>
@@ -27,7 +27,7 @@ export function ActionSection() {
               Create a powerful resume and profile in minutes and let your work speak for you.
             </p>
 
-            <ul className="space-y-4 mb-10">
+            <ul className="space-y-3 md:space-y-4 mb-8 md:mb-10">
               <li className="flex items-center gap-3 text-text-primary font-medium">
                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white">
                   <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>

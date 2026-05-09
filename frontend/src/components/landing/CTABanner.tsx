@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/Button";
 
 export function CTABanner() {
   return (
-    <section className="py-16 bg-background">
+    <section className="py-10 md:py-16 bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* CTA Box */}
-        <div className="relative overflow-hidden rounded-[32px] border border-border/80 bg-surface-low p-12 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl md:rounded-[32px] border border-border/80 bg-surface-low p-6 md:p-16 flex flex-col md:flex-row items-center justify-between gap-10 shadow-2xl">
           {/* Subtle Background Glow */}
           <div className="absolute -right-24 -top-24 h-[300px] w-[300px] rounded-full bg-primary/20 blur-[100px] pointer-events-none" />
           <div className="absolute -left-24 -bottom-24 h-[300px] w-[300px] rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
@@ -33,7 +33,7 @@ export function CTABanner() {
         </div>
 
         {/* Logo Strip */}
-        <div className="mt-20 flex flex-wrap justify-center lg:justify-between items-center gap-10 opacity-50 grayscale">
+        <div className="mt-10 md:mt-20 flex flex-wrap justify-center lg:justify-between items-center gap-6 md:gap-10 opacity-50 grayscale">
           <div className="text-2xl font-bold font-heading text-text-primary">
             Google
           </div>

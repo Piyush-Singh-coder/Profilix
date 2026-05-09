@@ -22,26 +22,42 @@ export function Navbar() {
   const { isAuthenticated, user, updateSelectedTheme } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // Local isDark state — source of truth for unauthenticated users.
+  // Initialised to match whatever is already set on the DOM (e.g. system preference / Providers).
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Read initial theme from DOM so we always start in sync
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    setIsDark(dark);
   }, []);
 
+  // Keep local state in sync when the authenticated user's stored theme changes
+  useEffect(() => {
+    if (user?.selectedTheme) {
+      setIsDark(user.selectedTheme === "DARK");
+    }
+  }, [user?.selectedTheme]);
+
   const handleThemeToggle = async () => {
-    const currentTheme = user?.selectedTheme === "LIGHT" ? "LIGHT" : "DARK";
-    const newTheme = currentTheme === "LIGHT" ? "DARK" : "LIGHT";
-    
-    // Update local store
-    updateSelectedTheme(newTheme);
-    
-    // Apply to DOM immediately
-    if (newTheme === "LIGHT") {
-      document.documentElement.removeAttribute("data-theme");
-    } else {
+    const newIsDark = !isDark;
+    const newTheme = newIsDark ? "DARK" : "LIGHT";
+
+    // 1. Update local toggle state immediately
+    setIsDark(newIsDark);
+
+    // 2. Apply to DOM immediately
+    if (newIsDark) {
       document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
     }
 
-    // Persist if authenticated
+    // 3. Update auth store (only works when user is not null, but we have local state as fallback)
+    updateSelectedTheme(newTheme);
+
+    // 4. Persist if authenticated
     if (isAuthenticated) {
       try {
         await api.put("/profile", { theme: newTheme });
@@ -74,10 +90,10 @@ export function Navbar() {
                 className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-low text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
                 title="Toggle Theme"
               >
-                {user?.selectedTheme === "LIGHT" ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
+                {isDark ? (
                   <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
                 )}
               </button>
 
@@ -120,10 +136,10 @@ export function Navbar() {
               onClick={handleThemeToggle}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-low text-text-secondary transition-all"
             >
-              {user?.selectedTheme === "LIGHT" ? (
-                <Moon className="h-5 w-5" />
-              ) : (
+              {isDark ? (
                 <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
               )}
             </button>
           )}
