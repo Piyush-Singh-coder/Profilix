@@ -34,7 +34,7 @@ export function HowItWorks() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-80px" }}
-          className="mx-auto mb-8 md:mb-20 max-w-2xl text-center"
+          className="mx-auto mb-6 md:mb-20 max-w-2xl text-center"
         >
           <h2 className="font-heading text-2xl md:text-5xl font-bold text-text-primary tracking-tight leading-tight">Built for modern professionals</h2>
           <p className="mt-4 text-sm md:text-lg text-text-secondary max-w-xl mx-auto">

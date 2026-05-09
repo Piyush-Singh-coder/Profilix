@@ -35,7 +35,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative min-h-[85vh] w-full overflow-hidden pb-0 md:pb-10 pt-20 md:pt-24">
+    <section className="relative min-h-[70vh] md:min-h-[85vh] w-full overflow-hidden pb-12 md:pb-10 pt-32 md:pt-24">
       <div className="pointer-events-none absolute inset-0 z-0 hidden">
         {/* Removed giant glowing blobs to match strict dark background mockup */}
       </div>
@@ -86,7 +86,7 @@ export function Hero() {
             )}
           </div>
 
-          <div className="mt-8 md:mt-12 flex items-center gap-4">
+          <div className="mt-6 md:mt-12 flex items-center gap-8">
             <div className="flex -space-x-3">
               <Image className="h-10 w-10 rounded-full border-2 border-background" src="https://api.dicebear.com/7.x/notionists/svg?seed=1" alt="User 1" width={40} height={40} />
               <Image className="h-10 w-10 rounded-full border-2 border-background" src="https://api.dicebear.com/7.x/notionists/svg?seed=2" alt="User 2" width={40} height={40} />
