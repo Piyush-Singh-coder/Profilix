@@ -27,12 +27,16 @@ export function Select({
   disabled = false,
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
+  // true = dropdown opens upward
+  const [opensUp, setOpensUp] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const generatedId = useId();
   const selectId = label ? `select-${generatedId}` : undefined;
 
   const selectedOption = options.find((opt) => opt.value === value);
 
+  // Close on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
@@ -42,6 +46,18 @@ export function Select({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!isOpen && buttonRef.current) {
+      // Measure available space below the button
+      const rect = buttonRef.current.getBoundingClientRect();
+      // 240px = max-h-60 (dropdown height), 96px = mobile nav height + buffer
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setOpensUp(spaceBelow < 240 + 96);
+    }
+    setIsOpen((prev) => !prev);
+  };
 
   return (
     <div className={cn("flex w-full flex-col gap-1.5 relative", isOpen && "z-[100]")} ref={containerRef}>
@@ -54,8 +70,9 @@ export function Select({
         <button
           type="button"
           id={selectId}
+          ref={buttonRef}
           disabled={disabled}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={handleToggle}
           className={cn(
             "flex h-11 w-full items-center justify-between rounded-[var(--radius-md)] border border-border bg-surface-low px-4 py-2 text-sm text-text-primary transition-all duration-200",
             isOpen && "border-primary/60 ring-4 ring-primary/10 shadow-[0_0_20px_var(--color-primary-glow)]",
@@ -72,7 +89,14 @@ export function Select({
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 top-[calc(100%+8px)] z-[100] max-h-60 w-full overflow-y-auto rounded-[var(--radius-md)] border border-border bg-surface-high p-1 shadow-2xl animate-in fade-in zoom-in-95">
+          <div
+            className={cn(
+              "absolute left-0 z-[100] max-h-60 w-full overflow-y-auto rounded-[var(--radius-md)] border border-border bg-surface-high p-1 shadow-2xl animate-in fade-in zoom-in-95",
+              opensUp
+                ? "bottom-[calc(100%+8px)] top-auto"
+                : "top-[calc(100%+8px)]"
+            )}
+          >
             {options.map((option) => (
               <button
                 key={option.value}
