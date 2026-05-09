@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Download, FileText, Loader2, Layout, BookOpen, Columns, PenTool, Edit3, Settings, Eye, X } from "lucide-react";
 import { toast } from "sonner";
@@ -34,6 +34,17 @@ export default function ResumePage() {
   const [format, setFormat] = useState<"pdf" | "docx">("pdf");
   const [templateType, setTemplateType] = useState<"ATS" | "DESIGN" | "MODERN" | "ENHANCV">("ATS");
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  // Ref to the preview wrapper — used to compute exact CSS scale for the A4 sheet
+  const previewWrapperRef = useRef<HTMLDivElement>(null);
+  const [previewScale, setPreviewScale] = useState(0.41);
+
+  // Whenever the modal opens, measure the real container width and derive scale
+  useEffect(() => {
+    if (mobilePreviewOpen && previewWrapperRef.current) {
+      const w = previewWrapperRef.current.offsetWidth;
+      setPreviewScale(w / 794);
+    }
+  }, [mobilePreviewOpen]);
 
   useEffect(() => {
     fetchProfile();
@@ -301,7 +312,7 @@ export default function ResumePage() {
           )}
         </div>
 
-        {/* Right Column: Live Preview Sticky Container — desktop only */}
+        {/* Right Column: Live Preview — desktop only */}
         <div className="hidden lg:block sticky top-8">
           <div className="rounded-2xl border border-border bg-surface-low p-6 shadow-xl relative">
             <div className="absolute top-0 right-0 p-3 flex gap-2 z-10">
@@ -317,11 +328,11 @@ export default function ResumePage() {
         </div>
       </div>
 
-      {/* ── Mobile: floating preview button ── */}
-      <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 z-50 lg:hidden">
+      {/* ── Mobile: inline preview button (below wizard, no overlap) ── */}
+      <div className="mt-4 lg:hidden">
         <button
           onClick={() => setMobilePreviewOpen(true)}
-          className="flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-2xl shadow-primary/40 hover:bg-primary/90 active:scale-95 transition-all"
+          className="w-full flex items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary/10 px-5 py-3 text-sm font-bold text-primary hover:bg-primary/20 active:scale-[0.98] transition-all"
         >
           <Eye className="h-4 w-4" />
           Preview Resume
@@ -335,7 +346,9 @@ export default function ResumePage() {
           <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 shrink-0">
             <div>
               <p className="font-bold text-text-primary text-sm">Resume Preview</p>
-              <p className="text-[10px] text-text-secondary capitalize">{templateType === "ATS" ? "ATS Friendly" : templateType === "DESIGN" ? "Premium Dark" : templateType === "MODERN" ? "Modern Classic" : "Premium Two-Col"} · {format.toUpperCase()}</p>
+              <p className="text-[10px] text-text-secondary">
+                {templateType === "ATS" ? "ATS Friendly" : templateType === "DESIGN" ? "Premium Dark" : templateType === "MODERN" ? "Modern Classic" : "Premium Two-Col"} &middot; {format.toUpperCase()}
+              </p>
             </div>
             <button
               onClick={() => setMobilePreviewOpen(false)}
@@ -345,47 +358,40 @@ export default function ResumePage() {
             </button>
           </div>
 
-          {/* Scrollable preview area */}
-          <div className="flex-1 overflow-y-auto bg-zinc-100 dark:bg-zinc-900 px-4 pt-4 pb-6">
-            <div className="mx-auto w-full">
-              {/* 
-                Scale trick: the preview is designed for 794px wide (A4).
-                We render it full-size inside a clipping wrapper, then scale it down.
-                The wrapper's height must equal 794 * 11/8.5 * scale = 1123 * scale.
-                On a 360px-wide phone with 32px padding: usable = 328px, scale = 328/794 ≈ 0.413
-              */}
-              <div
-                className="relative overflow-hidden rounded-xl shadow-2xl border border-black/10 bg-white mx-auto"
-                style={{
-                  width: '100%',
-                  paddingBottom: `${(1123 / 794) * 100}%`,
-                }}
-              >
+          {/* Scrollable preview area — perfectly centered */}
+          <div className="flex-1 overflow-y-auto bg-zinc-100 dark:bg-zinc-950">
+            <div className="min-h-full flex flex-col items-center justify-center p-6 sm:p-10">
+              {/* Preview Card */}
+              <div ref={previewWrapperRef} className="w-full max-w-[500px]">
                 <div
-                  className="absolute top-0 left-0 origin-top-left"
-                  style={{
+                  className="overflow-hidden rounded-xl shadow-2xl border border-black/10 bg-white mx-auto"
+                  style={{ width: '100%', height: `${Math.round(1123 * previewScale)}px` }}
+                >
+                  <div style={{
                     width: '794px',
                     height: '1123px',
-                    transform: 'scale(var(--preview-scale, 0.41))',
-                  }}
-                >
-                  {/* CSS custom property set via a small style tag so it reacts to container width */}
-                  <style>{`
-                    :root { --preview-scale: 0.41; }
-                    @media (min-width: 400px) { :root { --preview-scale: 0.46; } }
-                    @media (min-width: 480px) { :root { --preview-scale: 0.56; } }
-                    @media (min-width: 560px) { :root { --preview-scale: 0.66; } }
-                  `}</style>
-                  <ResumeLivePreview templateType={templateType} />
+                    transformOrigin: 'top left',
+                    transform: `scale(${previewScale})`,
+                  }}>
+                    <ResumeLivePreview templateType={templateType} />
+                  </div>
                 </div>
               </div>
-              <p className="text-center text-xs text-zinc-500 mt-4 px-4">
-                Preview matches ATS output. Premium templates add sidebars &amp; colors on export.
-              </p>
+              
+              {/* Note Section */}
+              <div className="mt-8 text-center space-y-3 max-w-[420px]">
+                <p className="text-[12px] font-semibold text-text-primary px-2">
+                  💡 Masterful Arrangement: This preview illustrates the layout and content hierarchy. 
+                  The final export is dynamically optimized to fit a standard one-page format for maximum recruiter impact.
+                </p>
+                <p className="text-[10px] text-text-secondary opacity-80">
+                  Premium styles, full sidebars, and high-fidelity colors are automatically applied during export.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Download button at the bottom */}
+          {/* Download button */}
           <div className="shrink-0 border-t border-border bg-surface p-4">
             <Button
               onClick={async () => { await handleGenerate(); setMobilePreviewOpen(false); }}

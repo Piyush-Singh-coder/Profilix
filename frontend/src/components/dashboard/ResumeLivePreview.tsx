@@ -7,6 +7,8 @@ import { useExperienceStore } from "@/store/useExperienceStore";
 import { useEducationStore } from "@/store/useEducationStore";
 import { useSocialStore } from "@/store/useSocialStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useProjectStore } from "@/store/useProjectStore";
+import { useAchievementStore } from "@/store/useAchievementStore";
 
 type ResumeTemplate = "ATS" | "DESIGN" | "MODERN" | "ENHANCV";
 
@@ -30,15 +32,19 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
   const { experiences, fetchExperiences, isLoading: isExpLoading } = useExperienceStore();
   const { educations, fetchEducations, isLoading: isEduLoading } = useEducationStore();
   const { links, fetchLinks, isLoading: isSocialsLoading } = useSocialStore();
+  const { projects, fetchProjects, isLoading: isProjectsLoading } = useProjectStore();
+  const { achievements, fetchAchievements, isLoading: isAchievementsLoading } = useAchievementStore();
   const { user } = useAuthStore();
 
   useEffect(() => {
     fetchExperiences();
     fetchEducations();
     fetchLinks();
-  }, [fetchExperiences, fetchEducations, fetchLinks]);
+    fetchProjects();
+    fetchAchievements();
+  }, [fetchExperiences, fetchEducations, fetchLinks, fetchProjects, fetchAchievements]);
 
-  const isLoading = isProfileLoading || isExpLoading || isEduLoading || isSocialsLoading;
+  const isLoading = isProfileLoading || isExpLoading || isEduLoading || isSocialsLoading || isProjectsLoading || isAchievementsLoading;
 
   if (isLoading && (!profile || experiences.length === 0)) {
     return (
@@ -50,6 +56,8 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
   const sortedExperiences = [...experiences].sort((a, b) => a.displayOrder - b.displayOrder);
   const sortedEducations = [...educations].sort((a, b) => a.displayOrder - b.displayOrder);
+  const sortedProjects = [...projects].sort((a, b) => a.displayOrder - b.displayOrder);
+  const sortedAchievements = [...achievements].sort((a, b) => a.displayOrder - b.displayOrder);
   const techStacks = profile?.techStacks || [];
   const primaryColor = THEME_COLOR_MAP[user?.selectedTheme || "MINIMAL"] || "#111111";
 
@@ -85,12 +93,12 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
       
       {/* -------------------- DESIGN TEMPLATE (2-COLUMN) -------------------- */}
       {templateType === "DESIGN" && (
-        <div className="absolute inset-0 flex text-black bg-white overflow-hidden" style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif' }}>
+        <div className="absolute inset-0 flex text-black bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Arial, sans-serif' }}>
           
           {/* Sidebar */}
           <div className="flex-none bg-[#0f172a] text-[#e2e8f0] p-6" style={{ width: '32%' }}>
-            <h1 className="text-xl font-black text-white leading-tight tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[9px] font-bold uppercase tracking-wider mb-6 pb-4 border-b border-[#1e3a5f] text-[#38bdf8]">
+            <h1 className="text-2xl font-black text-white leading-tight tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            <div className="text-[11px] font-bold uppercase tracking-wider mb-6 pb-4 border-b border-[#1e3a5f] text-[#38bdf8]">
               {profile?.headline || "Professional Title"}
             </div>
 
@@ -165,21 +173,53 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
               </>
             )}
             
-            {/* Note: Projects & Achievements omitted for brevity in preview, but would follow the exact same structure */}
-            <div className="mt-6 text-center text-gray-400 italic text-[9px] border-t pt-4">
-              (Projects & Achievements not fully rendered in this miniature preview)
-            </div>
+            {sortedProjects.length > 0 && (
+              <>
+                <div className="text-[11.5px] font-black uppercase tracking-wide text-[#0f172a] mt-3 mb-3 pb-1 border-b-2" style={{ borderColor: primaryColor }}>Projects</div>
+                {sortedProjects.slice(0, 3).map(proj => (
+                  <div key={proj.id} className="mb-4">
+                    <div className="flex justify-between items-start">
+                      <div className="text-[11px] font-bold text-[#0f172a]">{proj.title}</div>
+                      {proj.techTags && proj.techTags.length > 0 && (
+                        <div className="text-[8.5px] text-[#64748b] text-right">{proj.techTags.slice(0, 3).join(" · ")}</div>
+                      )}
+                    </div>
+                    {proj.description && <div className="text-[9px] text-[#475569] mt-0.5 leading-relaxed">{proj.description.slice(0, 120)}</div>}
+                    {proj.bullets && proj.bullets.length > 0 && (
+                      <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[9px] text-[#475569] leading-relaxed">
+                        {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {sortedAchievements.length > 0 && (
+              <>
+                <div className="text-[11.5px] font-black uppercase tracking-wide text-[#0f172a] mt-3 mb-2 pb-1 border-b-2" style={{ borderColor: primaryColor }}>Achievements</div>
+                {sortedAchievements.slice(0, 3).map(ach => (
+                  <div key={ach.id} className="mb-2 flex justify-between items-start">
+                    <div>
+                      <div className="text-[10px] font-bold text-[#0f172a]">{ach.title}</div>
+                      {ach.provider && <div className="text-[9px] text-[#475569]">{ach.provider}</div>}
+                    </div>
+                    <div className="text-[8.5px] text-[#64748b] whitespace-nowrap">{ach.date ? new Date(ach.date).getFullYear() : ach.type.replace(/_/g, " ")}</div>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
         </div>
       )}
 
       {/* -------------------- ATS TEMPLATE (1-COLUMN) -------------------- */}
       {templateType === "ATS" && (
-        <div className="absolute inset-0 p-8 md:p-12 flex flex-col gap-3 text-[#111] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif' }}>
+        <div className="absolute inset-0 p-8 md:p-12 flex flex-col gap-3 text-[#111] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Arial, sans-serif' }}>
           
           <div className="text-center">
-            <h1 className="text-2xl font-bold tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[10px] text-[#333] flex flex-wrap justify-center items-center gap-x-2 gap-y-1">
+            <h1 className="text-3xl font-bold tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            <div className="text-[12px] text-[#333] flex flex-wrap justify-center items-center gap-x-2 gap-y-1">
               <span>{user?.email}</span>
               {links.filter(l => l.visibleInDefault).map(link => (
                 <span key={link.id}> | {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}</span>
@@ -246,18 +286,49 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
             </div>
           )}
           
-          <div className="mt-2 text-center text-gray-400 italic text-[9px] border-t pt-2">
-            (Projects & Achievements not fully rendered in this miniature preview)
-          </div>
+          {sortedProjects.length > 0 && (
+            <div className="mb-2">
+              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Projects</div>
+              {sortedProjects.slice(0, 3).map(proj => (
+                <div key={proj.id} className="mb-2">
+                  <div className="flex justify-between items-baseline">
+                    <div className="text-[11px] font-bold">{proj.title}</div>
+                    {proj.techTags && <div className="text-[9px] text-[#555]">{proj.techTags.slice(0, 3).join(" · ")}</div>}
+                  </div>
+                  {proj.description && <div className="text-[10px] text-[#444] leading-relaxed">{proj.description.slice(0, 130)}</div>}
+                  {proj.bullets && proj.bullets.length > 0 && (
+                    <ul className="list-disc pl-4 space-y-0.5 text-[10px] text-[#444] leading-relaxed">
+                      {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sortedAchievements.length > 0 && (
+            <div className="mb-2">
+              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Achievements</div>
+              {sortedAchievements.slice(0, 4).map(ach => (
+                <div key={ach.id} className="flex justify-between items-baseline mb-1">
+                  <div>
+                    <span className="text-[10px] font-bold">{ach.title}</span>
+                    {ach.provider && <span className="text-[9px] text-[#444]"> · {ach.provider}</span>}
+                  </div>
+                  <div className="text-[9px] text-[#555] whitespace-nowrap">{ach.date ? new Date(ach.date).getFullYear() : ""}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
         </div>
       )}
       {/* -------------------- MODERN TEMPLATE (serif, clean) -------------------- */}
       {templateType === "MODERN" && (
-        <div className="absolute inset-0 p-8 md:p-10 flex flex-col gap-5 text-[#1a1a1a] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '10px', fontFamily: 'Georgia, serif' }}>
+        <div className="absolute inset-0 p-8 md:p-10 flex flex-col gap-5 text-[#1a1a1a] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Georgia, serif' }}>
           <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[9px] text-[#444] flex flex-wrap justify-center items-center gap-x-2">
+            <h1 className="text-4xl font-bold tracking-tight mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            <div className="text-[11px] text-[#444] flex flex-wrap justify-center items-center gap-x-2">
               <span>{user?.email}</span>
               {links.filter(l => l.visibleInDefault).map(link => (
                 <span key={link.id}>| {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}</span>
@@ -302,11 +373,43 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           )}
 
           {Object.keys(groupedSkills).length > 0 && (
-            <div>
+            <div className="mb-4">
               <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Technical Skills</div>
               {Object.entries(groupedSkills).map(([label, names]) => (
                 <div key={label} className="text-[10px] mb-0.5">
                   <strong style={{ fontFamily: 'Arial, sans-serif' }}>{label}:</strong> <span className="text-[#444]">{names.join(", ")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sortedProjects.length > 0 && (
+            <div className="mb-4">
+              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-3" style={{ fontFamily: 'Arial, sans-serif' }}>Projects</div>
+              {sortedProjects.slice(0, 3).map(proj => (
+                <div key={proj.id} className="mb-3">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.title}</span>
+                    {proj.techTags && <span className="text-[9px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.techTags.slice(0, 3).join(" · ")}</span>}
+                  </div>
+                  {proj.description && <div className="text-[9.5px] text-[#333] mt-0.5 leading-relaxed">{proj.description.slice(0, 140)}</div>}
+                  {proj.bullets && proj.bullets.length > 0 && (
+                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[9.5px] text-[#333] leading-relaxed">
+                      {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {sortedAchievements.length > 0 && (
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Achievements</div>
+              {sortedAchievements.slice(0, 4).map(ach => (
+                <div key={ach.id} className="flex justify-between items-baseline mb-1">
+                  <span className="text-[10px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{ach.title}{ach.provider ? ` · ${ach.provider}` : ""}</span>
+                  <span className="text-[9px] text-[#555]">{ach.date ? new Date(ach.date).getFullYear() : ""}</span>
                 </div>
               ))}
             </div>
@@ -316,11 +419,11 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
       {/* -------------------- ENHANCV TEMPLATE (two-column colored) -------------------- */}
       {templateType === "ENHANCV" && (
-        <div className="absolute inset-0 flex text-black bg-white overflow-hidden" style={{ fontSize: '10px', fontFamily: 'Arial, sans-serif' }}>
+        <div className="absolute inset-0 flex text-black bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Arial, sans-serif' }}>
           {/* Left */}
           <div className="flex-none bg-white p-6 border-r border-[#e5e7eb]" style={{ width: '62%' }}>
-            <h1 className="text-2xl font-black text-[#0f172a] leading-tight tracking-tight">{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            {profile?.headline && <div className="text-[9.5px] font-bold uppercase tracking-wider mt-1 mb-2" style={{ color: primaryColor }}>{profile.headline}</div>}
+            <h1 className="text-3xl font-black text-[#0f172a] leading-tight tracking-tight">{profile?.displayName || user?.fullName || "Your Name"}</h1>
+            {profile?.headline && <div className="text-[11.5px] font-bold uppercase tracking-wider mt-1 mb-2" style={{ color: primaryColor }}>{profile.headline}</div>}
             <div className="h-[3px] w-full mb-3 rounded" style={{ background: `linear-gradient(to right, ${primaryColor}, transparent)` }} />
 
             {profile?.bio && (
@@ -345,6 +448,25 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
                     {exp.bullets && exp.bullets.length > 0 && (
                       <ul className="list-disc pl-3 mt-1 space-y-0.5 text-[9px] text-[#374151]">
                         {exp.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+            {sortedProjects.length > 0 && (
+              <div className="mb-3">
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Projects</div>
+                {sortedProjects.slice(0, 3).map(proj => (
+                  <div key={proj.id} className="mb-3">
+                    <div className="text-[10.5px] font-bold text-[#0f172a]">{proj.title}</div>
+                    {proj.techTags && proj.techTags.length > 0 && (
+                      <div className="text-[8.5px] font-semibold mt-0.5" style={{ color: primaryColor }}>{proj.techTags.slice(0, 3).join(" · ")}</div>
+                    )}
+                    {proj.description && <div className="text-[8.5px] text-[#374151] mt-0.5 leading-relaxed">{proj.description.slice(0, 110)}</div>}
+                    {proj.bullets && proj.bullets.length > 0 && (
+                      <ul className="list-disc pl-3 mt-1 space-y-0.5 text-[8.5px] text-[#374151]">
+                        {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
                       </ul>
                     )}
                   </div>
@@ -380,13 +502,26 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
             )}
 
             {sortedEducations.length > 0 && (
-              <div>
+              <div className="mb-3">
                 <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Education</div>
                 {sortedEducations.map(edu => (
                   <div key={edu.id} className="mb-2">
                     <div className="text-[9px] font-bold text-[#0f172a]">{edu.school}</div>
                     <div className="text-[8px] text-[#374151]">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")}</div>
                     <div className="text-[7.5px] italic text-[#64748b]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {sortedAchievements.length > 0 && (
+              <div>
+                <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Achievements</div>
+                {sortedAchievements.slice(0, 4).map(ach => (
+                  <div key={ach.id} className="mb-1.5">
+                    <div className="text-[9px] font-bold text-[#0f172a]">{ach.title}</div>
+                    {ach.provider && <div className="text-[8px] text-[#374151]">{ach.provider}</div>}
+                    {ach.date && <div className="text-[7.5px] italic text-[#64748b]">{new Date(ach.date).getFullYear()}</div>}
                   </div>
                 ))}
               </div>
