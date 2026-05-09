@@ -82,7 +82,7 @@ export default function DashboardSidebar() {
         </button>
       </aside>
 
-      <nav className="fixed bottom-0 left-0 z-50 flex h-[72px] w-full items-center gap-1 overflow-x-auto border-t border-border bg-surface/95 px-4 backdrop-blur-xl md:hidden scrollbar-hide">
+      <nav className="fixed bottom-0 left-0 z-40 flex h-[72px] w-full items-center gap-1 overflow-x-auto border-t border-border bg-surface/95 px-4 backdrop-blur-xl md:hidden scrollbar-hide">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.path;

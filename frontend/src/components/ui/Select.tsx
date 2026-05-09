@@ -44,7 +44,7 @@ export function Select({
   }, []);
 
   return (
-    <div className={cn("flex w-full flex-col gap-1.5 relative", isOpen && "z-50")} ref={containerRef}>
+    <div className={cn("flex w-full flex-col gap-1.5 relative", isOpen && "z-[100]")} ref={containerRef}>
       {label && (
         <label htmlFor={selectId} className="text-sm font-medium text-text-secondary">
           {label}
@@ -72,7 +72,7 @@ export function Select({
         </button>
 
         {isOpen && (
-          <div className="absolute left-0 top-[calc(100%+8px)] z-50 max-h-60 w-full overflow-y-auto rounded-[var(--radius-md)] border border-border bg-surface-high p-1 shadow-2xl animate-in fade-in zoom-in-95">
+          <div className="absolute left-0 top-[calc(100%+8px)] z-[100] max-h-60 w-full overflow-y-auto rounded-[var(--radius-md)] border border-border bg-surface-high p-1 shadow-2xl animate-in fade-in zoom-in-95">
             {options.map((option) => (
               <button
                 key={option.value}
