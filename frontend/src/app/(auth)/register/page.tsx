@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register, googleLogin, githubLogin, isLoading, error } = useAuthStore();
+  const { register, googleLogin, githubLogin } = useAuthStore();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -22,6 +22,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
   });
+  const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -32,6 +33,7 @@ export default function RegisterPage() {
     }
 
     try {
+      setIsPending(true);
       await register({
         fullName: form.fullName.trim(),
         username: form.username.trim().toLowerCase(),
@@ -42,11 +44,14 @@ export default function RegisterPage() {
       router.push("/verify");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Registration failed.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   const handleOAuth = async (provider: "google" | "github") => {
     try {
+      setIsPending(true);
       if (provider === "google") {
         const result = await signInWithPopup(auth, googleProvider);
         const idToken = await result.user.getIdToken();
@@ -62,6 +67,8 @@ export default function RegisterPage() {
       if (oauthError.code !== "auth/popup-closed-by-user") {
         toast.error(oauthError.message || "Authentication failed.");
       }
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -74,7 +81,7 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={() => handleOAuth("google")}
-          disabled={isLoading}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 hover:bg-surface-high disabled:opacity-60"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -88,7 +95,7 @@ export default function RegisterPage() {
         <button
           type="button"
           onClick={() => handleOAuth("github")}
-          disabled={isLoading}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 hover:bg-surface-high disabled:opacity-60"
         >
           <FaGithub className="h-4 w-4" />
@@ -108,14 +115,14 @@ export default function RegisterPage() {
           value={form.fullName}
           onChange={(event) => setForm((prev) => ({ ...prev, fullName: event.target.value }))}
           placeholder="Ada Lovelace"
-          disabled={isLoading}
+          disabled={isPending}
         />
         <Input
           label="Username"
           value={form.username}
           onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
           placeholder="adalovescode"
-          disabled={isLoading}
+          disabled={isPending}
         />
         <Input
           label="Email"
@@ -123,7 +130,7 @@ export default function RegisterPage() {
           value={form.email}
           onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
           placeholder="you@example.com"
-          disabled={isLoading}
+          disabled={isPending}
         />
         <Input
           label="Password"
@@ -131,9 +138,9 @@ export default function RegisterPage() {
           value={form.password}
           onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
           placeholder="Create password"
-          disabled={isLoading}
+          disabled={isPending}
         />
-        <Button type="submit" className="w-full" isLoading={isLoading}>
+        <Button type="submit" className="w-full" isLoading={isPending}>
           <UserPlus className="mr-2 h-4 w-4" />
           Create Account
         </Button>

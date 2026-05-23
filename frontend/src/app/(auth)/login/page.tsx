@@ -14,9 +14,10 @@ import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, googleLogin, githubLogin, isLoading, error } = useAuthStore();
+  const { login, googleLogin, githubLogin } = useAuthStore();
 
   const [form, setForm] = useState({ email: "", password: "" });
+  const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -26,16 +27,20 @@ export default function LoginPage() {
     }
 
     try {
+      setIsPending(true);
       await login({ email: form.email.trim(), password: form.password });
       toast.success("Successfully logged in");
       router.push("/dashboard");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Login failed.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   const handleOAuth = async (provider: "google" | "github") => {
     try {
+      setIsPending(true);
       if (provider === "google") {
         const result = await signInWithPopup(auth, googleProvider);
         const idToken = await result.user.getIdToken();
@@ -51,6 +56,8 @@ export default function LoginPage() {
       if (oauthError.code !== "auth/popup-closed-by-user") {
         toast.error(oauthError.message || "Authentication failed.");
       }
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -63,7 +70,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => handleOAuth("google")}
-          disabled={isLoading}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 hover:bg-surface-high disabled:opacity-60"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
@@ -77,7 +84,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => handleOAuth("github")}
-          disabled={isLoading}
+          disabled={isPending}
           className="flex items-center justify-center gap-2 rounded-[var(--radius-md)] border border-border bg-surface px-4 py-3 text-sm font-medium text-text-primary transition-colors hover:border-primary/40 hover:bg-surface-high disabled:opacity-60"
         >
           <FaGithub className="h-4 w-4" />
@@ -99,7 +106,7 @@ export default function LoginPage() {
           onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
           placeholder="you@example.com"
           autoComplete="email"
-          disabled={isLoading}
+          disabled={isPending}
         />
         <Input
           label="Password"
@@ -108,9 +115,9 @@ export default function LoginPage() {
           onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
           placeholder="Enter password"
           autoComplete="current-password"
-          disabled={isLoading}
+          disabled={isPending}
         />
-        <Button type="submit" className="w-full" isLoading={isLoading}>
+        <Button type="submit" className="w-full" isLoading={isPending}>
           <Mail className="mr-2 h-4 w-4" />
           Sign In
         </Button>
