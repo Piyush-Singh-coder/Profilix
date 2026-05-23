@@ -9,6 +9,8 @@ interface CreateEducationInput {
   startDate: string;
   endDate?: string | null;
   isCurrent?: boolean;
+  scoreType?: "CGPA" | "PERCENTAGE" | null;
+  score?: string | null;
   description?: string | null;
   bullets?: string[] | null;
   displayOrder?: number;

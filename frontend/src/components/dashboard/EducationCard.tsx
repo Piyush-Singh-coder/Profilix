@@ -31,10 +31,15 @@ export default function EducationCard({ education, onEdit, onDelete }: Education
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="font-heading text-lg font-bold text-text-primary overflow-hidden text-ellipsis whitespace-normal sm:whitespace-nowrap sm:truncate">{education.school}</h3>
-            {subtitle ? (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary min-w-0">
+            {subtitle || education.score ? (
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-text-secondary min-w-0">
                 <GraduationCap className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{subtitle}</span>
+                {subtitle && <span className="truncate">{subtitle}</span>}
+                {education.score && (
+                  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary shrink-0">
+                    {education.scoreType || "CGPA"}: {education.score}
+                  </span>
+                )}
               </p>
             ) : null}
             <p className="mt-1 flex items-center gap-1.5 text-xs text-text-secondary">

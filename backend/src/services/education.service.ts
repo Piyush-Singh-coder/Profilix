@@ -22,6 +22,8 @@ export const createEducation = async (userId: string, data: CreateEducationInput
       startDate: new Date(data.startDate),
       endDate: data.endDate ? new Date(data.endDate) : null,
       isCurrent: data.isCurrent ?? false,
+      scoreType: data.scoreType || null,
+      score: data.score || null,
       description: data.description || null,
       bullets: data.bullets && data.bullets.length > 0 ? data.bullets : Prisma.DbNull,
       displayOrder: data.displayOrder ?? count,
@@ -44,6 +46,8 @@ export const updateEducation = async (userId: string, educationId: string, data:
       endDate:
         data.endDate !== undefined ? (data.endDate ? new Date(data.endDate) : null) : edu.endDate,
       isCurrent: data.isCurrent ?? edu.isCurrent,
+      scoreType: data.scoreType !== undefined ? data.scoreType || null : edu.scoreType,
+      score: data.score !== undefined ? data.score || null : edu.score,
       description: data.description !== undefined ? data.description || null : edu.description,
       bullets:
         data.bullets !== undefined

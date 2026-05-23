@@ -5,6 +5,7 @@ export const updateProfileSchema = z.object({
   headline: z.string().max(150).trim().optional().nullable(),
   bio: z.string().max(2000).trim().optional().nullable(),
   location: z.string().max(100).trim().optional().nullable(),
+  phoneNumber: z.string().max(30).trim().optional().nullable(),
   status: z
     .enum([
       "LOOKING_FOR_ROLES",

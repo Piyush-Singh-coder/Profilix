@@ -239,7 +239,8 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
 
   const eduHtml = educations.map(edu => {
     const degree = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ");
-    return `<div class="s-label">${escapeHtml(edu.school)}</div>${degree ? `<div class="s-value">${escapeHtml(degree)}</div>` : ""}<div class="s-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>`;
+    const scoreHtml = edu.score ? `<div class="s-value" style="font-size: 8pt; color: #94a3b8; margin-top: 2px;">${escapeHtml(edu.scoreType || "CGPA")}: ${escapeHtml(edu.score)}</div>` : "";
+    return `<div class="s-label">${escapeHtml(edu.school)}</div>${degree ? `<div class="s-value">${escapeHtml(degree)}</div>` : ""}${scoreHtml}<div class="s-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>`;
   }).join("");
 
   const achHtml = achievements.length ? `<ul>${achievements.map(a => {
@@ -362,6 +363,7 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
           <div class="s-section">Contact</div>
           <div class="s-label">Email</div>
           <a href="mailto:${user.email}" class="s-link">${escapeHtml(user.email)}</a>
+          ${user.profile?.phoneNumber ? `<div class="s-label" style="margin-top: 10px;">Phone</div><div class="s-value" style="margin-bottom: 10px;">${escapeHtml(user.profile.phoneNumber)}</div>` : ""}
           ${socialHtml}
 
           ${eduHtml ? `<div class="s-section">Education</div>${eduHtml}` : ""}
@@ -388,12 +390,13 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     .map((s) => {
       const platform = s.platform.replace(/_/g, " ");
       const label = platform.charAt(0) + platform.slice(1).toLowerCase();
-      return `<span style="white-space: nowrap;"><strong>${escapeHtml(label)}:</strong> <a href="${s.url}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a></span>`;
+      return `<span style="white-space: nowrap;"><strong>${escapeHtml(label)}:</strong> <a href="${s.url}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a></span>`;
     });
 
-  // Header links: Email | Socials | Portfolio (if any)
+  // Header links: Email | Phone | Socials | Portfolio (if any)
   const headerLinks = [
-    `<span style="white-space: nowrap;"><a href="mailto:${user.email}" style="color: inherit; text-decoration: none;">${escapeHtml(user.email)}</a></span>`,
+    `<span style="white-space: nowrap;"><a href="mailto:${user.email}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(user.email)}</a></span>`,
+    profile?.phoneNumber ? `<span style="white-space: nowrap;">${escapeHtml(profile.phoneNumber)}</span>` : "",
     ...formattedSocials
   ]
     .filter(Boolean)
@@ -457,7 +460,11 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
 
   const eduHtml = educations
     .map((edu) => {
-      const subtitle = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ");
+      const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
+      if (edu.score) {
+        subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
+      }
+      const subtitle = subtitleParts.filter(Boolean).join(" | ");
       const bullets = Array.isArray(edu.bullets) ? (edu.bullets as string[]) : [];
       return `
         <div class="item">
@@ -482,8 +489,8 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     .map((p) => {
       const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
       const links = [];
-      if (p.liveUrl) links.push(`<strong>Live Demo:</strong> <a href="${p.liveUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
-      if (p.repoUrl) links.push(`<strong>GitHub:</strong> <a href="${p.repoUrl}" style="color: inherit; text-decoration: none;">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
+      if (p.liveUrl) links.push(`<strong>Live Demo:</strong> <a href="${p.liveUrl}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
+      if (p.repoUrl) links.push(`<strong>GitHub:</strong> <a href="${p.repoUrl}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(cleanUrl(p.repoUrl))}</a>`);
       return `
         <div class="item">
           <div class="row">
@@ -519,13 +526,13 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
         * { box-sizing: border-box; }
         body {
           font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-          font-size: 9pt;
+          font-size: 9.5pt;
           line-height: 1.25;
           color: #111;
           margin: 0;
         }
         .name {
-          font-size: 18pt;
+          font-size: 19.5pt;
           font-weight: 700;
           letter-spacing: -0.5px;
           margin: 0;
@@ -534,13 +541,13 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
         .contact { 
           margin-top: 4px; 
           color: #333; 
-          font-size: 9pt; 
+          font-size: 9.5pt; 
           text-align: center;
         }
-        .divider { height: 1px; background: #ddd; margin: 8px 0 10px; }
-        .section { margin-bottom: 10px; }
+        .divider { height: 1.5px; background: #222; margin: 6px 0 8px; }
+        .section { margin-bottom: 6.5pt; }
         .section-title {
-          font-size: 10pt;
+          font-size: 10.5pt;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.8px;
@@ -548,14 +555,14 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
           padding-bottom: 2px;
           margin-bottom: 5px;
         }
-        .item { margin-bottom: 6px; }
+        .item { margin-bottom: 4pt; }
         .row { display: flex; justify-content: space-between; gap: 10px; }
         .left { flex: 1; min-width: 0; }
-        .right { white-space: nowrap; color: #444; font-size: 9pt; }
-        .item-title { font-weight: 700; font-size: 9.8pt; }
-        .item-subtitle { color: #222; margin-top: 1px; font-size: 9pt; font-weight: 500; }
+        .right { white-space: nowrap; color: #444; font-size: 9.5pt; }
+        .item-title { font-weight: 700; font-size: 10.2pt; }
+        .item-subtitle { color: #222; margin-top: 1px; font-size: 9.5pt; font-weight: 500; }
         .skill-row { margin-bottom: 2px; }
-        .muted { color: #444; margin-top: 1px; font-size: 9pt; }
+        .muted { color: #444; margin-top: 1px; font-size: 9.5pt; }
         ul { margin: 6px 0 0 0; padding-left: 15px; }
         li { margin: 1px 0; }
       </style>
@@ -618,8 +625,9 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   });
   const headerLinks = [
     `<a href="mailto:${user.email}" class="hlink">${escapeHtml(user.email)}</a>`,
+    profile?.phoneNumber ? `<span class="hlink">${escapeHtml(profile.phoneNumber)}</span>` : "",
     ...socialParts,
-  ].join(" &nbsp;|&nbsp; ");
+  ].filter(Boolean).join(" &nbsp;|&nbsp; ");
 
   const sec = (title: string, body: string) =>
     `<div class="sec"><div class="sec-title">${escapeHtml(title)}</div><div class="sec-body">${body}</div></div>`;
@@ -638,7 +646,11 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   }).join("");
 
   const eduHtml = educations.map((edu) => {
-    const subtitle = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ");
+    const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
+    if (edu.score) {
+      subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
+    }
+    const subtitle = subtitleParts.filter(Boolean).join(" | ");
     return `
       <div class="item">
         <div class="item-header">
@@ -683,25 +695,25 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   <style>
     @page { size: Letter; margin: 0.3in 0.45in; }
     * { box-sizing: border-box; }
-    body { font-family: "Georgia", "Times New Roman", serif; font-size: 9pt; color: #1a1a1a; margin: 0; line-height: 1.25; }
-    .name { font-size: 21pt; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 2px 0; text-align: center; font-family: Arial, Helvetica, sans-serif; }
-    .contact-bar { text-align: center; font-size: 8pt; color: #444; margin-bottom: 12px; font-family: Arial, sans-serif; }
-    .hlink { color: #1a1a1a; text-decoration: none; }
-    .top-rule { border: none; border-top: 2px solid #1a1a1a; margin: 0 0 16px 0; }
-    .sec { margin-bottom: 16px; }
-    .sec-title { font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid #aaa; padding-bottom: 1px; margin-bottom: 6px; }
-    .item { margin-bottom: 10px; }
+    body { font-family: "Georgia", "Times New Roman", serif; font-size: 9.5pt; color: #1a1a1a; margin: 0; line-height: 1.3; }
+    .name { font-size: 22.5pt; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 2px 0; text-align: center; font-family: Arial, Helvetica, sans-serif; }
+    .contact-bar { text-align: center; font-size: 8.7pt; color: #444; margin-bottom: 12px; font-family: Arial, sans-serif; }
+    .hlink { color: #3b82f6; text-decoration: none; }
+    .top-rule { border: none; border-top: 2px solid #1a1a1a; margin: 0 0 9pt 0; }
+    .sec { margin-bottom: 8.5pt; }
+    .sec-title { font-family: Arial, sans-serif; font-size: 10.2pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; border-bottom: 1px solid #aaa; padding-bottom: 1px; margin-bottom: 6px; }
+    .item { margin-bottom: 6px; }
     .item-header { display: flex; justify-content: space-between; align-items: baseline; }
-    .item-company { font-family: Arial, sans-serif; font-size: 9.5pt; font-weight: 700; }
-    .item-date { font-family: Arial, sans-serif; font-size: 8pt; color: #555; white-space: nowrap; margin-left: 8px; }
-    .item-role { font-style: italic; font-size: 8.5pt; color: #333; margin-top: 0px; }
+    .item-company { font-family: Arial, sans-serif; font-size: 10.2pt; font-weight: 700; }
+    .item-date { font-family: Arial, sans-serif; font-size: 8.7pt; color: #555; white-space: nowrap; margin-left: 8px; }
+    .item-role { font-style: italic; font-size: 9.2pt; color: #333; margin-top: 0px; }
     .item-loc { font-style: normal; color: #666; }
-    .item-links { font-family: Arial, sans-serif; font-size: 7.5pt; color: #444; margin-top: 1px; }
+    .item-links { font-family: Arial, sans-serif; font-size: 8.2pt; color: #444; margin-top: 1px; }
     ul { margin: 3px 0 0 0; padding-left: 15px; }
-    li { margin-bottom: 1px; font-size: 8.5pt; line-height: 1.3; }
-    .skill-row { margin-bottom: 2px; font-size: 8.5pt; font-family: Arial, sans-serif; line-height: 1.3; }
+    li { margin-bottom: 1px; font-size: 9.2pt; line-height: 1.3; }
+    .skill-row { margin-bottom: 2px; font-size: 9.2pt; font-family: Arial, sans-serif; line-height: 1.3; }
     .skill-label { font-weight: 700; }
-    .inline-link { color: #333; text-decoration: underline; }
+    .inline-link { color: #3b82f6; text-decoration: none; }
     .ach-title { font-weight: 600; font-size: 8.5pt; font-family: Arial, sans-serif; }
     .ach-date { color: #666; font-size: 8pt; }
     .summary-text { font-size: 8.5pt; color: #333; line-height: 1.4; }
@@ -759,16 +771,21 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
   // Contact sidebar items
   const contactHtml = [
     `<div class="r-contact-item"><span class="r-contact-icon">✉</span><span>${escapeHtml(user.email)}</span></div>`,
+    profile?.phoneNumber ? `<div class="r-contact-item"><span class="r-contact-icon">📞</span><span>${escapeHtml(profile.phoneNumber)}</span></div>` : "",
     ...socialLinks.map(s => {
       const platform = s.platform.replace(/_/g, " ");
       const label = platform.charAt(0) + platform.slice(1).toLowerCase();
       return `<div class="r-contact-item"><span class="r-contact-icon">↗</span><span>${escapeHtml(label)}: ${escapeHtml(cleanUrl(s.url))}</span></div>`;
     })
-  ].join("");
+  ].filter(Boolean).join("");
 
   // Education (right column)
   const eduRightHtml = educations.map(edu => {
-    const degree = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ");
+    const degreeParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")];
+    if (edu.score) {
+      degreeParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
+    }
+    const degree = degreeParts.filter(Boolean).join(" | ");
     return `<div class="r-edu-item">
       <div class="r-edu-school">${escapeHtml(edu.school)}</div>
       ${degree ? `<div class="r-edu-degree">${escapeHtml(degree)}</div>` : ""}
@@ -952,10 +969,16 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
   // Email
   headerNodes.push(
     new ExternalHyperlink({
-      children: [new TextRun({ text: user.email, size: 18, color: "000000" })],
+      children: [new TextRun({ text: user.email, size: 18, color: "3B82F6" })],
       link: `mailto:${user.email}`,
     })
   );
+
+  // Phone
+  if (profile?.phoneNumber) {
+    headerNodes.push(new TextRun({ text: " | ", size: 18 }));
+    headerNodes.push(new TextRun({ text: profile.phoneNumber, size: 18 }));
+  }
 
   socialLinks.forEach((s) => {
     headerNodes.push(new TextRun({ text: " | ", size: 18 }));
@@ -964,7 +987,7 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
     headerNodes.push(new TextRun({ text: `${label}: `, size: 18 }));
     headerNodes.push(
       new ExternalHyperlink({
-        children: [new TextRun({ text: cleanUrl(s.url), size: 18, color: "000000" })],
+        children: [new TextRun({ text: cleanUrl(s.url), size: 18, color: "3B82F6" })],
         link: s.url,
       })
     );
@@ -1030,7 +1053,11 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
   if (educations.length) {
     addHeading("EDUCATION");
     educations.forEach((edu) => {
-      const subtitle = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ");
+      const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
+      if (edu.score) {
+        subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
+      }
+      const subtitle = subtitleParts.filter(Boolean).join(" | ");
       const bullets = Array.isArray(edu.bullets) ? (edu.bullets as string[]) : [];
       
       children.push(
@@ -1071,7 +1098,7 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       if (p.liveUrl) {
         linkNodes.push(new TextRun({ text: "Live Demo: ", size: 18, bold: true }));
         linkNodes.push(new ExternalHyperlink({
-          children: [new TextRun({ text: cleanUrl(p.liveUrl), size: 18, color: "000000" })],
+          children: [new TextRun({ text: cleanUrl(p.liveUrl), size: 18, color: "3B82F6" })],
           link: p.liveUrl,
         }));
       }
@@ -1079,7 +1106,7 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       if (p.repoUrl) {
         linkNodes.push(new TextRun({ text: "GitHub: ", size: 18, bold: true }));
         linkNodes.push(new ExternalHyperlink({
-          children: [new TextRun({ text: cleanUrl(p.repoUrl), size: 18, color: "000000" })],
+          children: [new TextRun({ text: cleanUrl(p.repoUrl), size: 18, color: "3B82F6" })],
           link: p.repoUrl,
         }));
       }

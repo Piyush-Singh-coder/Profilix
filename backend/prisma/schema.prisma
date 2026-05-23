@@ -44,6 +44,7 @@ model Profile {
   status           ProfileStatus      @default(NOT_AVAILABLE)
   statusCustomText String?            @map("status_custom_text") @db.VarChar(100)
   location         String?            @db.VarChar(100)
+  phoneNumber      String?            @map("phone_number") @db.VarChar(30)
   isPublic         Boolean            @default(true) @map("is_public")
   theme            ProfileTheme       @default(DARK)
   cardTheme        CardTheme          @default(GLASS) @map("card_theme")
@@ -231,6 +232,8 @@ model Education {
   startDate    DateTime  @map("start_date") @db.Date
   endDate      DateTime? @map("end_date") @db.Date
   isCurrent    Boolean   @default(false) @map("is_current")
+  scoreType    String?   @map("score_type") @db.VarChar(20)
+  score        String?   @map("score") @db.VarChar(20)
   description  String?
   bullets      Json?
   displayOrder Int       @default(0) @map("display_order")

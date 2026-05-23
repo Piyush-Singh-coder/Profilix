@@ -43,6 +43,7 @@ export function IdentityEditor() {
     headline: "",
     bio: "",
     location: "",
+    phoneNumber: "",
     status: "NOT_AVAILABLE" as ProfileStatus,
     statusCustomText: "",
   });
@@ -90,6 +91,7 @@ export function IdentityEditor() {
       headline: profile.headline || "",
       bio: profile.bio || "",
       location: profile.location || "",
+      phoneNumber: profile.phoneNumber || "",
       status: profile.status,
       statusCustomText: profile.statusCustomText || "",
     });
@@ -102,6 +104,7 @@ export function IdentityEditor() {
       formData.headline !== (profile.headline || "") ||
       formData.bio !== (profile.bio || "") ||
       formData.location !== (profile.location || "") ||
+      formData.phoneNumber !== (profile.phoneNumber || "") ||
       formData.status !== profile.status ||
       formData.statusCustomText !== (profile.statusCustomText || "")
     );
@@ -114,6 +117,7 @@ export function IdentityEditor() {
         headline: formData.headline.trim() || null,
         bio: formData.bio.trim() || null,
         location: formData.location.trim() || null,
+        phoneNumber: formData.phoneNumber.trim() || null,
         status: formData.status,
         statusCustomText: formData.status === "CUSTOM" ? formData.statusCustomText.trim() || null : null,
       });
@@ -199,6 +203,12 @@ export function IdentityEditor() {
             value={formData.location}
             onChange={(event) => setFormData((prev) => ({ ...prev, location: event.target.value }))}
             placeholder="Bengaluru, IN"
+          />
+          <Input
+            label="Phone Number"
+            value={formData.phoneNumber}
+            onChange={(event) => setFormData((prev) => ({ ...prev, phoneNumber: event.target.value }))}
+            placeholder="+91 98765 43210"
           />
           <div className="grid gap-4 md:grid-cols-2">
               <Select

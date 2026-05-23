@@ -45,6 +45,7 @@ export interface Profile {
   status: ProfileStatus;
   statusCustomText: string | null;
   location: string | null;
+  phoneNumber: string | null;
   isPublic: boolean;
   theme: ProfileTheme;
   cardTheme?: CardTheme;
@@ -117,6 +118,8 @@ export interface Education {
   startDate: string;
   endDate: string | null;
   isCurrent: boolean;
+  scoreType: "CGPA" | "PERCENTAGE" | null;
+  score: string | null;
   description: string | null;
   bullets: string[] | null;
   displayOrder: number;

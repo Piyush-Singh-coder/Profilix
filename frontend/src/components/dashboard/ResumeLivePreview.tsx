@@ -105,6 +105,12 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
             <div className="text-[9px] font-bold uppercase tracking-widest text-[#64748b] mt-4 mb-2">Contact</div>
             <div className="text-[9px] font-semibold text-[#94a3b8] mb-0.5">Email</div>
             <div className="text-[9px] mb-3 truncate text-[#38bdf8]">{user?.email}</div>
+            {profile?.phoneNumber && (
+              <>
+                <div className="text-[9px] font-semibold text-[#94a3b8] mb-0.5">Phone</div>
+                <div className="text-[9px] mb-3 truncate text-[#38bdf8]">{profile.phoneNumber}</div>
+              </>
+            )}
             
             {links.filter(l => l.visibleInDefault).map(link => {
               const platform = link.platform.replace(/_/g, " ");
@@ -125,6 +131,11 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
                     <div className="text-[9px] font-semibold text-[#94a3b8] mb-0.5">{edu.school}</div>
                     <div className="text-[9.5px] text-[#e2e8f0] mb-1">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")}</div>
                     <div className="text-[8.5px] italic text-[#475569]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
+                    {edu.score && (
+                      <div className="text-[8.5px] font-semibold text-[#94a3b8] mt-0.5">
+                        {edu.scoreType || "CGPA"}: {edu.score}
+                      </div>
+                    )}
                   </div>
                 ))}
               </>
@@ -215,41 +226,42 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
       {/* -------------------- ATS TEMPLATE (1-COLUMN) -------------------- */}
       {templateType === "ATS" && (
-        <div className="absolute inset-0 p-8 md:p-12 flex flex-col gap-3 text-[#111] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Arial, sans-serif' }}>
+        <div className="absolute inset-0 p-8 md:p-12 flex flex-col gap-3 text-[#111] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12.7px', fontFamily: 'Arial, sans-serif' }}>
           
           <div className="text-center">
             <h1 className="text-3xl font-bold tracking-tight mb-1">{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[12px] text-[#333] flex flex-wrap justify-center items-center gap-x-2 gap-y-1">
-              <span>{user?.email}</span>
+            <div className="text-[13px] text-[#333] flex flex-wrap justify-center items-center gap-x-2 gap-y-1">
+              <span><a href={`mailto:${user?.email}`} className="text-[#3b82f6]" style={{ textDecoration: 'none' }}>{user?.email}</a></span>
+              {profile?.phoneNumber && <span> | Phone: {profile.phoneNumber}</span>}
               {links.filter(l => l.visibleInDefault).map(link => (
-                <span key={link.id}> | {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}</span>
+                <span key={link.id}> | {link.platform.replace(/_/g, " ")}: <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-[#3b82f6]" style={{ textDecoration: 'none' }}>{cleanUrl(link.url)}</a></span>
               ))}
             </div>
           </div>
           
-          <div className="h-[1px] bg-[#ddd] my-1"></div>
+          <div className="h-[1.5px] bg-[#222] my-1"></div>
 
           {sortedExperiences.length === 0 && profile?.bio && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-1.5">Professional Summary</div>
-              <div className="text-[10px] text-[#444] leading-relaxed">{profile.bio}</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-1.5">Professional Summary</div>
+              <div className="text-[11px] text-[#444] leading-relaxed">{profile.bio}</div>
             </div>
           )}
 
           {sortedExperiences.length > 0 && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Experience</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Experience</div>
               {sortedExperiences.map((exp) => (
                 <div key={exp.id} className="mb-2">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <div className="text-[11px] font-bold">{exp.role}</div>
-                    <div className="text-[10px] text-[#444]">{range(exp.startDate, exp.endDate, exp.isCurrent)}</div>
+                    <div className="text-[12px] font-bold">{exp.role}</div>
+                    <div className="text-[11px] text-[#444]">{range(exp.startDate, exp.endDate, exp.isCurrent)}</div>
                   </div>
-                  <div className="text-[10px] font-medium text-[#222] mb-1">
+                  <div className="text-[11px] font-medium text-[#222] mb-1">
                     {exp.company}{exp.location ? ` • ${exp.location}` : ""}
                   </div>
                   {exp.bullets && exp.bullets.length > 0 && (
-                    <ul className="list-disc pl-4 space-y-0.5 text-[10px] text-[#444] leading-relaxed">
+                    <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#444] leading-relaxed">
                       {exp.bullets.map((bullet, i) => <li key={i}>{bullet}</li>)}
                     </ul>
                   )}
@@ -260,15 +272,16 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
           {sortedEducations.length > 0 && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Education</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Education</div>
               {sortedEducations.map((edu) => (
                 <div key={edu.id} className="mb-2">
                   <div className="flex justify-between items-baseline mb-0.5">
-                    <div className="text-[11px] font-bold">{edu.school}</div>
-                    <div className="text-[10px] text-[#444]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
+                    <div className="text-[12px] font-bold">{edu.school}</div>
+                    <div className="text-[11px] text-[#444]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
                   </div>
-                  <div className="text-[10px] font-medium text-[#222]">
+                  <div className="text-[11px] font-medium text-[#222]">
                     {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")}
+                    {edu.score && ` (${edu.scoreType || "CGPA"}: ${edu.score})`}
                   </div>
                 </div>
               ))}
@@ -277,9 +290,9 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
           {Object.keys(groupedSkills).length > 0 && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-1.5">Technical Skills</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-1.5">Technical Skills</div>
               {Object.entries(groupedSkills).map(([label, names]) => (
-                <div key={label} className="text-[10px] mb-0.5">
+                <div key={label} className="text-[11px] mb-0.5">
                   <strong className="text-[#111]">{label}:</strong> <span className="text-[#444]">{names.join(", ")}</span>
                 </div>
               ))}
@@ -288,16 +301,16 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           
           {sortedProjects.length > 0 && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Projects</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Projects</div>
               {sortedProjects.slice(0, 3).map(proj => (
                 <div key={proj.id} className="mb-2">
                   <div className="flex justify-between items-baseline">
-                    <div className="text-[11px] font-bold">{proj.title}</div>
-                    {proj.techTags && <div className="text-[9px] text-[#555]">{proj.techTags.slice(0, 3).join(" · ")}</div>}
+                    <div className="text-[12px] font-bold">{proj.title}</div>
+                    {proj.techTags && <div className="text-[10px] text-[#555]">{proj.techTags.slice(0, 3).join(" · ")}</div>}
                   </div>
-                  {proj.description && <div className="text-[10px] text-[#444] leading-relaxed">{proj.description.slice(0, 130)}</div>}
+                  {proj.description && <div className="text-[11px] text-[#444] leading-relaxed">{proj.description.slice(0, 130)}</div>}
                   {proj.bullets && proj.bullets.length > 0 && (
-                    <ul className="list-disc pl-4 space-y-0.5 text-[10px] text-[#444] leading-relaxed">
+                    <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-[#444] leading-relaxed">
                       {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
                     </ul>
                   )}
@@ -308,14 +321,14 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
           {sortedAchievements.length > 0 && (
             <div className="mb-2">
-              <div className="text-[11px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Achievements</div>
+              <div className="text-[12px] font-bold uppercase tracking-wide border-b border-[#eee] pb-0.5 mb-2">Achievements</div>
               {sortedAchievements.slice(0, 4).map(ach => (
                 <div key={ach.id} className="flex justify-between items-baseline mb-1">
                   <div>
-                    <span className="text-[10px] font-bold">{ach.title}</span>
-                    {ach.provider && <span className="text-[9px] text-[#444]"> · {ach.provider}</span>}
+                    <span className="text-[11px] font-bold">{ach.title}</span>
+                    {ach.provider && <span className="text-[10px] text-[#444]"> · {ach.provider}</span>}
                   </div>
-                  <div className="text-[9px] text-[#555] whitespace-nowrap">{ach.date ? new Date(ach.date).getFullYear() : ""}</div>
+                  <div className="text-[10px] text-[#555] whitespace-nowrap">{ach.date ? new Date(ach.date).getFullYear() : ""}</div>
                 </div>
               ))}
             </div>
@@ -323,32 +336,34 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
 
         </div>
       )}
+
       {/* -------------------- MODERN TEMPLATE (serif, clean) -------------------- */}
       {templateType === "MODERN" && (
-        <div className="absolute inset-0 p-8 md:p-10 flex flex-col gap-5 text-[#1a1a1a] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12px', fontFamily: 'Georgia, serif' }}>
+        <div className="absolute inset-0 p-8 md:p-10 flex flex-col gap-2.5 text-[#1a1a1a] bg-white overflow-y-auto custom-scrollbar" style={{ fontSize: '12.7px', fontFamily: 'Georgia, serif' }}>
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>{profile?.displayName || user?.fullName || "Your Name"}</h1>
-            <div className="text-[11px] text-[#444] flex flex-wrap justify-center items-center gap-x-2">
-              <span>{user?.email}</span>
+            <div className="text-[12px] text-[#444] flex flex-wrap justify-center items-center gap-x-2">
+              <span><a href={`mailto:${user?.email}`} className="text-[#3b82f6]" style={{ textDecoration: 'none' }}>{user?.email}</a></span>
+              {profile?.phoneNumber && <span>| {profile.phoneNumber}</span>}
               {links.filter(l => l.visibleInDefault).map(link => (
-                <span key={link.id}>| {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}</span>
+                <span key={link.id}>| {link.platform.replace(/_/g, " ")}: <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-[#3b82f6]" style={{ textDecoration: 'none' }}>{cleanUrl(link.url)}</a></span>
               ))}
             </div>
           </div>
-          <div className="border-t-2 border-[#1a1a1a] mb-2" />
+          <div className="border-t-2 border-[#1a1a1a] mb-1.5" />
 
           {sortedExperiences.length > 0 && (
-            <div className="mb-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-3" style={{ fontFamily: 'Arial, sans-serif' }}>Experience</div>
+            <div className="mb-2">
+              <div className="text-[12px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Experience</div>
               {sortedExperiences.map(exp => (
-                <div key={exp.id} className="mb-4">
+                <div key={exp.id} className="mb-2">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{exp.company}</span>
-                    <span className="text-[9px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{range(exp.startDate, exp.endDate, exp.isCurrent)}</span>
+                    <span className="text-[12px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{exp.company}</span>
+                    <span className="text-[10px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{range(exp.startDate, exp.endDate, exp.isCurrent)}</span>
                   </div>
-                  <div className="text-[10px] italic text-[#333]">{exp.role}{exp.location ? ` · ${exp.location}` : ""}</div>
+                  <div className="text-[11px] italic text-[#333]">{exp.role}{exp.location ? ` · ${exp.location}` : ""}</div>
                   {exp.bullets && exp.bullets.length > 0 && (
-                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[9.5px] text-[#333] leading-relaxed">
+                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[10.5px] text-[#333] leading-relaxed">
                       {exp.bullets.map((b, i) => <li key={i}>{b}</li>)}
                     </ul>
                   )}
@@ -358,25 +373,28 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           )}
 
           {sortedEducations.length > 0 && (
-            <div className="mb-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-4" style={{ fontFamily: 'Arial, sans-serif' }}>Education</div>
+            <div className="mb-2">
+              <div className="text-[12px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2.5" style={{ fontFamily: 'Arial, sans-serif' }}>Education</div>
               {sortedEducations.map(edu => (
-                <div key={edu.id} className="mb-3">
+                <div key={edu.id} className="mb-1.5">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{edu.school}</span>
-                    <span className="text-[9px] text-[#555]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</span>
+                    <span className="text-[12px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{edu.school}</span>
+                    <span className="text-[10px] text-[#555]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</span>
                   </div>
-                  <div className="text-[10px] italic text-[#444]">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")}</div>
+                  <div className="text-[11px] italic text-[#444]">
+                    {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")}
+                    {edu.score && ` (${edu.scoreType || "CGPA"}: ${edu.score})`}
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
           {Object.keys(groupedSkills).length > 0 && (
-            <div className="mb-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Technical Skills</div>
+            <div className="mb-2">
+              <div className="text-[12px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-1.5" style={{ fontFamily: 'Arial, sans-serif' }}>Technical Skills</div>
               {Object.entries(groupedSkills).map(([label, names]) => (
-                <div key={label} className="text-[10px] mb-0.5">
+                <div key={label} className="text-[11px] mb-0.5">
                   <strong style={{ fontFamily: 'Arial, sans-serif' }}>{label}:</strong> <span className="text-[#444]">{names.join(", ")}</span>
                 </div>
               ))}
@@ -384,17 +402,17 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           )}
 
           {sortedProjects.length > 0 && (
-            <div className="mb-4">
-              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-3" style={{ fontFamily: 'Arial, sans-serif' }}>Projects</div>
+            <div className="mb-2">
+              <div className="text-[12px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Projects</div>
               {sortedProjects.slice(0, 3).map(proj => (
-                <div key={proj.id} className="mb-3">
+                <div key={proj.id} className="mb-1.5">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.title}</span>
-                    {proj.techTags && <span className="text-[9px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.techTags.slice(0, 3).join(" · ")}</span>}
+                    <span className="text-[12px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.title}</span>
+                    {proj.techTags && <span className="text-[10px] text-[#555]" style={{ fontFamily: 'Arial, sans-serif' }}>{proj.techTags.slice(0, 3).join(" · ")}</span>}
                   </div>
-                  {proj.description && <div className="text-[9.5px] text-[#333] mt-0.5 leading-relaxed">{proj.description.slice(0, 140)}</div>}
+                  {proj.description && <div className="text-[10.5px] text-[#333] mt-0.5 leading-relaxed">{proj.description.slice(0, 140)}</div>}
                   {proj.bullets && proj.bullets.length > 0 && (
-                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[9.5px] text-[#333] leading-relaxed">
+                    <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[10.5px] text-[#333] leading-relaxed">
                       {proj.bullets.slice(0, 2).map((b, i) => <li key={i}>{b}</li>)}
                     </ul>
                   )}
@@ -404,12 +422,12 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
           )}
 
           {sortedAchievements.length > 0 && (
-            <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-2" style={{ fontFamily: 'Arial, sans-serif' }}>Achievements</div>
+            <div className="mb-2">
+              <div className="text-[12px] font-bold uppercase tracking-wider border-b border-[#aaa] pb-0.5 mb-1.5" style={{ fontFamily: 'Arial, sans-serif' }}>Achievements</div>
               {sortedAchievements.slice(0, 4).map(ach => (
                 <div key={ach.id} className="flex justify-between items-baseline mb-1">
-                  <span className="text-[10px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{ach.title}{ach.provider ? ` · ${ach.provider}` : ""}</span>
-                  <span className="text-[9px] text-[#555]">{ach.date ? new Date(ach.date).getFullYear() : ""}</span>
+                  <span className="text-[11px] font-bold" style={{ fontFamily: 'Arial, sans-serif' }}>{ach.title}{ach.provider ? ` · ${ach.provider}` : ""}</span>
+                  <span className="text-[10px] text-[#555]">{ach.date ? new Date(ach.date).getFullYear() : ""}</span>
                 </div>
               ))}
             </div>
@@ -480,6 +498,7 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
             <div className="mb-3">
               <div className="text-[9px] font-black uppercase tracking-wide text-[#0f172a] border-b-2 pb-1 mb-2" style={{ borderColor: primaryColor }}>Contact</div>
               <div className="text-[8.5px] text-[#374151] mb-1">✉ {user?.email}</div>
+              {profile?.phoneNumber && <div className="text-[8.5px] text-[#374151] mb-1">📞 {profile.phoneNumber}</div>}
               {links.filter(l => l.visibleInDefault).map(link => (
                 <div key={link.id} className="text-[8.5px] text-[#374151] mb-1">
                   ↗ {link.platform.replace(/_/g, " ")}: {cleanUrl(link.url)}
@@ -509,6 +528,11 @@ export function ResumeLivePreview({ templateType }: ResumeLivePreviewProps) {
                     <div className="text-[9px] font-bold text-[#0f172a]">{edu.school}</div>
                     <div className="text-[8px] text-[#374151]">{[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")}</div>
                     <div className="text-[7.5px] italic text-[#64748b]">{range(edu.startDate, edu.endDate, edu.isCurrent)}</div>
+                    {edu.score && (
+                      <div className="text-[8px] text-[#374151] font-semibold">
+                        {edu.scoreType || "CGPA"}: {edu.score}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

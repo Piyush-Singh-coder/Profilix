@@ -13,6 +13,8 @@ export const createEducationSchema = z.object({
     .refine((d) => !d || !isNaN(Date.parse(d)), "Invalid end date format")
     .optional(),
   isCurrent: z.boolean().default(false),
+  scoreType: z.enum(["CGPA", "PERCENTAGE"]).optional().nullable(),
+  score: z.string().max(20).trim().optional().nullable(),
   description: z.string().max(1000).trim().optional(),
   bullets: z.array(z.string().max(300).trim()).max(10).optional(),
   displayOrder: z.number().int().min(0).optional(),

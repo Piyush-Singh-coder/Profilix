@@ -20,6 +20,7 @@ import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Switch } from "@/components/ui/Switch";
 import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
 import { useEducationStore } from "@/store/useEducationStore";
 import { Education } from "@/types";
 
@@ -30,6 +31,8 @@ interface EducationFormState {
   startDate: string;
   endDate: string;
   isCurrent: boolean;
+  scoreType: "CGPA" | "PERCENTAGE";
+  score: string;
   description: string;
   bullets: string;
 }
@@ -41,6 +44,8 @@ const EMPTY_FORM: EducationFormState = {
   startDate: "",
   endDate: "",
   isCurrent: false,
+  scoreType: "CGPA",
+  score: "",
   description: "",
   bullets: "",
 };
@@ -84,6 +89,8 @@ export function EducationEditor() {
       startDate: education.startDate ? education.startDate.split("T")[0] : "",
       endDate: education.endDate ? education.endDate.split("T")[0] : "",
       isCurrent: education.isCurrent || false,
+      scoreType: education.scoreType || "CGPA",
+      score: education.score || "",
       description: education.description || "",
       bullets: (education.bullets || []).join("\n"),
     });
@@ -108,6 +115,8 @@ export function EducationEditor() {
       startDate: formState.startDate,
       endDate: formState.isCurrent ? undefined : formState.endDate || undefined,
       isCurrent: formState.isCurrent,
+      scoreType: formState.score.trim() ? formState.scoreType : null,
+      score: formState.score.trim() || null,
       description: formState.description.trim() || undefined,
       bullets: payloadBullets.length > 0 ? payloadBullets : undefined,
     };
@@ -256,6 +265,23 @@ export function EducationEditor() {
                 value={formState.fieldOfStudy}
                 onChange={(event) => setFormState((prev) => ({ ...prev, fieldOfStudy: event.target.value }))}
                 placeholder="Computer Science"
+              />
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Select
+                label="Grading System"
+                value={formState.scoreType}
+                onChange={(value) => setFormState((prev) => ({ ...prev, scoreType: value as "CGPA" | "PERCENTAGE" }))}
+                options={[
+                  { value: "CGPA", label: "CGPA (e.g., 9.5/10)" },
+                  { value: "PERCENTAGE", label: "Percentage (e.g., 95%)" },
+                ]}
+              />
+              <Input
+                label="Score / Grade"
+                value={formState.score}
+                onChange={(event) => setFormState((prev) => ({ ...prev, score: event.target.value }))}
+                placeholder={formState.scoreType === "CGPA" ? "9.5/10" : "95%"}
               />
             </div>
           </div>
