@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, LayoutTemplate, IdCard, QrCode, BarChart3 } from "lucide-react";
+import { FileText, LayoutTemplate, IdCard, QrCode, BarChart3, PenTool } from "lucide-react";
 
 const features = [
   {
@@ -15,15 +15,16 @@ const features = [
     icon: <IdCard className="h-6 w-6 text-primary" />,
   },
   {
+    title: "AI Cover Letters",
+    description: "Compose custom, styled cover letters tailored to specific roles in seconds.",
+    icon: <PenTool className="h-6 w-6 text-primary" />,
+  },
+  {
     title: "QR Code",
     description: "Share your profile with a scan.",
     icon: <QrCode className="h-6 w-6 text-primary" />,
   },
-  {
-    title: "Analytics",
-    description: "Track views and engagement on your profile.",
-    icon: <BarChart3 className="h-6 w-6 text-primary" />,
-  },
+  
 ];
 
 export function HowItWorks() {

@@ -30,6 +30,10 @@ const FAQS = [
     answer: "Absolutely. Our AI Content Engine analyzes your target job description and suggests impact-focused bullet points and summaries tailored to your specific industry.",
   },
   {
+    question: "Can I generate cover letters with Profilix?",
+    answer: "Yes! Profilix now features an AI Cover Letter Writer. Input a job description and select one of our 4 professional design styles (Classic, Modern, Creative, or Minimalist), and our AI will compose a highly tailored cover letter matching your experience and top skills in seconds, ready to export as a single-page PDF or Word Document.",
+  },
+  {
     question: "Can I use my own domain?",
     answer: "By default, your profile is hosted at profilix.site/yourname. Custom domain support (mapping your-name.com to your Profilix profile) is coming soon.",
   },

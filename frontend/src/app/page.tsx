@@ -63,6 +63,14 @@ const faqJsonLd = {
         text: "Profilix offers 4 professional resume templates: (1) ATS Friendly — a clean single-column layout that passes all Applicant Tracking Systems, available as PDF and DOCX; (2) Modern Classic — a serif Georgia-style design with centered header and clean section dividers, available as PDF and DOCX; (3) Premium Dark — an elegant two-column layout with a dark sidebar, PDF only; (4) Premium Two-Column — an Enhancv-style design with accent colors and chip-style skills, PDF only. All templates are 100% free.",
       },
     },
+    {
+      "@type": "Question",
+      name: "Can I generate cover letters with Profilix?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes! Profilix includes a free AI Cover Letter Writer. Input your target job details and select from 4 layout styles (Classic, Modern, Creative, Minimalist). The AI matches your specific developer skills and experiences with the job description in seconds to output a polished, single-page cover letter ready to download as PDF or Word (.docx).",
+      },
+    },
   ],
 };
 

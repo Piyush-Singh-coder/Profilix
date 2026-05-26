@@ -21,6 +21,20 @@ type Update = {
 
 const UPDATES: Update[] = [
   {
+    version: "2.1.0",
+    date: "May 2026",
+    badge: "new",
+    title: "AI Cover Letters & GitHub Sync",
+    description: "We have released two massive feature additions: a highly custom AI Cover Letter Writer and an automated GitHub Stats Sync integration.",
+    changes: [
+      "Released AI Cover Letter Writer with 4 layouts: Classic, Modern, Creative, and Minimalist",
+      "Dynamic side-by-side Live Preview editor canvas for instant, single-page letter composition",
+      "Guaranteed single-page downloads for high-fidelity PDF and editable Microsoft Word (.docx) formats",
+      "Full GitHub Stats Ingestion to dynamically show off contributions, repositories, and languages in one click",
+      "Launches two new dedicated feature marketing pages explaining these modules",
+    ],
+  },
+  {
     version: "2.0.0",
     date: "May 2026",
     badge: "new",

@@ -11,6 +11,7 @@ import githubRoutes from "./github.routes";
 import experienceRoutes from "./experience.routes";
 import achievementRoutes from "./achievement.routes";
 import educationRoutes from "./education.routes";
+import coverLetterRoutes from "./coverLetter.routes";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.use("/profile", profileRoutes);
 router.use("/projects", projectRoutes);
 router.use("/social-links", socialRoutes);
 router.use("/resume", resumeRoutes);
+router.use("/cover-letter", coverLetterRoutes);
 router.use("/qr", qrRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/github", githubRoutes);

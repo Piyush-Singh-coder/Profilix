@@ -10,6 +10,7 @@ import {
   LogOut,
   IdCard,
   QrCode,
+  PenTool,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -18,6 +19,7 @@ import { Logo } from "@/components/ui/Logo";
 const NAV_ITEMS = [
   { name: "Profile Editor", path: "/dashboard", icon: User },
   { name: "Resume", path: "/dashboard/resume", icon: FileText },
+  { name: "Cover Letter", path: "/dashboard/cover-letter", icon: PenTool },
   { name: "Profile Card", path: "/dashboard/profile-card", icon: IdCard },
   { name: "QR & Share", path: "/dashboard/qr", icon: QrCode },
   { name: "Analytics", path: "/dashboard/analytics", icon: BarChart3 },

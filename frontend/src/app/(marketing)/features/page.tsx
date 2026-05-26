@@ -2,7 +2,8 @@ import { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CTABanner } from "@/components/landing/CTABanner";
-import { FileText, IdCard, QrCode, BarChart3, Sparkles, Layout, ArrowRight, CheckCircle2, ShieldCheck, Zap } from "lucide-react";
+import { FileText, IdCard, QrCode, BarChart3, Sparkles, Layout, ArrowRight, CheckCircle2, ShieldCheck, Zap, PenTool, Globe } from "lucide-react";
+import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
@@ -44,6 +45,18 @@ const FEATURES = [
     href: "/features/profile-cards",
   },
   {
+    icon: PenTool,
+    title: "AI Cover Letters",
+    description: "Compose custom, styled cover letters tailored to specific roles in seconds, ready to export as PDF or Word.",
+    href: "/features/cover-letter",
+  },
+  {
+    icon: FaGithub,
+    title: "GitHub Stats Sync",
+    description: "Automatically sync your public contribution graph, languages, stars, and repos in one click.",
+    href: "/features/github-sync",
+  },
+  {
     icon: QrCode,
     title: "Dynamic QR Sharing",
     description: "Instantly share your professional identity with a custom QR code that links directly to your portfolio.",
@@ -66,6 +79,12 @@ const FEATURES = [
     title: "Premium Templates",
     description: "Choose from 4 distinct styles: ATS Friendly, Modern Classic, Premium Dark, and Premium Two-Column.",
     href: "/features/templates",
+  },
+  {
+    icon: Globe,
+    title: "SEO-Optimized Profiles",
+    description: "Built-in semantic HTML, automatic sitemaps, and search engine schemas to help recruiters find you.",
+    href: "/features",
   },
 ];
 
@@ -111,24 +130,26 @@ export default function FeaturesPage() {
       {/* Features Grid */}
       <section className="py-24 relative">
         <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature, i) => (
               <Link
                 key={i}
                 href={feature.href}
-                className="group relative overflow-hidden rounded-[40px] border border-border/50 bg-surface p-10 transition-all hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5"
+                className="group relative overflow-hidden rounded-[24px] md:rounded-[32px] border border-border/50 bg-surface p-6 md:p-8 transition-all hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/5 flex flex-col justify-between"
               >
                 <div className="absolute top-0 left-0 h-1.5 w-full bg-primary/20 transition-colors group-hover:bg-primary" />
 
-                <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-3">
-                  <feature.icon className="h-8 w-8" />
+                <div>
+                  <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110 group-hover:rotate-3">
+                    <feature.icon className="h-6 w-6" />
+                  </div>
+
+                  <h3 className="mb-3 font-heading text-xl font-bold text-text-primary">{feature.title}</h3>
+
+                  <p className="mb-6 text-text-secondary leading-relaxed text-sm">{feature.description}</p>
                 </div>
 
-                <h3 className="mb-4 font-heading text-2xl font-bold text-text-primary">{feature.title}</h3>
-
-                <p className="mb-8 text-text-secondary leading-relaxed">{feature.description}</p>
-
-                <div className="inline-flex items-center text-sm font-bold text-primary">
+                <div className="inline-flex items-center text-sm font-bold text-primary mt-auto">
                   Explore feature <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </div>
               </Link>
