@@ -159,7 +159,7 @@ JSON Schema:
     { role: "system", content: systemPrompt },
     { role: "user", content: `Please parse this resume text:\n\n${text}` }
   ], { 
-    model: "meta/llama-3.3-70b-instruct",
+    model: "meta/llama-3.1-8b-instruct",
     maxTokens: 4096, 
     temperature: 0.2, 
     jsonMode: true 
