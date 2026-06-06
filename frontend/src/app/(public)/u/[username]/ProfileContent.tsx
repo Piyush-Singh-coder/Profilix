@@ -204,7 +204,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
     .toUpperCase();
 
   return (
-    <div className={`min-h-screen ${theme.root} transition-colors duration-300`}>
+    <div className={`min-h-screen ${theme.root} transition-colors duration-300 overflow-x-hidden`}>
       <div className={`fixed inset-0 -z-10 bg-gradient-to-br ${theme.canvas}`} />
       
       {/* Background Glows */}
@@ -219,12 +219,12 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
         
         {/* ==================== HEADER ==================== */}
         <motion.header
-          className={`rounded-[32px] p-6 md:p-8 ${theme.card} flex flex-col md:flex-row justify-between items-start gap-8`}
+          className={`rounded-[32px] p-5 sm:p-6 md:p-8 ${theme.card} flex flex-col md:flex-row justify-between items-start gap-8 w-full overflow-hidden`}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 flex-1 w-full min-w-0">
             {avatarUrl ? (
               <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-full border border-sky-500/35 bg-[#0a1128]/70 shadow-lg shadow-sky-500/5">
                 <Image
@@ -241,28 +241,28 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
               </div>
             )}
             
-            <div className="min-w-0">
+            <div className="min-w-0 w-full">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${theme.badge}`}>
                   <Sparkles className="h-3 w-3" />
                   {profile.cardTheme || "GLASS"} THEME
                 </span>
               </div>
-              <h1 className="font-heading text-3xl font-extrabold md:text-4xl text-white tracking-tight leading-tight">{displayFullName}</h1>
-              <p className="mt-1 text-sm font-semibold text-sky-400">@{initialUsername}</p>
+              <h1 className="font-heading text-3xl font-extrabold md:text-4xl text-white tracking-tight leading-tight break-words">{displayFullName}</h1>
+              <p className="mt-1 text-sm font-semibold text-sky-400 break-all">@{initialUsername}</p>
               {profile.bio && (
-                <p className={`mt-4 max-w-2xl text-xs md:text-sm leading-relaxed ${theme.muted}`}>
+                <p className={`mt-4 max-w-2xl text-xs md:text-sm leading-relaxed break-words ${theme.muted}`}>
                   {profile.bio}
                 </p>
               )}
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 w-full md:w-auto md:min-w-[260px]">
+          <div className="flex flex-col gap-3 w-full md:w-auto md:min-w-[260px] shrink-0">
             {profile.location && (
-              <div className="flex items-center gap-2 text-sm text-slate-400 px-1 mb-1">
-                <MapPin className="h-4 w-4 text-sky-400 shrink-0" />
-                <span>{profile.location}</span>
+              <div className="flex items-start gap-2 text-sm text-slate-400 px-1 mb-1 w-full break-words">
+                <MapPin className="h-4 w-4 text-sky-400 shrink-0 mt-0.5" />
+                <span className="break-words">{profile.location}</span>
               </div>
             )}
 
@@ -301,7 +301,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
         {githubStats && (
           <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
             {/* GitHub Stats & Contribution Graph Card */}
-            <article className={`lg:col-span-5 rounded-[32px] p-6 ${theme.card} flex flex-col justify-between`}>
+            <article className={`lg:col-span-5 rounded-[32px] p-5 sm:p-6 ${theme.card} flex flex-col justify-between w-full overflow-hidden`}>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2.5 text-sky-400 mb-6">
                   <FaGithub className="h-5 w-5 text-white" />
@@ -313,7 +313,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                   href={`https://github.com/${githubStats.githubUsername}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 text-lg font-black hover:underline text-sky-400 inline-block"
+                  className="mt-1 text-lg font-black hover:underline text-sky-400 inline-block break-all"
                 >
                   {githubStats.githubUsername}
                 </a>
@@ -389,7 +389,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
             </article>
 
             {/* Pinned Repos Card */}
-            <article className={`lg:col-span-7 rounded-[32px] p-6 ${theme.card}`}>
+            <article className={`lg:col-span-7 rounded-[32px] p-5 sm:p-6 ${theme.card} w-full overflow-hidden`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2.5 text-sky-400">
                   <Flag className="h-5 w-5" />
@@ -459,24 +459,27 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
           {/* Experience Card */}
           {experiences.length > 0 && (
-            <article className={`rounded-[32px] p-6 ${theme.card}`}>
+            <article className={`rounded-[32px] p-5 sm:p-6 ${theme.card} w-full overflow-hidden`}>
               <div className="flex items-center gap-2.5 text-sky-400 mb-6">
                 <Briefcase className="h-5 w-5" />
                 <h2 className="font-heading text-lg font-bold text-white">Experience</h2>
               </div>
               <div className="space-y-6">
                 {experiences.map((exp) => (
-                  <div key={exp.id} className="relative pl-6 border-l border-slate-800/80 last:border-l-0 pb-2">
+                  <div key={exp.id} className="relative pl-6 border-l border-slate-800/80 last:border-l-0 pb-2 w-full min-w-0">
                     <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-sky-400" />
                     
-                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1">
-                      <h3 className="font-heading text-base font-extrabold text-sky-400">{exp.role}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1.5 mb-1 w-full min-w-0">
+                      <h3 className="font-heading text-base font-extrabold text-sky-400 break-words">{exp.role}</h3>
                       <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 font-semibold shrink-0">
                         <Calendar className="h-3.5 w-3.5 text-sky-400/80" />
                         {formatMonthYear(exp.startDate)} - {exp.isCurrent ? "Present" : formatMonthYear(exp.endDate)}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-slate-200 mb-3">{exp.company}{exp.location ? ` · ${exp.location}` : ""}</p>
+                    <p className="text-sm font-semibold text-slate-200 mb-3 break-words">
+                      {exp.company}
+                      {exp.location ? ` · ${exp.location}` : ""}
+                    </p>
                     {exp.bullets && exp.bullets.length > 0 && (
                       <ul className="list-disc space-y-1.5 pl-4 text-xs text-slate-300 leading-relaxed">
                         {exp.bullets.map((bullet, idx) => {
@@ -485,14 +488,14 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                             const label = firstColon !== -1 ? bullet.substring(0, firstColon + 1) : bullet;
                             const content = firstColon !== -1 ? bullet.substring(firstColon + 1) : "";
                             return (
-                              <li key={idx} className="list-none -ml-4 mt-3">
+                              <li key={idx} className="list-none -ml-4 mt-3 break-words">
                                 <span className="text-slate-400 font-bold">{label} </span>
                                 <span className="text-slate-300 font-semibold">{content}</span>
                               </li>
                             );
                           }
                           return (
-                            <li key={idx} className="marker:text-sky-400/80">
+                            <li key={idx} className="marker:text-sky-400/80 break-words">
                               {bullet}
                             </li>
                           );
@@ -517,33 +520,33 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
 
           {/* Education Card */}
           {educations && educations.length > 0 && (
-            <article className={`rounded-[32px] p-6 ${theme.card}`}>
+            <article className={`rounded-[32px] p-5 sm:p-6 ${theme.card} w-full overflow-hidden`}>
               <div className="flex items-center gap-2.5 text-sky-400 mb-6">
                 <GraduationCap className="h-5 w-5" />
                 <h2 className="font-heading text-lg font-bold text-white">Education</h2>
               </div>
               <div className="space-y-6">
                 {educations.map((edu) => (
-                  <div key={edu.id} className="relative pl-6 border-l border-slate-800/80 last:border-l-0 pb-2">
+                  <div key={edu.id} className="relative pl-6 border-l border-slate-800/80 last:border-l-0 pb-2 w-full min-w-0">
                     <div className="absolute -left-[5px] top-1.5 h-2 w-2 rounded-full bg-sky-400" />
                     
-                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 mb-1">
-                      <h3 className="font-heading text-base font-extrabold text-sky-400">{edu.school}</h3>
+                    <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1.5 mb-1 w-full min-w-0">
+                      <h3 className="font-heading text-base font-extrabold text-sky-400 break-words">{edu.school}</h3>
                       <span className="inline-flex items-center gap-1.5 text-xs text-slate-400 font-semibold shrink-0">
                         <Calendar className="h-3.5 w-3.5 text-sky-400/80" />
                         {formatMonthYear(edu.startDate)} - {edu.isCurrent ? "Present" : formatMonthYear(edu.endDate)}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-slate-200 mb-2">
+                    <p className="text-sm font-semibold text-slate-200 mb-2 break-words">
                       {[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")}
                     </p>
                     {edu.score && (
-                      <p className="text-xs font-bold text-sky-400">
+                      <p className="text-xs font-bold text-sky-400 break-words">
                         {edu.scoreType || "CGPA"}: {edu.score}
                       </p>
                     )}
                     {edu.description && (
-                      <p className="mt-2 text-xs text-slate-400 leading-relaxed">{edu.description}</p>
+                      <p className="mt-2 text-xs text-slate-400 leading-relaxed break-words">{edu.description}</p>
                     )}
                   </div>
                 ))}
@@ -564,24 +567,24 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
 
         {/* ==================== SKILLS & TECHNOLOGIES ==================== */}
         {profileSkills && profileSkills.length > 0 && (
-          <section className="rounded-[32px] p-6 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl mt-8">
+          <section className="rounded-[32px] p-5 sm:p-6 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl mt-8 w-full overflow-hidden">
             <div className="flex items-center gap-2.5 text-sky-400 mb-6">
               <Code2 className="h-5 w-5" />
               <h2 className="font-heading text-lg font-bold text-white">Skills & Technologies</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {profileSkills.map((group) => (
-                <article key={group.id} className="rounded-2xl border border-blue-950/40 bg-[#0f172a]/30 p-4 transition-all hover:scale-[1.01] hover:border-sky-500/30 flex flex-col justify-between shadow-lg">
+                <article key={group.id} className="rounded-2xl border border-blue-950/40 bg-[#0f172a]/30 p-4 transition-all hover:scale-[1.01] hover:border-sky-500/30 flex flex-col justify-between shadow-lg w-full overflow-hidden">
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       {getSkillCategoryIcon(group.category)}
-                      <h3 className="font-heading text-xs font-black text-white uppercase tracking-wider">{group.category}</h3>
+                      <h3 className="font-heading text-xs font-black text-white uppercase tracking-wider break-words">{group.category}</h3>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {group.skills.map((skill) => (
                         <span
                           key={skill}
-                          className={`inline-flex items-center rounded-lg border px-2.5 py-0.5 text-xs font-semibold ${theme.badge}`}
+                          className={`inline-flex items-center rounded-lg border px-2.5 py-0.5 text-xs font-semibold break-words ${theme.badge}`}
                         >
                           {skill}
                         </span>
@@ -618,22 +621,22 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] p-6 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl transition-all hover:scale-[1.01] hover:border-sky-500/30 min-h-[220px]"
+                  className="group relative flex flex-col justify-between overflow-hidden rounded-[24px] p-5 sm:p-6 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl transition-all hover:scale-[1.01] hover:border-sky-500/30 min-h-[220px] w-full"
                 >
                   <div>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
+                    <div className="flex items-start justify-between gap-3 w-full min-w-0">
+                      <div className="flex items-center gap-2.5 min-w-0">
                         {getProjectIcon(project.title)}
-                        <h3 className="font-heading text-base font-extrabold text-white">{project.title}</h3>
+                        <h3 className="font-heading text-base font-extrabold text-white break-words min-w-0">{project.title}</h3>
                       </div>
                       {project.isPinned && (
-                        <Star className="h-4 w-4 fill-current text-sky-400" />
+                        <Star className="h-4 w-4 fill-current text-sky-400 shrink-0" />
                       )}
                     </div>
                     {project.bullets && project.bullets.length > 0 && (
                       <ul className="mt-4 list-disc space-y-1.5 pl-4 text-xs text-slate-300 leading-relaxed">
                         {project.bullets.map((bullet, index) => (
-                          <li key={`${project.id}-bullet-${index}`} className="marker:text-sky-400/80">
+                          <li key={`${project.id}-bullet-${index}`} className="marker:text-sky-400/80 break-words">
                             {bullet}
                           </li>
                         ))}
@@ -644,7 +647,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
                         {project.techTags.map((tag) => (
                           <span
                             key={tag}
-                            className={`rounded-lg border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${theme.badge} border-opacity-35`}
+                            className={`rounded-lg border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${theme.badge} border-opacity-35 break-words`}
                           >
                             {tag}
                           </span>
@@ -710,14 +713,14 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {achievements.map((achievement) => (
-                <article key={achievement.id} className="flex items-start gap-4 rounded-3xl p-5 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl">
+                <article key={achievement.id} className="flex items-start gap-4 rounded-3xl p-4 sm:p-5 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl w-full overflow-hidden">
                   <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-sky-950/40 border border-sky-500/20 text-sky-400">
                     <Award className="h-5 w-5" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-heading text-sm font-bold text-white">{achievement.title}</h3>
+                    <h3 className="font-heading text-sm font-bold text-white break-words">{achievement.title}</h3>
                     <div className="mt-2 flex flex-wrap gap-x-2 items-center text-xs text-slate-400 font-semibold">
-                      {achievement.provider && <span>{achievement.provider}</span>}
+                      {achievement.provider && <span className="break-words">{achievement.provider}</span>}
                       {achievement.provider && achievement.date && <span>·</span>}
                       {achievement.date && (
                         <span>{formatMonthYear(achievement.date)}</span>
@@ -731,29 +734,29 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
         )}
 
         {/* ==================== DYNAMIC FOOTER SECTIONS ==================== */}
-        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border-t border-slate-800/60 pt-8">
+        <section className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 border-t border-slate-800/60 pt-8 w-full">
           {/* Column 1: Custom Section / Languages */}
-          <div>
+          <div className="w-full min-w-0">
             {customSections && customSections.length > 0 ? (
               customSections.map((section) => (
-                <div key={section.id} className="mb-6 last:mb-0">
-                  <div className="flex items-center gap-2 mb-4 text-sky-400">
-                    <Globe2 className="h-5 w-5 text-sky-400" />
-                    <h3 className="font-heading text-base font-bold text-white">{section.title}</h3>
+                <div key={section.id} className="mb-6 last:mb-0 w-full min-w-0">
+                  <div className="flex items-center gap-2 mb-4 text-sky-400 w-full min-w-0">
+                    <Globe2 className="h-5 w-5 text-sky-400 shrink-0" />
+                    <h3 className="font-heading text-base font-bold text-white break-words min-w-0">{section.title}</h3>
                   </div>
-                  <div className="rounded-3xl p-5 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl">
+                  <div className="rounded-3xl p-4 sm:p-5 bg-[#0a0f1d]/75 backdrop-blur-xl border border-blue-950/40 shadow-2xl w-full">
                     <ul className="list-disc space-y-1.5 pl-4 text-xs text-slate-300 leading-relaxed">
                       {section.bullets.map((bullet, idx) => (
-                        <li key={idx} className="marker:text-sky-400/80">{bullet}</li>
+                        <li key={idx} className="marker:text-sky-400/80 break-words">{bullet}</li>
                       ))}
                     </ul>
                   </div>
                 </div>
               ))
             ) : (
-              <div>
-                <h3 className="font-heading text-base font-bold text-white mb-4">Connect</h3>
-                <p className="text-xs text-slate-400 leading-relaxed font-semibold">
+              <div className="w-full">
+                <h3 className="font-heading text-base font-bold text-white mb-4 break-words">Connect</h3>
+                <p className="text-xs text-slate-400 leading-relaxed font-semibold break-words">
                   Open to exciting full-stack development, software engineering, and contract opportunities. Feel free to download my resume or follow my socials!
                 </p>
               </div>
@@ -761,13 +764,13 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
           </div>
 
           {/* Column 2: Connect Message */}
-          <div className="flex flex-col justify-between min-h-[120px]">
+          <div className="flex flex-col justify-between min-h-[120px] w-full min-w-0">
             <div>
-              <div className="flex items-center gap-2 mb-4 text-sky-400">
-                <Users className="h-5 w-5 text-sky-400" />
-                <h3 className="font-heading text-base font-bold text-white">Connect with {displayFullName.split(" ")[0]}</h3>
+              <div className="flex items-center gap-2 mb-4 text-sky-400 w-full">
+                <Users className="h-5 w-5 text-sky-400 shrink-0" />
+                <h3 className="font-heading text-base font-bold text-white break-words">Connect with {displayFullName.split(" ")[0]}</h3>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-semibold">
+              <p className="text-xs text-slate-300 leading-relaxed font-semibold break-words">
                 Thank you for visiting my portfolio card! Let's build something awesome together.
               </p>
             </div>
@@ -777,7 +780,7 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
           </div>
 
           {/* Column 3: Quick Links List */}
-          <div>
+          <div className="w-full min-w-0">
             <h3 className="font-heading text-base font-bold text-white mb-4">Quick Links</h3>
             <div className="space-y-2.5">
               {socialLinks.map((link) => {
