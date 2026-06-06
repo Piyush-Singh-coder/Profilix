@@ -77,13 +77,14 @@ const faqJsonLd = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Profilix",
-  url: "https://profilix.site",
-  description:
+  "name": "Profilix",
+  "alternateName": ["Profilix Resume", "Profilix Portfolio"],
+  "url": "https://profilix.site/",
+  "description":
     "The best ATS resume generator and portfolio card creator for developers. Sync your GitHub, showcase your projects, and share via QR code.",
-  potentialAction: {
+  "potentialAction": {
     "@type": "SearchAction",
-    target: "https://profilix.site/u/{search_term_string}",
+    "target": "https://profilix.site/u/{search_term_string}",
     "query-input": "required name=search_term_string",
   },
 };

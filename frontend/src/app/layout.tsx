@@ -159,18 +159,6 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@graph": [
                 {
-                  "@type": "WebSite",
-                  "@id": "https://profilix.site/#website",
-                  "url": "https://profilix.site",
-                  "name": "Profilix",
-                  "description": "Free ATS resume generator and professional profile card platform for developers and job seekers.",
-                  "potentialAction": {
-                    "@type": "SearchAction",
-                    "target": "https://profilix.site/blog?q={search_term_string}",
-                    "query-input": "required name=search_term_string",
-                  },
-                },
-                {
                   "@type": "WebApplication",
                   "@id": "https://profilix.site/#app",
                   "name": "Profilix",
