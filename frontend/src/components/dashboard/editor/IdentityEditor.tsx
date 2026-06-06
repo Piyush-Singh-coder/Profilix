@@ -40,7 +40,6 @@ export function IdentityEditor() {
 
   const [formData, setFormData] = useState({
     displayName: "",
-    headline: "",
     bio: "",
     location: "",
     phoneNumber: "",
@@ -88,7 +87,6 @@ export function IdentityEditor() {
     if (!profile) return;
     setFormData({
       displayName: profile.displayName || "",
-      headline: profile.headline || "",
       bio: profile.bio || "",
       location: profile.location || "",
       phoneNumber: profile.phoneNumber || "",
@@ -97,11 +95,20 @@ export function IdentityEditor() {
     });
   }, [profile]);
 
+  const wordCount = useMemo(() => {
+    const text = formData.bio.trim();
+    if (!text) return 0;
+    return text.split(/\s+/).filter(Boolean).length;
+  }, [formData.bio]);
+
+  const isWordCountValid = useMemo(() => {
+    return wordCount <= 200;
+  }, [wordCount]);
+
   const hasChanged = useMemo(() => {
     if (!profile) return false;
     return (
       formData.displayName !== (profile.displayName || "") ||
-      formData.headline !== (profile.headline || "") ||
       formData.bio !== (profile.bio || "") ||
       formData.location !== (profile.location || "") ||
       formData.phoneNumber !== (profile.phoneNumber || "") ||
@@ -111,10 +118,14 @@ export function IdentityEditor() {
   }, [formData, profile]);
 
   const handleSave = async () => {
+    if (!isWordCountValid) {
+      toast.error("Professional summary must be between 100 and 200 words");
+      return;
+    }
     try {
       await updateProfile({
         displayName: formData.displayName.trim(),
-        headline: formData.headline.trim() || null,
+        headline: null, // Removed headline input
         bio: formData.bio.trim() || null,
         location: formData.location.trim() || null,
         phoneNumber: formData.phoneNumber.trim() || null,
@@ -126,8 +137,6 @@ export function IdentityEditor() {
       toast.error("Failed to save identity changes");
     }
   };
-
-  
 
   const handleSyncGithub = async () => {
     if (!githubUsername.trim()) {
@@ -175,7 +184,7 @@ export function IdentityEditor() {
       <Card variant="glass" className="relative z-10">
         <CardHeader>
           <CardTitle>Profile Basics</CardTitle>
-          <CardDescription>Display name, headline, bio and location appear on your public page.</CardDescription>
+          <CardDescription>Display name, professional summary and location appear on your public page.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <Input
@@ -184,20 +193,28 @@ export function IdentityEditor() {
             onChange={(event) => setFormData((prev) => ({ ...prev, displayName: event.target.value }))}
             placeholder="Jane Developer"
           />
-          <Input
-            label="Headline"
-            value={formData.headline}
-            onChange={(event) => setFormData((prev) => ({ ...prev, headline: event.target.value }))}
-            placeholder="Full-stack engineer building polished products"
-            info="Keep it short and impactful. E.g., 'Full-stack developer building polished products'. This appears right below your name."
-          />
-          <Textarea
-            label="Bio"
-            value={formData.bio}
-            onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))}
-            placeholder="Tell visitors what you build, what you care about, and what you are open to."
-            info="Tell visitors what you build. Keep it complete but concise since it tells your story on your profile card and resume."
-          />
+          <div>
+            <Textarea
+              label="Professional Summary"
+              value={formData.bio}
+              onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))}
+              placeholder="Tell visitors what you build, what you care about, and what you are open to. Maximum 200 words."
+              info="Keep it complete but concise since it tells your story on your profile card and resume."
+            />
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className={cn(
+                "font-medium",
+                wordCount > 200 ? "text-red-500" : "text-text-secondary"
+              )}>
+                Word Count: {wordCount} / 200
+              </span>
+              {wordCount > 0 && wordCount <= 200 && (
+                <span className="text-green-500 flex items-center gap-1 font-medium">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Valid length
+                </span>
+              )}
+            </div>
+          </div>
           <Input
             label="Location"
             value={formData.location}
@@ -264,7 +281,7 @@ export function IdentityEditor() {
       <div className="mt-6 flex justify-end">
         <Button
           onClick={handleSave}
-          disabled={!hasChanged || isSaving || !formData.displayName.trim()}
+          disabled={!hasChanged || isSaving || !formData.displayName.trim() || !isWordCountValid}
           className="shadow-xl"
         >
           {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}

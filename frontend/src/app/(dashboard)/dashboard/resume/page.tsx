@@ -17,23 +17,105 @@ import { useEducationStore } from "@/store/useEducationStore";
 import { cn } from "@/lib/utils";
 import { ResumeLivePreview } from "@/components/dashboard/ResumeLivePreview";
 
-type WizardStep = "CONTENT" | "CUSTOMIZE" | "DOWNLOAD";
+type WizardStep = "TEMPLATE" | "CUSTOMIZE" | "DOWNLOAD";
+
+interface ResumeConfig {
+  sections: {
+    summary: boolean;
+    experience: boolean;
+    education: boolean;
+    projects: boolean;
+    skills: boolean;
+    achievements: boolean;
+    customSections: boolean;
+  };
+  limits: {
+    projects: number;
+    experiences: number;
+    achievements: number;
+    educations: number;
+  };
+  styling: {
+    fontFamily: string;
+    fontSize: string;
+  };
+}
+
+function parseResumeConfig(profile: any): ResumeConfig {
+  const defaults: ResumeConfig = {
+    sections: {
+      summary: true,
+      experience: true,
+      education: true,
+      projects: true,
+      skills: true,
+      achievements: true,
+      customSections: true,
+    },
+    limits: {
+      projects: 3,
+      experiences: 5,
+      achievements: 5,
+      educations: 3,
+    },
+    styling: {
+      fontFamily: "Arial",
+      fontSize: "9.5pt",
+    },
+  };
+
+  if (!profile?.resumeConfig) return defaults;
+  
+  try {
+    const config = typeof profile.resumeConfig === "string" 
+      ? JSON.parse(profile.resumeConfig) 
+      : profile.resumeConfig;
+      
+    return {
+      sections: {
+        summary: config.sections?.summary !== undefined ? config.sections.summary : defaults.sections.summary,
+        experience: config.sections?.experience !== undefined ? config.sections.experience : defaults.sections.experience,
+        education: config.sections?.education !== undefined ? config.sections.education : defaults.sections.education,
+        projects: config.sections?.projects !== undefined ? config.sections.projects : defaults.sections.projects,
+        skills: config.sections?.skills !== undefined ? config.sections.skills : defaults.sections.skills,
+        achievements: config.sections?.achievements !== undefined ? config.sections.achievements : defaults.sections.achievements,
+        customSections: config.sections?.customSections !== undefined ? config.sections.customSections : defaults.sections.customSections,
+      },
+      limits: {
+        projects: Number(config.limits?.projects ?? defaults.limits.projects),
+        experiences: Number(config.limits?.experiences ?? defaults.limits.experiences),
+        achievements: Number(config.limits?.achievements ?? defaults.limits.achievements),
+        educations: Number(config.limits?.educations ?? defaults.limits.educations),
+      },
+      styling: {
+        fontFamily: config.styling?.fontFamily ?? defaults.styling.fontFamily,
+        fontSize: config.styling?.fontSize ?? defaults.styling.fontSize,
+      },
+    };
+  } catch {
+    return defaults;
+  }
+}
 
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export default function ResumePage() {
   const { isGenerating, generateResume } = useResumeStore();
   const { user } = useAuthStore();
-  const { profile, fetchProfile } = useProfileStore();
+  const { profile, fetchProfile, updateProfile } = useProfileStore();
   const { experiences, fetchExperiences } = useExperienceStore();
   const { educations, fetchEducations } = useEducationStore();
   
-  const [activeStep, setActiveStep] = useState<WizardStep>("CONTENT");
+  const [activeStep, setActiveStep] = useState<WizardStep>("TEMPLATE");
   const [jobDescription, setJobDescription] = useState("");
   const [useAI, setUseAI] = useState(false);
   const [format, setFormat] = useState<"pdf" | "docx">("pdf");
   const [templateType, setTemplateType] = useState<"ATS" | "DESIGN" | "MODERN" | "ENHANCV">("ATS");
   const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
+  
+  const [localConfig, setLocalConfig] = useState<ResumeConfig | null>(null);
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+
   // Ref to the preview wrapper — used to compute exact CSS scale for the A4 sheet
   const previewWrapperRef = useRef<HTMLDivElement>(null);
   const [previewScale, setPreviewScale] = useState(0.41);
@@ -51,6 +133,44 @@ export default function ResumePage() {
     fetchExperiences();
     fetchEducations();
   }, [fetchProfile, fetchExperiences, fetchEducations]);
+
+  useEffect(() => {
+    if (profile) {
+      setLocalConfig(parseResumeConfig(profile));
+    }
+  }, [profile]);
+
+  const updateLocalConfig = (updater: (prev: ResumeConfig) => ResumeConfig) => {
+    const current = localConfig || parseResumeConfig(profile);
+    const next = updater(current);
+    setLocalConfig(next);
+
+    // Sync to useProfileStore state to update preview instantly
+    useProfileStore.setState((storeState) => {
+      if (!storeState.profile) return storeState;
+      return {
+        profile: {
+          ...storeState.profile,
+          resumeConfig: next,
+        },
+      };
+    });
+  };
+
+  const handleSaveConfig = async () => {
+    if (!localConfig) return;
+    try {
+      setIsSavingConfig(true);
+      await updateProfile({
+        resumeConfig: localConfig
+      });
+      toast.success("Resume styling and layout saved");
+    } catch {
+      toast.error("Failed to save configuration");
+    } finally {
+      setIsSavingConfig(false);
+    }
+  };
 
   const handleGenerate = async () => {
     try {
@@ -82,16 +202,16 @@ export default function ResumePage() {
           {/* Wizard Steps Navigation */}
           <div className="flex items-center justify-between bg-surface-low border border-border p-2 rounded-xl">
             <button
-              onClick={() => setActiveStep("CONTENT")}
-              className={cn("flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold transition-colors", activeStep === "CONTENT" ? "bg-primary text-white shadow-md" : "text-text-secondary hover:bg-surface-high")}
+              onClick={() => setActiveStep("TEMPLATE")}
+              className={cn("flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold transition-colors", activeStep === "TEMPLATE" ? "bg-primary text-white shadow-md" : "text-text-secondary hover:bg-surface-high")}
             >
-              <PenTool className="h-4 w-4" /> Content
+              <Layout className="h-4 w-4" /> Template
             </button>
             <button
               onClick={() => setActiveStep("CUSTOMIZE")}
               className={cn("flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold transition-colors", activeStep === "CUSTOMIZE" ? "bg-primary text-white shadow-md" : "text-text-secondary hover:bg-surface-high")}
             >
-              <Settings className="h-4 w-4" /> Customize
+              <Settings className="h-4 w-4" /> Customise
             </button>
             <button
               onClick={() => setActiveStep("DOWNLOAD")}
@@ -101,170 +221,337 @@ export default function ResumePage() {
             </button>
           </div>
 
-          {/* Step 1: Content */}
-          {activeStep === "CONTENT" && (
-            <Card variant="glass" className="border-primary/20 shadow-lg shadow-primary/5">
-              <CardHeader>
-                <CardTitle className="text-xl">Profile Content</CardTitle>
-                <CardDescription>Your resume data is linked to your central Profile Editor.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-xl border border-border bg-surface-low p-5">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="font-semibold text-text-primary">Data Sync is Active</p>
-                      <p className="text-xs text-text-secondary mt-1">Changes made in the dashboard apply here.</p>
-                    </div>
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Edit3 className="h-5 w-5" />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
-                      <span className="text-text-secondary">Identity & Bio</span>
-                      <span className={profile?.displayName ? "text-success font-semibold" : "text-danger"}>{profile?.displayName ? "Added" : "Missing"}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
-                      <span className="text-text-secondary">Experiences</span>
-                      <span className="font-semibold text-text-primary">{experiences.length}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm border-b border-border/50 pb-2">
-                      <span className="text-text-secondary">Education</span>
-                      <span className="font-semibold text-text-primary">{educations.length}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-text-secondary">Skills</span>
-                      <span className="font-semibold text-text-primary">{profile?.techStacks?.length || 0}</span>
-                    </div>
+          {/* Step 1: Template */}
+          {activeStep === "TEMPLATE" && (
+            <div className="space-y-6 animate-in fade-in-50 duration-200">
+              <Card variant="glass" className="border-primary/20 shadow-lg shadow-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-xl">Resume Templates</CardTitle>
+                  <CardDescription>Select a layout and file format for your resume.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* ATS */}
+                    <button
+                      type="button"
+                      onClick={() => setTemplateType("ATS")}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-xl border-2 py-5 px-3 text-center transition-all",
+                        templateType === "ATS"
+                          ? "border-primary bg-primary/5 shadow-md"
+                          : "border-border bg-surface-low hover:border-primary/40"
+                      )}
+                    >
+                      <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                        <FileText className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-text-primary text-sm">ATS Friendly</h3>
+                        <p className="mt-0.5 text-xs text-text-secondary">Clean single-column</p>
+                      </div>
+                      {templateType === "ATS" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                    </button>
+
+                    {/* DESIGN – dark sidebar */}
+                    <button
+                      type="button"
+                      onClick={() => { if (format === "pdf") setTemplateType("DESIGN"); }}
+                      disabled={format === "docx"}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-xl border-2 py-5 px-3 text-center transition-all",
+                        templateType === "DESIGN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
+                        format === "docx" && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                        <Layout className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-text-primary text-sm">Premium Dark</h3>
+                        <p className="mt-0.5 text-xs text-text-secondary">Dark sidebar design</p>
+                      </div>
+                      {templateType === "DESIGN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                    </button>
+
+                    {/* MODERN – serif classic */}
+                    <button
+                      type="button"
+                      onClick={() => setTemplateType("MODERN")}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-xl border-2 py-5 px-3 text-center transition-all",
+                        templateType === "MODERN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40"
+                      )}
+                    >
+                      <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                        <BookOpen className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-text-primary text-sm">Modern Classic</h3>
+                        <p className="mt-0.5 text-xs text-text-secondary">Serif · PDF & DOCX</p>
+                      </div>
+                      {templateType === "MODERN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                    </button>
+
+                    {/* ENHANCV – two-col colored */}
+                    <button
+                      type="button"
+                      onClick={() => { if (format === "pdf") setTemplateType("ENHANCV"); }}
+                      disabled={format === "docx"}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 rounded-xl border-2 py-5 px-3 text-center transition-all",
+                        templateType === "ENHANCV" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
+                        format === "docx" && "opacity-50 cursor-not-allowed"
+                      )}
+                    >
+                      <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
+                        <Columns className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-text-primary text-sm">Premium Two-Col</h3>
+                        <p className="mt-0.5 text-xs text-text-secondary">Accent · chip skills</p>
+                      </div>
+                      {templateType === "ENHANCV" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
+                    </button>
                   </div>
 
-                  <Link href="/dashboard" className="mt-6 block">
-                    <Button variant="outline" className="w-full">
-                      Edit Data in Profile Editor
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="space-y-3">
+                    <label className="text-sm font-semibold text-text-primary">File Format</label>
+                    <Select
+                      value={format}
+                      onChange={(value) => {
+                        const nextFormat = value as "pdf" | "docx";
+                        setFormat(nextFormat);
+                        // DESIGN and ENHANCV are PDF-only; reset to ATS if switching to docx
+                        if (nextFormat === "docx" && (templateType === "DESIGN" || templateType === "ENHANCV")) {
+                          setTemplateType("ATS");
+                        }
+                      }}
+                      options={[
+                        { value: "pdf", label: "PDF Document (.pdf)" },
+                        { value: "docx", label: "Word Document (.docx)" },
+                      ]}
+                    />
+                    {format === "docx" && (
+                      <p className="text-xs text-danger">Premium Dark and Two-Col templates are PDF only.</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setActiveStep("CUSTOMIZE")} className="shadow-lg shadow-primary/20">
+                  Next: Customise Layout
+                </Button>
+              </div>
+            </div>
           )}
 
-          {/* Step 2: Customize */}
+          {/* Step 2: Customise */}
           {activeStep === "CUSTOMIZE" && (
-            <Card variant="glass" className="border-primary/20 shadow-lg shadow-primary/5">
-              <CardHeader>
-                <CardTitle className="text-xl">Template & Format</CardTitle>
-                <CardDescription>Choose how your resume is presented.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-2 gap-3">
-                  {/* ATS */}
-                  <button
-                    type="button"
-                    onClick={() => setTemplateType("ATS")}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
-                      templateType === "ATS"
-                        ? "border-primary bg-primary/5 shadow-md"
-                        : "border-border bg-surface-low hover:border-primary/40"
-                    )}
-                  >
-                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
-                      <FileText className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-text-primary text-sm">ATS Friendly</h3>
-                      <p className="mt-0.5 text-xs text-text-secondary">Clean single-column</p>
-                    </div>
-                    {templateType === "ATS" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
-                  </button>
+            <div className="space-y-6 animate-in fade-in-50 duration-200">
+              {/* Section Visibility Switches */}
+              <Card variant="glass" className="border-primary/20 shadow-lg shadow-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-xl">Layout Sections</CardTitle>
+                  <CardDescription>Configure which sections to display on your resume.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-3">
+                    <Switch
+                      label="Show Professional Summary"
+                      checked={localConfig?.sections.summary ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, summary: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Work Experience"
+                      checked={localConfig?.sections.experience ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, experience: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Education History"
+                      checked={localConfig?.sections.education ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, education: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Technical Skills"
+                      checked={localConfig?.sections.skills ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, skills: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Projects"
+                      checked={localConfig?.sections.projects ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, projects: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Achievements"
+                      checked={localConfig?.sections.achievements ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, achievements: val }
+                      }))}
+                    />
+                    <Switch
+                      label="Show Custom Sections"
+                      checked={localConfig?.sections.customSections ?? true}
+                      onCheckedChange={(val) => updateLocalConfig(prev => ({
+                        ...prev,
+                        sections: { ...prev.sections, customSections: val }
+                      }))}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
 
-                  {/* DESIGN – dark sidebar */}
-                  <button
-                    type="button"
-                    onClick={() => { if (format === "pdf") setTemplateType("DESIGN"); }}
-                    disabled={format === "docx"}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
-                      templateType === "DESIGN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
-                      format === "docx" && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
-                      <Layout className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-text-primary text-sm">Premium Dark</h3>
-                      <p className="mt-0.5 text-xs text-text-secondary">Dark sidebar design</p>
-                    </div>
-                    {templateType === "DESIGN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
-                  </button>
-
-                  {/* MODERN – serif classic */}
-                  <button
-                    type="button"
-                    onClick={() => setTemplateType("MODERN")}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
-                      templateType === "MODERN" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40"
-                    )}
-                  >
-                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
-                      <BookOpen className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-text-primary text-sm">Modern Classic</h3>
-                      <p className="mt-0.5 text-xs text-text-secondary">Serif · PDF & DOCX</p>
-                    </div>
-                    {templateType === "MODERN" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
-                  </button>
-
-                  {/* ENHANCV – two-col colored */}
-                  <button
-                    type="button"
-                    onClick={() => { if (format === "pdf") setTemplateType("ENHANCV"); }}
-                    disabled={format === "docx"}
-                    className={cn(
-                      "relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 text-center transition-all",
-                      templateType === "ENHANCV" ? "border-primary bg-primary/5 shadow-md" : "border-border bg-surface-low hover:border-primary/40",
-                      format === "docx" && "opacity-50 cursor-not-allowed"
-                    )}
-                  >
-                    <div className="rounded-lg bg-surface-high p-3 text-text-primary shadow-sm">
-                      <Columns className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-text-primary text-sm">Premium Two-Col</h3>
-                      <p className="mt-0.5 text-xs text-text-secondary">Accent · chip skills</p>
-                    </div>
-                    {templateType === "ENHANCV" && <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-primary" />}
-                  </button>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold text-text-primary">File Format</label>
+              {/* Rendering Limits */}
+              <Card variant="surface" className="border-primary/10 shadow-md">
+                <CardHeader>
+                  <CardTitle className="text-xl">Content Limits</CardTitle>
+                  <CardDescription>Control the maximum number of items shown for each section.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
                   <Select
-                    value={format}
-                    onChange={(value) => {
-                      const nextFormat = value as "pdf" | "docx";
-                      setFormat(nextFormat);
-                      // DESIGN and ENHANCV are PDF-only; reset to ATS if switching to docx
-                      if (nextFormat === "docx" && (templateType === "DESIGN" || templateType === "ENHANCV")) {
-                        setTemplateType("ATS");
-                      }
-                    }}
+                    label="Max Experiences"
+                    value={String(localConfig?.limits.experiences ?? 5)}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      limits: { ...prev.limits, experiences: Number(val) }
+                    }))}
                     options={[
-                      { value: "pdf", label: "PDF Document (.pdf)" },
-                      { value: "docx", label: "Word Document (.docx)" },
+                      { value: "1", label: "1 Item" },
+                      { value: "2", label: "2 Items" },
+                      { value: "3", label: "3 Items" },
+                      { value: "4", label: "4 Items" },
+                      { value: "5", label: "5 Items" },
+                      { value: "10", label: "10 Items (All)" },
                     ]}
                   />
-                  {format === "docx" && (
-                    <p className="text-xs text-danger">Premium Dark and Two-Col templates are PDF only.</p>
-                  )}
+                  <Select
+                    label="Max Educations"
+                    value={String(localConfig?.limits.educations ?? 3)}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      limits: { ...prev.limits, educations: Number(val) }
+                    }))}
+                    options={[
+                      { value: "1", label: "1 Item" },
+                      { value: "2", label: "2 Items" },
+                      { value: "3", label: "3 Items" },
+                      { value: "4", label: "4 Items" },
+                      { value: "5", label: "5 Items" },
+                    ]}
+                  />
+                  <Select
+                    label="Max Projects"
+                    value={String(localConfig?.limits.projects ?? 3)}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      limits: { ...prev.limits, projects: Number(val) }
+                    }))}
+                    options={[
+                      { value: "1", label: "1 Item" },
+                      { value: "2", label: "2 Items" },
+                      { value: "3", label: "3 Items" },
+                      { value: "4", label: "4 Items" },
+                      { value: "5", label: "5 Items" },
+                    ]}
+                  />
+                  <Select
+                    label="Max Achievements"
+                    value={String(localConfig?.limits.achievements ?? 5)}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      limits: { ...prev.limits, achievements: Number(val) }
+                    }))}
+                    options={[
+                      { value: "1", label: "1 Item" },
+                      { value: "2", label: "2 Items" },
+                      { value: "3", label: "3 Items" },
+                      { value: "4", label: "4 Items" },
+                      { value: "5", label: "5 Items" },
+                      { value: "10", label: "10 Items" },
+                    ]}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Styling Selectors */}
+              <Card variant="glass" className="border-primary/20 shadow-lg shadow-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-xl">Typography & Styling</CardTitle>
+                  <CardDescription>Select typography settings for the final generated output.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-4 md:grid-cols-2">
+                  <Select
+                    label="Font Family"
+                    value={localConfig?.styling.fontFamily || "Arial"}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      styling: { ...prev.styling, fontFamily: val }
+                    }))}
+                    options={[
+                      { value: "Arial", label: "Arial (Sans-serif)" },
+                      { value: "Helvetica", label: "Helvetica (Sans-serif)" },
+                      { value: "Calibri", label: "Calibri (Sans-serif)" },
+                      { value: "Times New Roman", label: "Times New Roman (Serif)" },
+                      { value: "Georgia", label: "Georgia (Serif)" },
+                      { value: "Inter", label: "Inter (Premium)" },
+                      { value: "Roboto", label: "Roboto (Classic)" },
+                      { value: "Outfit", label: "Outfit (Modern)" },
+                    ]}
+                  />
+                  <Select
+                    label="Font Size"
+                    value={localConfig?.styling.fontSize || "9.5pt"}
+                    onChange={(val) => updateLocalConfig(prev => ({
+                      ...prev,
+                      styling: { ...prev.styling, fontSize: val }
+                    }))}
+                    options={[
+                      { value: "9pt", label: "9pt (Compact)" },
+                      { value: "9.5pt", label: "9.5pt (Standard)" },
+                      { value: "10pt", label: "10pt (Clean)" },
+                      { value: "11pt", label: "11pt (Readable)" },
+                      { value: "12pt", label: "12pt (Large)" },
+                    ]}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Save layout changes */}
+              <div className="flex items-center justify-between gap-3">
+                <Button variant="outline" onClick={() => setActiveStep("TEMPLATE")}>
+                  Back: Templates
+                </Button>
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={handleSaveConfig}
+                    isLoading={isSavingConfig}
+                    variant="outline"
+                  >
+                    Save Styling
+                  </Button>
+                  <Button onClick={() => setActiveStep("DOWNLOAD")} className="shadow-lg shadow-primary/20">
+                    Next: Download
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </div>
+          ) }
 
           {/* Step 3: Download (Includes AI Tailoring) */}
           {activeStep === "DOWNLOAD" && (
@@ -302,7 +589,7 @@ export default function ResumePage() {
                 <Button 
                   onClick={handleGenerate} 
                   isLoading={isGenerating} 
-                  className="w-full h-12 text-lg shadow-xl shadow-primary/20"
+                  className="w-full min-h-[3.5rem] py-3 text-lg shadow-xl shadow-primary/20"
                 >
                   <Download className="mr-2 h-5 w-5" />
                   Download {templateType === "ATS" ? "ATS" : templateType === "DESIGN" ? "Premium Dark" : templateType === "MODERN" ? "Modern" : "Premium Two-Col"} Resume
@@ -396,7 +683,7 @@ export default function ResumePage() {
             <Button
               onClick={async () => { await handleGenerate(); setMobilePreviewOpen(false); }}
               isLoading={isGenerating}
-              className="w-full h-12 text-base shadow-xl shadow-primary/20"
+              className="w-full min-h-[3.5rem] py-3 text-base shadow-xl shadow-primary/20"
             >
               <Download className="mr-2 h-5 w-5" />
               Download {templateType === "ATS" ? "ATS" : templateType === "DESIGN" ? "Premium Dark" : templateType === "MODERN" ? "Modern" : "Two-Col"} Resume

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import * as resumeService from "../services/resume.service";
 import * as resumeGeneratorService from "../services/resumeGenerator.service";
+import * as resumeParserService from "../services/resumeParser.service";
 import { trackEvent } from "../services/analytics.service";
 import { sendSuccess } from "../utils/response";
 
@@ -28,6 +29,32 @@ export const uploadResume = async (req: Request, res: Response, next: NextFuncti
       req.file.size
     );
     sendSuccess(res, resume, "Resume uploaded successfully", 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const parseResume = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, error: "No file uploaded" });
+      return;
+    }
+    if (req.file.mimetype !== "application/pdf") {
+      res.status(400).json({ success: false, error: "Only PDF files are allowed" });
+      return;
+    }
+
+    // 1. Parse PDF text
+    const text = await resumeParserService.parseResumeText(req.file.buffer);
+    
+    // 2. Call LLM to extract structured JSON
+    const parsedData = await resumeParserService.extractStructuredDetails(text);
+
+    // 3. Save details to database
+    await resumeParserService.autoFillUserProfile(req.user!.id, parsedData);
+
+    sendSuccess(res, parsedData, "Resume parsed and profile updated successfully", 200);
   } catch (error) {
     next(error);
   }

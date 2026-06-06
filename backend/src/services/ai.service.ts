@@ -19,10 +19,10 @@ function getApiKey(): string {
   return key;
 }
 
-export async function nimChat(messages: NimMessage[], opts?: { maxTokens?: number; temperature?: number; jsonMode?: boolean }) {
+export async function nimChat(messages: NimMessage[], opts?: { maxTokens?: number; temperature?: number; jsonMode?: boolean; model?: string }) {
   const apiKey = getApiKey();
   const payload: any = {
-    model: MODEL,
+    model: opts?.model ?? MODEL,
     messages,
     max_tokens: opts?.maxTokens ?? 4096,
     temperature: opts?.temperature ?? 0.8,

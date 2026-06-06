@@ -50,12 +50,12 @@ export function Hero() {
             Built for professionals. Designed to get you hired.
           </div>
           <h1 className="mt-4 md:mt-7 font-heading text-4xl font-black leading-[1.1] tracking-tight text-text-primary sm:text-7xl lg:text-[80px]">
-            Your Professional
+            Developer Portfolio
             <br />
-            Identity, <span className="animated-gradient-text">Reimagined.</span>
+            Builder & <span className="animated-gradient-text">ATS Resume Maker.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">
-            Turn your bio, experience, and projects into stunning profile cards and ATS-friendly resumes in minutes.
+            Sync GitHub activity, parse PDF resumes, write cover letters with AI, track real-time analytics, and export ATS-friendly resume templates in PDF & Word DOCX formats.
           </p>
 
           <div className="mt-6 md:mt-10 flex flex-col gap-4 sm:flex-row">

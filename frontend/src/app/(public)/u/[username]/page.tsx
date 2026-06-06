@@ -38,7 +38,7 @@ export async function generateMetadata({ params, searchParams }: PageProps): Pro
   }
 
   const ogUrl = `${getApiBaseUrl()}/u/${username}/og`;
-  const title = `${profile.fullName} (@${username}) | Profilix`;
+  const title = `${profile.fullName} | Developer Portfolio & Resume`;
   const description = profile.profile.bio || `${profile.fullName}'s developer portfolio on Profilix.`;
 
   return {

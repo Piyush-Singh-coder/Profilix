@@ -43,9 +43,9 @@ export const updateProfile = async (userId: string, data: UpdateProfileInput) =>
     create: {
       userId,
       displayName: data.displayName ?? "Profilix User",
-      ...data,
+      ...(data as any),
     },
-    update: data,
+    update: data as any,
     include: {
       techStacks: { include: { tech: true } },
     },

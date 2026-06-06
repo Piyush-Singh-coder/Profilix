@@ -6,6 +6,7 @@ import {
   DragEndEvent,
   PointerSensor,
   KeyboardSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -29,7 +30,6 @@ import { Project } from "@/types";
 
 interface ProjectFormState {
   title: string;
-  description: string;
   repoUrl: string;
   liveUrl: string;
   videoUrl: string;
@@ -38,7 +38,6 @@ interface ProjectFormState {
 
 const EMPTY_FORM: ProjectFormState = {
   title: "",
-  description: "",
   repoUrl: "",
   liveUrl: "",
   videoUrl: "",
@@ -73,6 +72,7 @@ export function ProjectsEditor() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -90,7 +90,6 @@ export function ProjectsEditor() {
     setEditingProject(project);
     setFormState({
       title: project.title || "",
-      description: project.description || "",
       repoUrl: project.repoUrl || "",
       liveUrl: project.liveUrl || "",
       videoUrl: project.videoUrl || "",
@@ -107,7 +106,7 @@ export function ProjectsEditor() {
 
     const payload = {
       title: formState.title.trim(),
-      description: formState.description.trim() || undefined,
+      description: null,
       repoUrl: formState.repoUrl.trim() || undefined,
       liveUrl: formState.liveUrl.trim() || undefined,
       videoUrl: formState.videoUrl.trim() || undefined,
@@ -150,6 +149,23 @@ export function ProjectsEditor() {
       await togglePin(projectId);
     } catch {
       toast.error("Failed to toggle pin. You can pin at most 3 projects.");
+    }
+  };
+
+  const moveProject = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= projectOrder.length) return;
+
+    const previousOrder = projectOrder;
+    const nextOrder = arrayMove(projectOrder, index, targetIndex);
+    setProjectOrder(nextOrder);
+
+    try {
+      await reorderProjects(nextOrder.map((project) => project.id));
+      toast.success("Project order updated");
+    } catch {
+      setProjectOrder(previousOrder);
+      toast.error("Failed to reorder projects");
     }
   };
 
@@ -212,13 +228,16 @@ export function ProjectsEditor() {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
-                  {projectOrder.map((project) => (
+                  {projectOrder.map((project, index) => (
                     <ProjectCard
                       key={project.id}
                       project={project}
                       onEdit={openEditModal}
                       onDelete={handleDelete}
                       onTogglePin={handleTogglePin}
+                      onMove={(dir) => moveProject(index, dir)}
+                      isFirst={index === 0}
+                      isLast={index === projectOrder.length - 1}
                     />
                   ))}
                 </div>
@@ -247,13 +266,6 @@ export function ProjectsEditor() {
               onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
               placeholder="Realtime Issue Tracker"
               required
-            />
-            <Textarea
-              label="Tagline / Short Description"
-              value={formState.description}
-              onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-              rows={2}
-              placeholder="A brief one-liner explaining what this project does."
             />
           </div>
 

@@ -18,12 +18,28 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: {
     template: "%s | Profilix",
-    default: "Profilix – Free ATS Resume Generator & Professional Profile Cards",
+    default: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
   },
   description:
-    "Profilix is the #1 free ATS resume generator for developers and job seekers. Build ATS-friendly resumes, create professional profile cards, share your portfolio with QR codes, and land more interviews. No credit card required.",
+    "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub activity, parse PDF resumes, write cover letters with AI, track analytics, and export ATS-friendly resume templates in PDF & Word DOCX formats.",
   keywords: [
-    // Core / highest priority
+    // High-intent primary keywords
+    "developer portfolio builder",
+    "ATS resume maker",
+    "ATS resume builder",
+    "AI resume builder",
+    "online portfolio for developers",
+    "developer resume builder",
+    "AI resume parser website autofill",
+    "convert PDF resume to portfolio site",
+    "instant resume to markdown portfolio",
+    "ATS friendly developer resume template",
+    "software engineer resume builder with GitHub link",
+    "best resume format for senior developers",
+    "generate recruiter QR code for resume",
+    "track resume download analytics",
+    "interactive portfolio with downloadable word resume",
+    // Core search keywords
     "free ATS resume generator",
     "ATS resume builder free",
     "ATS friendly resume maker",
@@ -31,26 +47,21 @@ export const metadata: Metadata = {
     "free resume generator",
     "ATS resume generator",
     "free ATS resume",
-    // Developer / student specific
     "developer resume builder",
     "software engineer resume generator",
     "computer science student resume",
     "student portfolio creator",
     "GitHub portfolio card",
     "developer profile card",
-    // Profile card
     "professional profile card generator",
     "digital business card",
     "portfolio card with QR code",
-    // QR
     "QR code portfolio",
     "share resume with QR code",
     "digital portfolio QR",
-    // Design/premium
     "premium resume templates",
     "ATS friendly resume templates",
     "professional resume design",
-    // Long-tail AI search queries
     "how to pass ATS resume",
     "AI resume builder free",
     "resume builder for developers",
@@ -78,16 +89,16 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Profilix – Free ATS Resume Generator & Professional Profile Cards",
+    title: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
     description:
-      "Build ATS-friendly resumes, create professional profile cards, and share your portfolio via QR code. 100% free. No credit card required.",
+      "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub, write resumes/cover letters with AI, track analytics, and share via QR code.",
     siteName: "Profilix",
     images: [
       {
         url: "/og-default.png",
         width: 1200,
         height: 630,
-        alt: "Profilix – Free ATS Resume Generator & Developer Profile Cards",
+        alt: "Profilix – Developer Portfolio Builder & ATS Resume Maker",
       },
     ],
   },
@@ -95,9 +106,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@profilix_site",
     creator: "@profilix_site",
-    title: "Profilix – Free ATS Resume Generator & Professional Profile Cards",
+    title: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
     description:
-      "Build ATS-friendly resumes, create professional profile cards, and share your portfolio via QR code. 100% free. No credit card required.",
+      "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub, write resumes/cover letters with AI, track analytics, and share via QR code.",
     images: ["/og-default.png"],
   },
   icons: {

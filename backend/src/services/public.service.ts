@@ -29,6 +29,12 @@ export const getPublicProfile = async (username: string, mode?: string) => {
       githubStats: true,
       socialLinks: true,
       resume: { select: { fileUrl: true, updatedAt: true } },
+      customSections: {
+        orderBy: { displayOrder: "asc" },
+      },
+      profileSkills: {
+        orderBy: { displayOrder: "asc" },
+      },
     },
   });
 
@@ -58,6 +64,8 @@ export const getPublicProfile = async (username: string, mode?: string) => {
     achievements: user.achievements,
     educations: user.educations,
     githubStats: user.githubStats,
+    customSections: user.customSections,
+    profileSkills: user.profileSkills,
   };
 
   if (isRecruiterMode) {

@@ -25,42 +25,42 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog } from "@/components/ui/Dialog";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { useProfileSkillStore } from "@/store/useProfileSkillStore";
-import { ProfileSkill } from "@/types";
+import { useCustomSectionStore } from "@/store/useCustomSectionStore";
+import { CustomSection } from "@/types";
 
-interface SkillFormState {
-  category: string;
-  skillsRaw: string;
+interface CustomSectionFormState {
+  title: string;
+  bulletsRaw: string;
 }
 
-const EMPTY_FORM: SkillFormState = {
-  category: "",
-  skillsRaw: "",
+const EMPTY_FORM: CustomSectionFormState = {
+  title: "",
+  bulletsRaw: "",
 };
 
-export function SkillsEditor() {
+export function CustomSectionEditor() {
   const {
-    profileSkills,
+    customSections,
     isLoading,
     isSaving,
-    fetchProfileSkills,
-    createProfileSkill,
-    updateProfileSkill,
-    deleteProfileSkill,
-  } = useProfileSkillStore();
+    fetchCustomSections,
+    createCustomSection,
+    updateCustomSection,
+    deleteCustomSection,
+  } = useCustomSectionStore();
 
-  const [skillsOrder, setSkillsOrder] = useState<ProfileSkill[]>([]);
+  const [sectionsOrder, setSectionsOrder] = useState<CustomSection[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingSkill, setEditingSkill] = useState<ProfileSkill | null>(null);
-  const [formState, setFormState] = useState<SkillFormState>(EMPTY_FORM);
+  const [editingSection, setEditingSection] = useState<CustomSection | null>(null);
+  const [formState, setFormState] = useState<CustomSectionFormState>(EMPTY_FORM);
 
   useEffect(() => {
-    fetchProfileSkills();
-  }, [fetchProfileSkills]);
+    fetchCustomSections();
+  }, [fetchCustomSections]);
 
   useEffect(() => {
-    setSkillsOrder(profileSkills);
-  }, [profileSkills]);
+    setSectionsOrder(customSections);
+  }, [customSections]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -70,82 +70,82 @@ export function SkillsEditor() {
     })
   );
 
-  const orderedIds = useMemo(() => skillsOrder.map((s) => s.id), [skillsOrder]);
+  const orderedIds = useMemo(() => sectionsOrder.map((s) => s.id), [sectionsOrder]);
 
   const openCreateModal = () => {
-    setEditingSkill(null);
+    setEditingSection(null);
     setFormState(EMPTY_FORM);
     setIsModalOpen(true);
   };
 
-  const openEditModal = (skill: ProfileSkill) => {
-    setEditingSkill(skill);
+  const openEditModal = (section: CustomSection) => {
+    setEditingSection(section);
     setFormState({
-      category: skill.category,
-      skillsRaw: skill.skills.join(", "),
+      title: section.title,
+      bulletsRaw: section.bullets.join("\n"),
     });
     setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
-    const category = formState.category.trim();
-    const skills = formState.skillsRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+    const title = formState.title.trim();
+    const bullets = formState.bulletsRaw
+      .split("\n")
+      .map((b) => b.trim())
+      .filter((b) => b.length > 0);
 
-    if (!category) {
-      toast.error("Category name is required");
+    if (!title) {
+      toast.error("Section title is required");
       return;
     }
 
-    if (skills.length === 0) {
-      toast.error("At least one skill is required");
+    if (bullets.length === 0) {
+      toast.error("At least one bullet point is required");
       return;
     }
 
     try {
-      if (editingSkill) {
-        await updateProfileSkill(editingSkill.id, { category, skills });
-        toast.success("Skill category updated");
+      if (editingSection) {
+        await updateCustomSection(editingSection.id, { title, bullets });
+        toast.success("Custom section updated");
       } else {
-        await createProfileSkill({
-          category,
-          skills,
-          displayOrder: profileSkills.length,
+        await createCustomSection({
+          title,
+          bullets,
+          displayOrder: customSections.length,
         });
-        toast.success("Skill category created");
+        toast.success("Custom section created");
       }
       setIsModalOpen(false);
       setFormState(EMPTY_FORM);
-      setEditingSkill(null);
+      setEditingSection(null);
     } catch {
-      toast.error("Failed to save skill category");
+      toast.error("Failed to save custom section");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Delete this skill category?")) return;
+    if (!window.confirm("Delete this custom section?")) return;
     try {
-      await deleteProfileSkill(id);
-      toast.success("Skill category deleted");
+      await deleteCustomSection(id);
+      toast.success("Custom section deleted");
     } catch {
-      toast.error("Failed to delete skill category");
+      toast.error("Failed to delete custom section");
     }
   };
 
-  const moveCategory = async (index: number, direction: "up" | "down") => {
+  const moveSection = async (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= skillsOrder.length) return;
+    if (targetIndex < 0 || targetIndex >= sectionsOrder.length) return;
 
-    const previousOrder = skillsOrder;
-    const nextOrder = arrayMove(skillsOrder, index, targetIndex);
-    setSkillsOrder(nextOrder);
+    const previousOrder = sectionsOrder;
+    const nextOrder = arrayMove(sectionsOrder, index, targetIndex);
+    setSectionsOrder(nextOrder);
 
     try {
       // Optimistically swap orders in UI
-      useProfileSkillStore.setState({
-        profileSkills: nextOrder.map((item, idx) => ({ ...item, displayOrder: idx })),
+      useCustomSectionStore.setState({
+        customSections: nextOrder.map((item, idx) => ({ ...item, displayOrder: idx })),
       });
 
       // Update in backend
@@ -156,13 +156,13 @@ export function SkillsEditor() {
             const original = previousOrder.find((s) => s.id === item.id);
             return original && original.displayOrder !== item.displayOrder;
           })
-          .map(({ id, displayOrder }) => updateProfileSkill(id, { displayOrder }))
+          .map(({ id, displayOrder }) => updateCustomSection(id, { displayOrder }))
       );
       toast.success("Display order updated");
     } catch {
       // Rollback on failure
-      setSkillsOrder(previousOrder);
-      useProfileSkillStore.setState({ profileSkills: previousOrder });
+      setSectionsOrder(previousOrder);
+      useCustomSectionStore.setState({ customSections: previousOrder });
       toast.error("Failed to update display order");
     }
   };
@@ -175,14 +175,14 @@ export function SkillsEditor() {
     const newIndex = orderedIds.indexOf(String(over.id));
     if (oldIndex < 0 || newIndex < 0) return;
 
-    const previousOrder = skillsOrder;
-    const nextOrder = arrayMove(skillsOrder, oldIndex, newIndex);
-    setSkillsOrder(nextOrder);
+    const previousOrder = sectionsOrder;
+    const nextOrder = arrayMove(sectionsOrder, oldIndex, newIndex);
+    setSectionsOrder(nextOrder);
 
     try {
       // Optimistically swap orders in UI
-      useProfileSkillStore.setState({
-        profileSkills: nextOrder.map((item, idx) => ({ ...item, displayOrder: idx })),
+      useCustomSectionStore.setState({
+        customSections: nextOrder.map((item, idx) => ({ ...item, displayOrder: idx })),
       });
 
       // Update in backend
@@ -193,18 +193,18 @@ export function SkillsEditor() {
             const original = previousOrder.find((s) => s.id === item.id);
             return original && original.displayOrder !== item.displayOrder;
           })
-          .map(({ id, displayOrder }) => updateProfileSkill(id, { displayOrder }))
+          .map(({ id, displayOrder }) => updateCustomSection(id, { displayOrder }))
       );
       toast.success("Display order updated");
     } catch {
       // Rollback on failure
-      setSkillsOrder(previousOrder);
-      useProfileSkillStore.setState({ profileSkills: previousOrder });
+      setSectionsOrder(previousOrder);
+      useCustomSectionStore.setState({ customSections: previousOrder });
       toast.error("Failed to update display order");
     }
   };
 
-  if (isLoading && profileSkills.length === 0) {
+  if (isLoading && customSections.length === 0) {
     return (
       <div className="flex h-40 items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -216,53 +216,48 @@ export function SkillsEditor() {
     <div className="animate-in space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="font-heading text-3xl font-bold">Skills & Technologies</h1>
+          <h1 className="font-heading text-3xl font-bold">Custom Sections</h1>
           <p className="mt-1 text-sm text-text-secondary">
-            Group your skills into custom categories (e.g. Frontend, Databases, Tools) to present them clearly.
+            Create user-defined headings (e.g. Languages Known, Certifications, Volunteer Work) with custom bullet items.
           </p>
         </div>
         <Button onClick={openCreateModal}>
           <Plus className="mr-2 h-4 w-4" />
-          New Category
+          New Custom Section
         </Button>
       </div>
 
       <Card variant="glass">
         <CardHeader>
-          <CardTitle>Skill Categories</CardTitle>
+          <CardTitle>Custom Section List</CardTitle>
           <CardDescription>
-            Manage and reorder your customized skill sections.
+            Manage and reorder your customized resume sections.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {skillsOrder.length === 0 ? (
+          {sectionsOrder.length === 0 ? (
             <div className="rounded-[var(--radius-md)] border border-dashed border-border p-12 text-center">
-              <p className="text-sm text-text-secondary">No custom skills created yet. Add a category to start showcasing your technical toolkit.</p>
+              <p className="text-sm text-text-secondary">No custom sections created yet. Add one to show additional achievements or custom lists.</p>
             </div>
           ) : (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
-                  {skillsOrder.map((categoryGroup, index) => (
-                    <SortableItem key={categoryGroup.id} id={categoryGroup.id}>
+                  {sectionsOrder.map((section, index) => (
+                    <SortableItem key={section.id} id={section.id}>
                       <div className="pr-7 sm:pr-9">
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                           <div className="min-w-0 flex-1 space-y-2">
                             <h3 className="text-base font-bold text-text-primary flex items-center gap-2">
-                              <span className="rounded-md bg-primary/10 px-2 py-0.5 text-xs text-primary font-semibold">
-                                {categoryGroup.category}
+                              <span className="rounded-md bg-primary/10 px-2.5 py-0.5 text-xs text-primary font-semibold">
+                                {section.title}
                               </span>
                             </h3>
-                            <div className="flex flex-wrap gap-1.5">
-                              {categoryGroup.skills.map((skill, sIdx) => (
-                                <span
-                                  key={sIdx}
-                                  className="rounded-full bg-surface-high border border-border px-2.5 py-0.5 text-xs text-text-primary"
-                                >
-                                  {skill}
-                                </span>
+                            <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
+                              {section.bullets.map((bullet, bIdx) => (
+                                <li key={bIdx}>{bullet}</li>
                               ))}
-                            </div>
+                            </ul>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
@@ -272,7 +267,7 @@ export function SkillsEditor() {
                                 size="icon"
                                 className="h-7 w-7 text-text-secondary disabled:opacity-30"
                                 disabled={index === 0}
-                                onClick={() => moveCategory(index, "up")}
+                                onClick={() => moveSection(index, "up")}
                                 type="button"
                               >
                                 <ArrowUp className="h-4 w-4" />
@@ -281,8 +276,8 @@ export function SkillsEditor() {
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-text-secondary disabled:opacity-30"
-                                disabled={index === skillsOrder.length - 1}
-                                onClick={() => moveCategory(index, "down")}
+                                disabled={index === sectionsOrder.length - 1}
+                                onClick={() => moveSection(index, "down")}
                                 type="button"
                               >
                                 <ArrowDown className="h-4 w-4" />
@@ -291,7 +286,7 @@ export function SkillsEditor() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => openEditModal(categoryGroup)}
+                              onClick={() => openEditModal(section)}
                               className="h-8"
                             >
                               <Edit2 className="mr-1.5 h-3.5 w-3.5" />
@@ -299,7 +294,7 @@ export function SkillsEditor() {
                             </Button>
                             <button
                               type="button"
-                              onClick={() => handleDelete(categoryGroup.id)}
+                              onClick={() => handleDelete(section.id)}
                               className="inline-flex items-center gap-1 rounded-full border border-danger/30 px-3 py-1 text-xs text-danger transition-colors hover:bg-danger/10"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -320,33 +315,33 @@ export function SkillsEditor() {
       <Dialog
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        title={editingSkill ? "Edit Skill Category" : "Create Skill Category"}
-        description="Add a header and list of skills to group under it."
+        title={editingSection ? "Edit Custom Section" : "Create Custom Section"}
+        description="Add a section title and the bullet highlights that go with it."
       >
         <div className="space-y-6 py-2">
           <Input
-            label="Category Heading"
-            value={formState.category}
-            onChange={(event) => setFormState((prev) => ({ ...prev, category: event.target.value }))}
-            placeholder="Frontend, Backend, Languages, Tools"
+            label="Section Title"
+            value={formState.title}
+            onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))}
+            placeholder="Languages Known, Certifications, Volunteer Work, Interests"
             required
-            info="The subheading that describes this group of skills."
+            info="The title/header of the custom section."
           />
 
           <div>
             <Textarea
-              label="Skills (Comma-separated)"
-              value={formState.skillsRaw}
-              onChange={(event) => setFormState((prev) => ({ ...prev, skillsRaw: event.target.value }))}
-              rows={4}
-              placeholder="HTML, CSS, JavaScript, React, Next.js"
+              label="Section Bullet Points (one per line)"
+              value={formState.bulletsRaw}
+              onChange={(event) => setFormState((prev) => ({ ...prev, bulletsRaw: event.target.value }))}
+              rows={6}
+              placeholder={"English (Native speaker)\nFrench (Conversational)\nGerman (Basic)"}
               required
-              info="Enter the skills separated by commas. We will automatically format them as individual tags."
+              info="Enter the details, one bullet point per line."
             />
             <div className="mt-2 flex items-start gap-1 text-xs text-text-secondary">
               <HelpCircle className="h-3.5 w-3.5 shrink-0 text-primary mt-0.5" />
               <span>
-                Example: Typing <code className="rounded bg-surface-low border border-border px-1">HTML, CSS, JS</code> will output 3 skill tags.
+                Enter each highlight on a new line. They will be rendered as a bulleted list in your resume and profile.
               </span>
             </div>
           </div>
@@ -360,7 +355,7 @@ export function SkillsEditor() {
               isLoading={isSaving}
               className="min-w-[140px] shadow-lg shadow-primary/20"
             >
-              {editingSkill ? "Save Changes" : "Create Category"}
+              {editingSection ? "Save Changes" : "Create Section"}
             </Button>
           </div>
         </div>

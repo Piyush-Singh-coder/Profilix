@@ -21,6 +21,22 @@ type Update = {
 
 const UPDATES: Update[] = [
   {
+    version: "2.2.0",
+    date: "June 2026",
+    badge: "new",
+    title: "AI Resume Parser, Redesigned Profiles & Analytics",
+    description: "Our biggest update yet! We've integrated an AI Resume PDF Parser, completely redesigned the public portfolio layouts, and added visitor analytics.",
+    changes: [
+      "Launched AI Resume PDF Parser powered by Llama 3.3 70B to instantly autofill user profiles",
+      "Redesigned public profile card layouts with a premium, dark glassmorphic design and custom timelines",
+      "Implemented a real-time analytics dashboard to track page views, resume downloads, and social clicks",
+      "Added support for custom sections (Certifications, Languages Known) and categorized technical skills",
+      "Created downloadable QR lock screen wallpapers and recruiter-oriented QR modes (?mode=hire)",
+      "Strengthened system security with heavy rate limiters on AI, PDF generation, and GitHub sync",
+      "Optimized SEO metadata across landing pages and dynamic user portfolio layouts",
+    ],
+  },
+  {
     version: "2.1.0",
     date: "May 2026",
     badge: "new",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, GraduationCap, Trash2 } from "lucide-react";
+import { Calendar, GraduationCap, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { Education } from "@/types";
 import { SortableItem } from "@/components/ui/SortableItem";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +9,9 @@ interface EducationCardProps {
   education: Education;
   onEdit: (education: Education) => void;
   onDelete: (id: string) => void;
+  onMove?: (direction: "up" | "down") => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 function formatMonthYear(dateStr: string): string {
@@ -22,7 +25,7 @@ function formatDateRange(startDate: string, endDate: string | null, isCurrent: b
   return `${start} - ${end}`;
 }
 
-export default function EducationCard({ education, onEdit, onDelete }: EducationCardProps) {
+export default function EducationCard({ education, onEdit, onDelete, onMove, isFirst, isLast }: EducationCardProps) {
   const subtitle = [education.degree, education.fieldOfStudy].filter(Boolean).join(", ");
 
   return (
@@ -64,6 +67,30 @@ export default function EducationCard({ education, onEdit, onDelete }: Education
         ) : null}
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
+          {onMove && (
+            <div className="flex sm:hidden items-center gap-0.5 border-r border-border/50 pr-1.5 mr-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isFirst}
+                onClick={() => onMove("up")}
+                type="button"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isLast}
+                onClick={() => onMove("down")}
+                type="button"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           <Button size="sm" variant="outline" onClick={() => onEdit(education)}>
             Edit
           </Button>

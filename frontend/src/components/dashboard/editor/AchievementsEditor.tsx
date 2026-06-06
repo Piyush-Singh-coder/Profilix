@@ -6,6 +6,7 @@ import {
   DragEndEvent,
   PointerSensor,
   KeyboardSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -83,6 +84,7 @@ export function AchievementsEditor() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -186,6 +188,31 @@ export function AchievementsEditor() {
     }
   };
 
+  const moveAchievement = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= achievementOrder.length) return;
+
+    const previousOrder = achievementOrder;
+    const nextOrder = arrayMove(achievementOrder, index, targetIndex);
+    setAchievementOrder(nextOrder);
+
+    try {
+      const updates = nextOrder.map((a, idx) => ({ id: a.id, displayOrder: idx }));
+      await Promise.all(
+        updates
+          .filter((item) => {
+            const original = previousOrder.find((a) => a.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) => updateAchievement(id, { displayOrder }))
+      );
+      toast.success("Achievement order updated");
+    } catch {
+      setAchievementOrder(previousOrder);
+      toast.error("Failed to reorder achievements");
+    }
+  };
+
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -259,12 +286,15 @@ export function AchievementsEditor() {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
-                  {achievementOrder.map((achievement) => (
+                  {achievementOrder.map((achievement, index) => (
                     <AchievementCard
                       key={achievement.id}
                       achievement={achievement}
                       onEdit={openEditModal}
                       onDelete={handleDelete}
+                      onMove={(dir) => moveAchievement(index, dir)}
+                      isFirst={index === 0}
+                      isLast={index === achievementOrder.length - 1}
                     />
                   ))}
                 </div>

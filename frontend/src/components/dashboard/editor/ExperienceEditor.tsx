@@ -6,6 +6,7 @@ import {
   DragEndEvent,
   PointerSensor,
   KeyboardSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -35,7 +36,6 @@ interface ExperienceFormState {
   startDate: string;
   endDate: string;
   isCurrent: boolean;
-  description: string;
   bullets: string;
 }
 
@@ -46,7 +46,6 @@ const EMPTY_FORM: ExperienceFormState = {
   startDate: "",
   endDate: "",
   isCurrent: false,
-  description: "",
   bullets: "",
 };
 
@@ -76,6 +75,7 @@ export function ExperienceEditor() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -98,7 +98,6 @@ export function ExperienceEditor() {
       startDate: experience.startDate ? experience.startDate.split("T")[0] : "",
       endDate: experience.endDate ? experience.endDate.split("T")[0] : "",
       isCurrent: experience.isCurrent || false,
-      description: experience.description || "",
       bullets: (experience.bullets || []).join("\n"),
     });
     setIsModalOpen(true);
@@ -125,7 +124,7 @@ export function ExperienceEditor() {
       startDate: formState.startDate,
       endDate: formState.isCurrent ? undefined : formState.endDate || undefined,
       isCurrent: formState.isCurrent,
-      description: formState.description.trim() || undefined,
+      description: undefined, // description field removed from UI
       bullets: bullets.length > 0 ? bullets : undefined,
     };
 
@@ -167,6 +166,31 @@ export function ExperienceEditor() {
       toast.success("Experience deleted");
     } catch {
       toast.error("Failed to delete experience");
+    }
+  };
+
+  const moveExperience = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= experienceOrder.length) return;
+
+    const previousOrder = experienceOrder;
+    const nextOrder = arrayMove(experienceOrder, index, targetIndex);
+    setExperienceOrder(nextOrder);
+
+    try {
+      const updates = nextOrder.map((exp, idx) => ({ id: exp.id, displayOrder: idx }));
+      await Promise.all(
+        updates
+          .filter((item) => {
+            const original = previousOrder.find((e) => e.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) => updateExperience(id, { displayOrder }))
+      );
+      toast.success("Experience order updated");
+    } catch {
+      setExperienceOrder(previousOrder);
+      toast.error("Failed to reorder experiences");
     }
   };
 
@@ -241,12 +265,15 @@ export function ExperienceEditor() {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
-                  {experienceOrder.map((experience) => (
+                  {experienceOrder.map((experience, index) => (
                     <ExperienceCard
                       key={experience.id}
                       experience={experience}
                       onEdit={openEditModal}
                       onDelete={handleDelete}
+                      onMove={(dir) => moveExperience(index, dir)}
+                      isFirst={index === 0}
+                      isLast={index === experienceOrder.length - 1}
                     />
                   ))}
                 </div>
@@ -340,14 +367,6 @@ export function ExperienceEditor() {
               <Plus className="h-4 w-4" />
               <h4 className="text-sm font-bold uppercase tracking-wider">Impact & Details</h4>
             </div>
-            <Textarea
-              label="High-level Description"
-              value={formState.description}
-              onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
-              rows={3}
-              placeholder="Brief description of your role and responsibilities."
-              info="A high level overview. Focus on the 'what'."
-            />
             <Textarea
               label="Key Achievements (Bullets)"
               value={formState.bullets}

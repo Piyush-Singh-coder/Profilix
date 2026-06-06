@@ -6,8 +6,10 @@ import { EducationEditor } from "@/components/dashboard/editor/EducationEditor";
 import { SkillsEditor } from "@/components/dashboard/editor/SkillsEditor";
 import { ProjectsEditor } from "@/components/dashboard/editor/ProjectsEditor";
 import { AchievementsEditor } from "@/components/dashboard/editor/AchievementsEditor";
+import { CustomSectionEditor } from "@/components/dashboard/editor/CustomSectionEditor";
 import { SocialsEditor } from "@/components/dashboard/editor/SocialsEditor";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { ResumeParserCard } from "@/components/dashboard/ResumeParserCard";
 import { User } from "lucide-react";
 
 export default function UnifiedProfileEditorPage() {
@@ -21,6 +23,8 @@ export default function UnifiedProfileEditorPage() {
       />
 
       <div className="flex flex-col gap-6">
+        <ResumeParserCard />
+        
         <section id="identity">
           <IdentityEditor />
         </section>
@@ -43,6 +47,10 @@ export default function UnifiedProfileEditorPage() {
 
         <section id="achievements">
           <AchievementsEditor />
+        </section>
+
+        <section id="custom-sections">
+          <CustomSectionEditor />
         </section>
 
         <section id="socials">

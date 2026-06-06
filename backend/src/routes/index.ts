@@ -12,6 +12,8 @@ import experienceRoutes from "./experience.routes";
 import achievementRoutes from "./achievement.routes";
 import educationRoutes from "./education.routes";
 import coverLetterRoutes from "./coverLetter.routes";
+import profileSkillRoutes from "./profileSkill.routes";
+import customSectionRoutes from "./customSection.routes";
 
 const router = Router();
 
@@ -27,6 +29,8 @@ router.use("/github", githubRoutes);
 router.use("/experience", experienceRoutes);
 router.use("/achievements", achievementRoutes);
 router.use("/education", educationRoutes);
+router.use("/profile-skills", profileSkillRoutes);
+router.use("/custom-sections", customSectionRoutes);
 router.use("/u", publicRoutes);
 
 export default router;

@@ -19,6 +19,74 @@ const THEME_COLOR_MAP: Record<string, string> = {
   SKEUOMORPHIC: "#c3a069",
 };
 
+interface ResumeConfig {
+  sections: {
+    summary: boolean;
+    experience: boolean;
+    education: boolean;
+    projects: boolean;
+    skills: boolean;
+    achievements: boolean;
+    customSections: boolean;
+  };
+  limits: {
+    projects: number;
+    experiences: number;
+    achievements: number;
+    educations: number;
+  };
+  styling: {
+    fontFamily: string;
+    fontSize: string;
+  };
+}
+
+function parseResumeConfig(profile: any): ResumeConfig {
+  const defaults: ResumeConfig = {
+    sections: {
+      summary: true,
+      experience: true,
+      education: true,
+      projects: true,
+      skills: true,
+      achievements: true,
+      customSections: true,
+    },
+    limits: {
+      projects: 3,
+      experiences: 5,
+      achievements: 5,
+      educations: 3,
+    },
+    styling: {
+      fontFamily: "Arial",
+      fontSize: "9.5pt",
+    },
+  };
+
+  if (!profile?.resumeConfig) return defaults;
+  
+  try {
+    const config = typeof profile.resumeConfig === "string" 
+      ? JSON.parse(profile.resumeConfig) 
+      : profile.resumeConfig;
+      
+    return {
+      sections: { ...defaults.sections, ...config.sections },
+      limits: { ...defaults.limits, ...config.limits },
+      styling: { ...defaults.styling, ...config.styling },
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+function getFontFamilyCss(fontFamily: string) {
+  const serifFonts = ["Georgia", "Times New Roman", "Garamond"];
+  const fallback = serifFonts.includes(fontFamily) ? "serif" : "sans-serif";
+  return `font-family: "${fontFamily}", ${fallback};`;
+}
+
 function monthYear(dateStr: string) {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
@@ -39,7 +107,6 @@ function cleanUrl(url: string) {
 
 /** Returns the first `maxSentences` complete sentences from a block of text. */
 function capToSentences(text: string, maxSentences = 2): string {
-  // Split on sentence-ending punctuation followed by whitespace or end-of-string
   const sentenceEnds = /(?<=[.!?])\s+/g;
   const parts: string[] = [];
   let last = 0;
@@ -49,7 +116,6 @@ function capToSentences(text: string, maxSentences = 2): string {
     last = match.index + match[0].length;
     if (parts.length >= maxSentences) break;
   }
-  // If we haven't reached maxSentences yet, include the remainder (it may not end with punctuation)
   if (parts.length < maxSentences && last < text.length) {
     const remainder = text.slice(last).trim();
     if (remainder) parts.push(remainder);
@@ -76,7 +142,7 @@ export async function getResumeData(userId: string) {
   });
   if (!user) throw new BadRequestError("User not found");
 
-  const [projects, experiences, achievements, educations, socialLinks] = await Promise.all([
+  const [projects, experiences, achievements, educations, socialLinks, profileSkills, customSections] = await Promise.all([
     prisma.project.findMany({
       where: { userId },
       orderBy: [{ isPinned: "desc" }, { displayOrder: "asc" }],
@@ -97,9 +163,17 @@ export async function getResumeData(userId: string) {
       where: { userId },
       orderBy: [{ platform: "asc" }],
     }),
+    prisma.profileSkill.findMany({
+      where: { userId },
+      orderBy: { displayOrder: "asc" },
+    }),
+    prisma.customSection.findMany({
+      where: { userId },
+      orderBy: { displayOrder: "asc" },
+    }),
   ]);
 
-  return { user, projects, experiences, achievements, educations, socialLinks };
+  return { user, projects, experiences, achievements, educations, socialLinks, profileSkills, customSections };
 }
 
 export async function maybeTailorWithAI(args: {
@@ -138,13 +212,11 @@ export async function maybeTailorWithAI(args: {
 
   console.log(`[BatchAI] Tailoring ${items.length} items for job description...`);
 
-  // Call batch AI service
   const results = await batchTailorBullets({
     jobDescription: jobDescription.trim(),
     items,
   });
 
-  // Map results back
   const nextExperiences = data.experiences.map((exp) => {
     const tailored = results[exp.id];
     return tailored ? { ...exp, bullets: tailored } : exp;
@@ -169,35 +241,40 @@ function escapeHtml(input: string | null | undefined) {
 }
 
 function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, themeName: string) {
-  const { user, socialLinks, experiences, projects, educations, achievements } = data;
+  const { user, socialLinks, experiences, projects, educations, achievements, profileSkills, customSections } = data;
+  const config = parseResumeConfig(user.profile);
   const primaryColor = THEME_COLOR_MAP[themeName] || "#111111";
 
-  // Category Labels
-  const categoryLabels: Record<string, string> = {
-    LANGUAGE: "Languages",
-    FRONTEND: "Frontend",
-    BACKEND: "Backend",
-    DATABASE: "Database",
-    DEVOPS: "Tools",
-    TOOL: "Tools",
-    CLOUD: "Cloud",
-    CS_CORE: "CS Core",
-    OTHER: "Other"
-  };
-
-  // Grouped Skills
-  const techStacks = user.profile?.techStacks || [];
-  const groupedSkills: Record<string, string[]> = {};
-  techStacks.forEach((ps) => {
-    const label = categoryLabels[ps.tech.category] || categoryLabels.OTHER;
-    if (!groupedSkills[label]) groupedSkills[label] = [];
-    groupedSkills[label].push(ps.tech.name);
-  });
-
-  const skillsHtml = Object.entries(groupedSkills)
-    .map(([label, names]) =>
-      `<div class="s-label">${escapeHtml(label)}</div><div class="s-value">${escapeHtml(names.join(", "))}</div>`
-    ).join("");
+  // Grouped Skills (custom or legacy fallback)
+  let skillsHtml = "";
+  if (profileSkills && profileSkills.length > 0) {
+    skillsHtml = profileSkills
+      .map((ps) =>
+        `<div class="s-label">${escapeHtml(ps.category)}</div><div class="s-value">${escapeHtml(ps.skills.join(", "))}</div>`
+      ).join("");
+  } else {
+    const categoryLabels: Record<string, string> = {
+      LANGUAGE: "Languages",
+      FRONTEND: "Frontend",
+      BACKEND: "Backend",
+      DATABASE: "Database",
+      DEVOPS: "Tools",
+      TOOL: "Tools",
+      CLOUD: "Cloud",
+      CS_CORE: "CS Core",
+      OTHER: "Other"
+    };
+    const groupedSkills: Record<string, string[]> = {};
+    (user.profile?.techStacks || []).forEach((ps) => {
+      const label = categoryLabels[ps.tech.category] || categoryLabels.OTHER;
+      if (!groupedSkills[label]) groupedSkills[label] = [];
+      groupedSkills[label].push(ps.tech.name);
+    });
+    skillsHtml = Object.entries(groupedSkills)
+      .map(([label, names]) =>
+        `<div class="s-label">${escapeHtml(label)}</div><div class="s-value">${escapeHtml(names.join(", "))}</div>`
+      ).join("");
+  }
 
   const socialHtml = socialLinks.map(s => {
     const platform = s.platform.replace(/_/g, " ");
@@ -205,7 +282,13 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     return `<div class="s-label">${escapeHtml(label)}</div><a href="${s.url}" class="s-link">${escapeHtml(cleanUrl(s.url))}</a>`;
   }).join("");
 
-  const expHtml = experiences.map(exp => {
+  // Slice list based on limits config
+  const experiencesToShow = experiences.slice(0, config.limits.experiences);
+  const projectsToShow = projects.slice(0, config.limits.projects);
+  const educationsToShow = educations.slice(0, config.limits.educations);
+  const achievementsToShow = achievements.slice(0, config.limits.achievements);
+
+  const expHtml = experiencesToShow.map(exp => {
     const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
     return `
       <div class="m-item">
@@ -218,9 +301,6 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     `;
   }).join("");
 
-  // Smart project limit: 0 exp → 3, 1 exp → 2, 2+ exp → 1
-  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
-  const projectsToShow = projects.slice(0, projectLimit);
   const projHtml = projectsToShow.map(p => {
     const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
     const linkParts: string[] = [];
@@ -237,21 +317,28 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     `;
   }).join("");
 
-  const eduHtml = educations.map(edu => {
+  const eduHtml = educationsToShow.map(edu => {
     const degree = [edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ");
     const scoreHtml = edu.score ? `<div class="s-value" style="font-size: 8pt; color: #94a3b8; margin-top: 2px;">${escapeHtml(edu.scoreType || "CGPA")}: ${escapeHtml(edu.score)}</div>` : "";
     return `<div class="s-label">${escapeHtml(edu.school)}</div>${degree ? `<div class="s-value">${escapeHtml(degree)}</div>` : ""}${scoreHtml}<div class="s-date">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>`;
   }).join("");
 
-  const achHtml = achievements.length ? `<ul>${achievements.map(a => {
+  const achHtml = achievementsToShow.length ? `<ul>${achievementsToShow.map(a => {
     const parts = [a.title, a.provider].filter(Boolean);
     const dateHtml = a.date ? `<span style="float: right;">${escapeHtml(monthYear(a.date.toISOString()))}</span>` : "";
     return `<li style="margin-bottom: 4px;">${dateHtml}${escapeHtml(parts.join(" | "))}</li>`;
   }).join("")}</ul>` : "";
 
-  // Professional summary: only show when no experience; capped to first 2 sentences
-  const rawBio = user.profile?.bio || "";
-  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
+  const customSecsHtml = customSections && customSections.length > 0
+    ? customSections.map(cs => `
+      <div class="m-section">${escapeHtml(cs.title)}</div>
+      <div class="m-item">
+        <ul>${cs.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>
+      </div>
+    `).join("")
+    : "";
+
+  const summaryText = user.profile?.bio || "";
 
   return `<!doctype html>
 <html>
@@ -260,7 +347,11 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
     <style>
       @page { size: 8.5in 11in; margin: 0; }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: Arial, Helvetica, sans-serif; font-size: 9.5pt; color: #1e293b; }
+      body {
+        ${getFontFamilyCss(config.styling.fontFamily)}
+        font-size: ${config.styling.fontSize};
+        color: #1e293b;
+      }
       table.layout { width: 100%; border-collapse: collapse; min-height: 11in; }
       td.sidebar {
         width: 260px;
@@ -366,14 +457,15 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
           ${user.profile?.phoneNumber ? `<div class="s-label" style="margin-top: 10px;">Phone</div><div class="s-value" style="margin-bottom: 10px;">${escapeHtml(user.profile.phoneNumber)}</div>` : ""}
           ${socialHtml}
 
-          ${eduHtml ? `<div class="s-section">Education</div>${eduHtml}` : ""}
-          ${skillsHtml ? `<div class="s-section">Skills</div>${skillsHtml}` : ""}
+          ${config.sections.education && eduHtml ? `<div class="s-section">Education</div>${eduHtml}` : ""}
+          ${config.sections.skills && skillsHtml ? `<div class="s-section">Skills</div>${skillsHtml}` : ""}
         </td>
         <td class="main">
-          ${summaryText ? `<div class="m-bio">${escapeHtml(summaryText)}</div>` : ""}
-          ${experiences.length ? `<div class="m-section">Experience</div>${expHtml}` : ""}
-          ${projectsToShow.length ? `<div class="m-section">Projects</div>${projHtml}` : ""}
-          ${achievements.length ? `<div class="m-section">Achievements</div>${achHtml}` : ""}
+          ${config.sections.summary && summaryText ? `<div class="m-bio">${escapeHtml(summaryText)}</div>` : ""}
+          ${config.sections.experience && experiencesToShow.length ? `<div class="m-section">Experience</div>${expHtml}` : ""}
+          ${config.sections.projects && projectsToShow.length ? `<div class="m-section">Projects</div>${projHtml}` : ""}
+          ${config.sections.achievements && achievementsToShow.length ? `<div class="m-section">Achievements</div>${achHtml}` : ""}
+          ${config.sections.customSections && customSecsHtml ? customSecsHtml : ""}
         </td>
       </tr>
     </table>
@@ -382,56 +474,61 @@ function buildDesignResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, 
 }
 
 function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
-  const { user, socialLinks, experiences, projects, educations, achievements } = data;
-  const profile = user.profile;
+  const { user, socialLinks, experiences, projects, educations, achievements, profileSkills, customSections } = data;
+  const config = parseResumeConfig(user.profile);
 
-  // Clean and format social links with clickable anchors (nowrap to prevent label breaking from link)
   const formattedSocials = socialLinks
     .map((s) => {
       const platform = s.platform.replace(/_/g, " ");
       const label = platform.charAt(0) + platform.slice(1).toLowerCase();
-      return `<span style="white-space: nowrap;"><strong>${escapeHtml(label)}:</strong> <a href="${s.url}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a></span>`;
+      return `<span style="white-space: nowrap;"><strong>${escapeHtml(platform === "OTHER" ? label : platform)}:</strong> <a href="${s.url}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(cleanUrl(s.url))}</a></span>`;
     });
 
-  // Header links: Email | Phone | Socials | Portfolio (if any)
   const headerLinks = [
     `<span style="white-space: nowrap;"><a href="mailto:${user.email}" style="color: #3b82f6; text-decoration: none;">${escapeHtml(user.email)}</a></span>`,
-    profile?.phoneNumber ? `<span style="white-space: nowrap;">${escapeHtml(profile.phoneNumber)}</span>` : "",
+    user.profile?.phoneNumber ? `<span style="white-space: nowrap;">${escapeHtml(user.profile.phoneNumber)}</span>` : "",
     ...formattedSocials
   ]
     .filter(Boolean)
     .join(" | ");
 
-  // Technical Skills Category Mapping
-  const categoryLabels: Record<string, string> = {
-    LANGUAGE: "Programming Languages",
-    FRONTEND: "Frontend",
-    BACKEND: "Backend",
-    DATABASE: "Database",
-    DEVOPS: "Tools & Technologies",
-    TOOL: "Tools & Technologies",
-    CLOUD: "Tools & Technologies",
-    CS_CORE: "CS Core",
-    OTHER: "Other"
-  };
-
-  // Group tech stacks
-  const techStacks = profile?.techStacks || [];
-  const groupedSkills: Record<string, string[]> = {};
-  techStacks.forEach((ps) => {
-    const cat = ps.tech.category;
-    const label = categoryLabels[cat] || categoryLabels.OTHER;
-    if (!groupedSkills[label]) groupedSkills[label] = [];
-    groupedSkills[label].push(ps.tech.name);
-  });
-
-  const skillsHtml = Object.entries(groupedSkills)
-    .map(([label, names]) => `
-      <div class="skill-row">
-        <strong>${escapeHtml(label)}:</strong> ${escapeHtml(names.join(", "))}
-      </div>
-    `)
-    .join("");
+  // Custom skills or fallback
+  let skillsHtml = "";
+  if (profileSkills && profileSkills.length > 0) {
+    skillsHtml = profileSkills
+      .map((ps) => `
+        <div class="skill-row">
+          <strong>${escapeHtml(ps.category)}:</strong> ${escapeHtml(ps.skills.join(", "))}
+        </div>
+      `)
+      .join("");
+  } else {
+    const categoryLabels: Record<string, string> = {
+      LANGUAGE: "Programming Languages",
+      FRONTEND: "Frontend",
+      BACKEND: "Backend",
+      DATABASE: "Database",
+      DEVOPS: "Tools & Technologies",
+      TOOL: "Tools & Technologies",
+      CLOUD: "Tools & Technologies",
+      CS_CORE: "CS Core",
+      OTHER: "Other"
+    };
+    const groupedSkills: Record<string, string[]> = {};
+    (user.profile?.techStacks || []).forEach((ps) => {
+      const cat = ps.tech.category;
+      const label = categoryLabels[cat] || categoryLabels.OTHER;
+      if (!groupedSkills[label]) groupedSkills[label] = [];
+      groupedSkills[label].push(ps.tech.name);
+    });
+    skillsHtml = Object.entries(groupedSkills)
+      .map(([label, names]) => `
+        <div class="skill-row">
+          <strong>${escapeHtml(label)}:</strong> ${escapeHtml(names.join(", "))}
+        </div>
+      `)
+      .join("");
+  }
 
   const section = (title: string, body: string) => `
     <div class="section">
@@ -440,7 +537,13 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     </div>
   `;
 
-  const expHtml = experiences
+  // Apply limits from config
+  const experiencesToShow = experiences.slice(0, config.limits.experiences);
+  const projectsToShow = projects.slice(0, config.limits.projects);
+  const educationsToShow = educations.slice(0, config.limits.educations);
+  const achievementsToShow = achievements.slice(0, config.limits.achievements);
+
+  const expHtml = experiencesToShow
     .map((exp) => {
       const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
       return `
@@ -458,14 +561,13 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     })
     .join("");
 
-  const eduHtml = educations
+  const eduHtml = educationsToShow
     .map((edu) => {
       const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
       if (edu.score) {
         subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
       }
       const subtitle = subtitleParts.filter(Boolean).join(" | ");
-      const bullets = Array.isArray(edu.bullets) ? (edu.bullets as string[]) : [];
       return `
         <div class="item">
           <div class="row">
@@ -475,16 +577,11 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
             </div>
             <div class="right">${escapeHtml(range(edu.startDate, edu.endDate, edu.isCurrent))}</div>
           </div>
-          ${bullets.length ? `<ul>${bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}</ul>` : ""}
         </div>
       `;
     })
     .join("");
 
-  // Smart project limit: 0 exp → 3, 1 exp → 2, 2+ exp → 1
-  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
-  const projectsToShow = projects.slice(0, projectLimit);
-  
   const projHtml = projectsToShow
     .map((p) => {
       const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
@@ -505,15 +602,17 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
     })
     .join("");
 
-  const achHtml = achievements.length ? `<ul>${achievements.map((a) => {
+  const achHtml = achievementsToShow.length ? `<ul>${achievementsToShow.map((a) => {
     const parts = [a.title, a.provider].filter(Boolean);
     const dateHtml = a.date ? `<span style="float: right;">${escapeHtml(monthYear(a.date.toISOString()))}</span>` : "";
     return `<li style="margin-bottom: 4px;">${dateHtml}${escapeHtml(parts.join(" | "))}</li>`;
   }).join("")}</ul>` : "";
 
-  // Professional summary: only show when no experience; capped to first 2 sentences
-  const rawBio = profile?.bio || "";
-  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
+  const customSecsHtml = customSections && customSections.length > 0
+    ? customSections.map(cs => section(cs.title, `<ul>${cs.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`)).join("")
+    : "";
+
+  const summaryText = user.profile?.bio || "";
 
   return `
   <!doctype html>
@@ -525,8 +624,8 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
         @page { size: Letter; margin: 0.4in 0.5in; }
         * { box-sizing: border-box; }
         body {
-          font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
-          font-size: 9.5pt;
+          ${getFontFamilyCss(config.styling.fontFamily)}
+          font-size: ${config.styling.fontSize};
           line-height: 1.25;
           color: #111;
           margin: 0;
@@ -551,7 +650,7 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.8px;
-          border-bottom: 1px solid #eee;
+          border-bottom: 1px solid #888;
           padding-bottom: 2px;
           margin-bottom: 5px;
         }
@@ -572,52 +671,51 @@ function buildResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
       <div class="contact">${headerLinks}</div>
       <div class="divider"></div>
       
-      ${summaryText ? section("Professional Summary", `<div class="muted">${escapeHtml(summaryText)}</div>`) : ""}
-      ${experiences.length ? section("Experience", expHtml) : ""}
-      ${educations.length ? section("Education", eduHtml) : ""}
-      ${projectsToShow.length ? section("Projects", projHtml) : ""}
-      ${Object.keys(groupedSkills).length ? section("Technical Skills", skillsHtml) : ""}
-      ${achievements.length ? section("Achievements", achHtml) : ""}
+      ${config.sections.summary && summaryText ? section("Professional Summary", `<div class="muted">${escapeHtml(summaryText)}</div>`) : ""}
+      ${config.sections.experience && experiencesToShow.length ? section("Experience", expHtml) : ""}
+      ${config.sections.education && educationsToShow.length ? section("Education", eduHtml) : ""}
+      ${config.sections.projects && projectsToShow.length ? section("Projects", projHtml) : ""}
+      ${config.sections.skills && skillsHtml ? section("Technical Skills", skillsHtml) : ""}
+      ${config.sections.achievements && achievementsToShow.length ? section("Achievements", achHtml) : ""}
+      ${config.sections.customSections && customSecsHtml ? customSecsHtml : ""}
     </body>
   </html>
   `;
 }
 
-/** ─────────────────────────────────────────────────────────────────────────
- *  TEMPLATE: MODERN  (single-column, clean, Ritu-Gupta style)
- * ───────────────────────────────────────────────────────────────────────── */
 function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) {
-  const { user, socialLinks, experiences, projects, educations, achievements } = data;
-  const profile = user.profile;
+  const { user, socialLinks, experiences, projects, educations, achievements, profileSkills, customSections } = data;
+  const config = parseResumeConfig(user.profile);
 
-  // Condensed category labels matching standard resume skill sections
-  const categoryLabels: Record<string, string> = {
-    LANGUAGE: "Programming Languages",
-    FRONTEND: "Frontend",
-    BACKEND: "Backend",
-    DATABASE: "Databases",
-    DEVOPS: "Cloud & DevOps",
-    TOOL: "Developer Tools",
-    CLOUD: "Cloud & DevOps",
-    CS_CORE: "Computer Science Fundamentals",
-    OTHER: "Other",
-  };
+  // Grouped Skills
+  let skillsHtml = "";
+  if (profileSkills && profileSkills.length > 0) {
+    skillsHtml = profileSkills
+      .map((ps) => `<div class="skill-row"><span class="skill-label">${escapeHtml(ps.category)}:</span> ${escapeHtml(ps.skills.join(", "))}</div>`)
+      .join("");
+  } else {
+    const categoryLabels: Record<string, string> = {
+      LANGUAGE: "Programming Languages",
+      FRONTEND: "Frontend",
+      BACKEND: "Backend",
+      DATABASE: "Databases",
+      DEVOPS: "Cloud & DevOps",
+      TOOL: "Developer Tools",
+      CLOUD: "Cloud & DevOps",
+      CS_CORE: "Computer Science Fundamentals",
+      OTHER: "Other",
+    };
+    const groupedSkills: Record<string, string[]> = {};
+    (user.profile?.techStacks || []).forEach((ps) => {
+      const label = categoryLabels[ps.tech.category] || "Other";
+      if (!groupedSkills[label]) groupedSkills[label] = [];
+      if (!groupedSkills[label].includes(ps.tech.name)) groupedSkills[label].push(ps.tech.name);
+    });
+    skillsHtml = Object.entries(groupedSkills)
+      .map(([label, names]) => `<div class="skill-row"><span class="skill-label">${escapeHtml(label)}:</span> ${escapeHtml(names.join(", "))}</div>`)
+      .join("");
+  }
 
-  const techStacks = profile?.techStacks || [];
-  // Merge duplicates (DEVOPS + CLOUD both map to "Cloud & DevOps")
-  const groupedSkills: Record<string, string[]> = {};
-  techStacks.forEach((ps) => {
-    const label = categoryLabels[ps.tech.category] || "Other";
-    if (!groupedSkills[label]) groupedSkills[label] = [];
-    if (!groupedSkills[label].includes(ps.tech.name)) groupedSkills[label].push(ps.tech.name);
-  });
-
-  // Skills rendered as a compact inline list — one row per category
-  const skillsHtml = Object.entries(groupedSkills)
-    .map(([label, names]) => `<div class="skill-row"><span class="skill-label">${escapeHtml(label)}:</span> ${escapeHtml(names.join(", "))}</div>`)
-    .join("");
-
-  // Header links bar
   const socialParts = socialLinks.map((s) => {
     const platform = s.platform.replace(/_/g, " ");
     const label = platform.charAt(0) + platform.slice(1).toLowerCase();
@@ -625,14 +723,20 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   });
   const headerLinks = [
     `<a href="mailto:${user.email}" class="hlink">${escapeHtml(user.email)}</a>`,
-    profile?.phoneNumber ? `<span class="hlink">${escapeHtml(profile.phoneNumber)}</span>` : "",
+    user.profile?.phoneNumber ? `<span class="hlink">${escapeHtml(user.profile.phoneNumber)}</span>` : "",
     ...socialParts,
   ].filter(Boolean).join(" &nbsp;|&nbsp; ");
 
   const sec = (title: string, body: string) =>
     `<div class="sec"><div class="sec-title">${escapeHtml(title)}</div><div class="sec-body">${body}</div></div>`;
 
-  const expHtml = experiences.map((exp) => {
+  // Apply limits from config
+  const experiencesToShow = experiences.slice(0, config.limits.experiences);
+  const projectsToShow = projects.slice(0, config.limits.projects);
+  const educationsToShow = educations.slice(0, config.limits.educations);
+  const achievementsToShow = achievements.slice(0, config.limits.achievements);
+
+  const expHtml = experiencesToShow.map((exp) => {
     const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
     return `
       <div class="item">
@@ -645,7 +749,7 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
       </div>`;
   }).join("");
 
-  const eduHtml = educations.map((edu) => {
+  const eduHtml = educationsToShow.map((edu) => {
     const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
     if (edu.score) {
       subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
@@ -661,8 +765,7 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
       </div>`;
   }).join("");
 
-  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
-  const projHtml = projects.slice(0, projectLimit).map((p) => {
+  const projHtml = projectsToShow.map((p) => {
     const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
     const linkParts: string[] = [];
     if (p.liveUrl) linkParts.push(`Live: <a href="${p.liveUrl}" class="inline-link">${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
@@ -677,16 +780,19 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
       </div>`;
   }).join("");
 
-  const achHtml = achievements.length
-    ? `<ul>${achievements.map((a) => {
+  const achHtml = achievementsToShow.length
+    ? `<ul>${achievementsToShow.map((a) => {
         const parts = [a.title, a.provider].filter(Boolean);
         const dateStr = a.date ? monthYear(a.date.toISOString()) : "";
         return `<li><span class="ach-title">${escapeHtml(parts.join(" — "))}</span>${dateStr ? ` <span class="ach-date">(${escapeHtml(dateStr)})</span>` : ""}</li>`;
       }).join("")}</ul>`
     : "";
 
-  const rawBio = profile?.bio || "";
-  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : "";
+  const customSecsHtml = customSections && customSections.length > 0
+    ? customSections.map(cs => sec(cs.title, `<ul>${cs.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}</ul>`)).join("")
+    : "";
+
+  const summaryText = user.profile?.bio || "";
 
   return `<!doctype html>
 <html>
@@ -695,7 +801,13 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   <style>
     @page { size: Letter; margin: 0.3in 0.45in; }
     * { box-sizing: border-box; }
-    body { font-family: "Georgia", "Times New Roman", serif; font-size: 9.5pt; color: #1a1a1a; margin: 0; line-height: 1.3; }
+    body {
+      ${getFontFamilyCss(config.styling.fontFamily)}
+      font-size: ${config.styling.fontSize};
+      color: #1a1a1a;
+      margin: 0;
+      line-height: 1.3;
+    }
     .name { font-size: 22.5pt; font-weight: 700; letter-spacing: -0.5px; margin: 0 0 2px 0; text-align: center; font-family: Arial, Helvetica, sans-serif; }
     .contact-bar { text-align: center; font-size: 8.7pt; color: #444; margin-bottom: 12px; font-family: Arial, sans-serif; }
     .hlink { color: #3b82f6; text-decoration: none; }
@@ -720,58 +832,61 @@ function buildModernResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>) 
   </style>
 </head>
 <body>
-  <div class="name">${escapeHtml(profile?.displayName || user.fullName)}</div>
+  <div class="name">${escapeHtml(user.profile?.displayName || user.fullName)}</div>
   <div class="contact-bar">${headerLinks}</div>
   <hr class="top-rule"/>
-  ${summaryText ? sec("Professional Summary", `<div class="summary-text">${escapeHtml(summaryText)}</div>`) : ""}
-  ${experiences.length ? sec("Experience", expHtml) : ""}
-  ${educations.length ? sec("Education", eduHtml) : ""}
-  ${projects.length ? sec("Projects", projHtml) : ""}
-  ${Object.keys(groupedSkills).length ? sec("Technical Skills", skillsHtml) : ""}
-  ${achievements.length ? sec("Achievements", achHtml) : ""}
+  ${config.sections.summary && summaryText ? sec("Professional Summary", `<div class="summary-text">${escapeHtml(summaryText)}</div>`) : ""}
+  ${config.sections.experience && experiencesToShow.length ? sec("Experience", expHtml) : ""}
+  ${config.sections.education && educationsToShow.length ? sec("Education", eduHtml) : ""}
+  ${config.sections.projects && projectsToShow.length ? sec("Projects", projHtml) : ""}
+  ${config.sections.skills && skillsHtml ? sec("Technical Skills", skillsHtml) : ""}
+  ${config.sections.achievements && achievementsToShow.length ? sec("Achievements", achHtml) : ""}
+  ${config.sections.customSections && customSecsHtml ? customSecsHtml : ""}
 </body>
 </html>`;
 }
 
-/** ─────────────────────────────────────────────────────────────────────────
- *  TEMPLATE: ENHANCV  (two-column, premium, image-style with accent color)
- * ───────────────────────────────────────────────────────────────────────── */
 function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>, themeName: string) {
-  const { user, socialLinks, experiences, projects, educations, achievements } = data;
-  const profile = user.profile;
+  const { user, socialLinks, experiences, projects, educations, achievements, profileSkills, customSections } = data;
+  const config = parseResumeConfig(user.profile);
   const accentColor = THEME_COLOR_MAP[themeName] || "#2563EB";
 
-  const categoryLabels: Record<string, string> = {
-    LANGUAGE: "Languages",
-    FRONTEND: "Frontend",
-    BACKEND: "Backend",
-    DATABASE: "Database",
-    DEVOPS: "DevOps & Tools",
-    TOOL: "Tools",
-    CLOUD: "Cloud",
-    CS_CORE: "CS Core",
-    OTHER: "Other",
-  };
+  // Grouped Skills
+  let skillsHtml = "";
+  if (profileSkills && profileSkills.length > 0) {
+    skillsHtml = profileSkills.map(ps => `
+      <div class="r-skill-group">
+        <div class="r-skill-cat">${escapeHtml(ps.category)}</div>
+        <div class="r-chips">${ps.skills.map(n => `<span class="r-chip">${escapeHtml(n)}</span>`).join("")}</div>
+      </div>`).join("");
+  } else {
+    const categoryLabels: Record<string, string> = {
+      LANGUAGE: "Languages",
+      FRONTEND: "Frontend",
+      BACKEND: "Backend",
+      DATABASE: "Database",
+      DEVOPS: "DevOps & Tools",
+      TOOL: "Tools",
+      CLOUD: "Cloud",
+      CS_CORE: "CS Core",
+      OTHER: "Other",
+    };
+    const groupedSkills: Record<string, string[]> = {};
+    (user.profile?.techStacks || []).forEach((ps) => {
+      const label = categoryLabels[ps.tech.category] || "Other";
+      if (!groupedSkills[label]) groupedSkills[label] = [];
+      groupedSkills[label].push(ps.tech.name);
+    });
+    skillsHtml = Object.entries(groupedSkills).map(([label, names]) => `
+      <div class="r-skill-group">
+        <div class="r-skill-cat">${escapeHtml(label)}</div>
+        <div class="r-chips">${names.map(n => `<span class="r-chip">${escapeHtml(n)}</span>`).join("")}</div>
+      </div>`).join("");
+  }
 
-  const techStacks = profile?.techStacks || [];
-  const groupedSkills: Record<string, string[]> = {};
-  techStacks.forEach((ps) => {
-    const label = categoryLabels[ps.tech.category] || "Other";
-    if (!groupedSkills[label]) groupedSkills[label] = [];
-    groupedSkills[label].push(ps.tech.name);
-  });
-
-  // Skills as tag chips grouped by category
-  const skillsHtml = Object.entries(groupedSkills).map(([label, names]) => `
-    <div class="r-skill-group">
-      <div class="r-skill-cat">${escapeHtml(label)}</div>
-      <div class="r-chips">${names.map(n => `<span class="r-chip">${escapeHtml(n)}</span>`).join("")}</div>
-    </div>`).join("");
-
-  // Contact sidebar items
   const contactHtml = [
     `<div class="r-contact-item"><span class="r-contact-icon">✉</span><span>${escapeHtml(user.email)}</span></div>`,
-    profile?.phoneNumber ? `<div class="r-contact-item"><span class="r-contact-icon">📞</span><span>${escapeHtml(profile.phoneNumber)}</span></div>` : "",
+    user.profile?.phoneNumber ? `<div class="r-contact-item"><span class="r-contact-icon">📞</span><span>${escapeHtml(user.profile.phoneNumber)}</span></div>` : "",
     ...socialLinks.map(s => {
       const platform = s.platform.replace(/_/g, " ");
       const label = platform.charAt(0) + platform.slice(1).toLowerCase();
@@ -779,8 +894,13 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
     })
   ].filter(Boolean).join("");
 
-  // Education (right column)
-  const eduRightHtml = educations.map(edu => {
+  // Apply limits from config
+  const experiencesToShow = experiences.slice(0, config.limits.experiences);
+  const projectsToShow = projects.slice(0, config.limits.projects);
+  const educationsToShow = educations.slice(0, config.limits.educations);
+  const achievementsToShow = achievements.slice(0, config.limits.achievements);
+
+  const eduRightHtml = educationsToShow.map(edu => {
     const degreeParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(" in ")];
     if (edu.score) {
       degreeParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
@@ -793,8 +913,7 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
     </div>`;
   }).join("");
 
-  // Achievements right column — icon style
-  const achRightHtml = achievements.length ? achievements.map(a => {
+  const achRightHtml = achievementsToShow.length ? achievementsToShow.map(a => {
     const parts = [a.title, a.provider].filter(Boolean);
     const dateStr = a.date ? monthYear(a.date.toISOString()) : "";
     return `<div class="r-ach-item">
@@ -806,8 +925,7 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
     </div>`;
   }).join("") : "";
 
-  // Experience (left main column)
-  const expHtml = experiences.map(exp => {
+  const expHtml = experiencesToShow.map(exp => {
     const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
     return `<div class="l-item">
       <div class="l-item-header">
@@ -821,9 +939,7 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
     </div>`;
   }).join("");
 
-  // Projects (left column) — links placed below title to avoid wrapping in flex row
-  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
-  const projHtml = projects.slice(0, projectLimit).map(p => {
+  const projHtml = projectsToShow.map(p => {
     const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
     const linkParts: string[] = [];
     if (p.liveUrl) linkParts.push(`<a href="${p.liveUrl}" style="color:${accentColor};text-decoration:none;">Live: ${escapeHtml(cleanUrl(p.liveUrl))}</a>`);
@@ -835,8 +951,20 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
     </div>`;
   }).join("");
 
-  const rawBio = profile?.bio || "";
-  const summaryText = experiences.length === 0 && rawBio ? capToSentences(rawBio) : rawBio ? capToSentences(rawBio, 3) : "";
+  const customSecsHtml = customSections && customSections.length > 0
+    ? customSections.map(cs => `
+      <div class="l-section">
+        <div class="l-section-title">${escapeHtml(cs.title)}</div>
+        <div class="l-item">
+          <ul class="l-bullets">
+            ${cs.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join("")}
+          </ul>
+        </div>
+      </div>
+    `).join("")
+    : "";
+
+  const summaryText = user.profile?.bio || "";
 
   return `<!doctype html>
 <html>
@@ -845,7 +973,11 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
   <style>
     @page { size: Letter; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; color: #1a1a1a; }
+    body {
+      ${getFontFamilyCss(config.styling.fontFamily)}
+      font-size: ${config.styling.fontSize};
+      color: #1a1a1a;
+    }
 
     /* ── Layout ── */
     .wrapper { display: table; width: 100%; min-height: 11in; border-collapse: collapse; }
@@ -900,21 +1032,22 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
   <div class="wrapper">
     <!-- LEFT COLUMN -->
     <div class="left-col">
-      <div class="l-name">${escapeHtml(profile?.displayName || user.fullName)}</div>
-      ${profile?.headline ? `<div class="l-headline">${escapeHtml(profile.headline)}</div>` : ""}
+      <div class="l-name">${escapeHtml(user.profile?.displayName || user.fullName)}</div>
+      ${user.profile?.headline ? `<div class="l-headline">${escapeHtml(user.profile.headline)}</div>` : ""}
       <hr class="l-name-underline"/>
 
-      ${summaryText ? `<div class="l-section"><div class="l-section-title">Summary</div><div class="l-summary">${escapeHtml(summaryText)}</div></div>` : ""}
-      ${experiences.length ? `<div class="l-section"><div class="l-section-title">Experience</div>${expHtml}</div>` : ""}
-      ${projects.length ? `<div class="l-section"><div class="l-section-title">Projects</div>${projHtml}</div>` : ""}
+      ${config.sections.summary && summaryText ? `<div class="l-section"><div class="l-section-title">Summary</div><div class="l-summary">${escapeHtml(summaryText)}</div></div>` : ""}
+      ${config.sections.experience && experiencesToShow.length ? `<div class="l-section"><div class="l-section-title">Experience</div>${expHtml}</div>` : ""}
+      ${config.sections.projects && projectsToShow.length ? `<div class="l-section"><div class="l-section-title">Projects</div>${projHtml}</div>` : ""}
+      ${config.sections.customSections && customSecsHtml ? customSecsHtml : ""}
     </div>
 
     <!-- RIGHT COLUMN -->
     <div class="right-col">
       ${contactHtml ? `<div class="r-section"><div class="r-section-title">Contact</div>${contactHtml}</div>` : ""}
-      ${Object.keys(groupedSkills).length ? `<div class="r-section"><div class="r-section-title">Skills</div>${skillsHtml}</div>` : ""}
-      ${educations.length ? `<div class="r-section"><div class="r-section-title">Education</div>${eduRightHtml}</div>` : ""}
-      ${achievements.length ? `<div class="r-section"><div class="r-section-title">Achievements</div>${achRightHtml}</div>` : ""}
+      ${config.sections.skills && skillsHtml ? `<div class="r-section"><div class="r-section-title">Skills</div>${skillsHtml}</div>` : ""}
+      ${config.sections.education && educationsToShow.length ? `<div class="r-section"><div class="r-section-title">Education</div>${eduRightHtml}</div>` : ""}
+      ${config.sections.achievements && achievementsToShow.length ? `<div class="r-section"><div class="r-section-title">Achievements</div>${achRightHtml}</div>` : ""}
     </div>
   </div>
 </body>
@@ -922,21 +1055,17 @@ function buildEnhancvResumeHtml(data: Awaited<ReturnType<typeof getResumeData>>,
 }
 
 async function renderPdfFromHtml(html: string) {
-  // On Render/production: use sparticuz/chromium (low RAM, no system deps needed)
-  // On local Windows dev: falls back to system Chrome if CHROME_EXECUTABLE_PATH is set
   const isLocal = process.env.NODE_ENV !== "production";
-
   const browser = await puppeteer.launch({
     args: chromium.args,
-    defaultViewport: null,               // chromium.defaultViewport resolves to null
+    defaultViewport: null,
     executablePath: isLocal
       ? (process.env.CHROME_EXECUTABLE_PATH ?? await chromium.executablePath())
       : await chromium.executablePath(),
-    headless: true,                      // chromium.headless resolves to true in production
+    headless: true,
   });
   try {
     const page = await browser.newPage();
-    // Set viewport to US Letter width at 96dpi (8.5in * 96 = 816px)
     await page.setViewport({ width: 816, height: 1056 });
     await page.setContent(html, { waitUntil: "networkidle2" });
     const pdf = await page.pdf({
@@ -950,8 +1079,16 @@ async function renderPdfFromHtml(html: string) {
 }
 
 async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
-  const { user, socialLinks, experiences, projects, educations, achievements } = data;
-  const profile = user.profile;
+  const { user, socialLinks, experiences, projects, educations, achievements, profileSkills, customSections } = data;
+  const config = parseResumeConfig(user.profile);
+  const fontFamily = config.styling.fontFamily;
+  const fontSize = config.styling.fontSize;
+
+  const sizePt = parseFloat(fontSize) || 9.5;
+  const baseSize = Math.round(sizePt * 2);
+  const nameSize = Math.round((sizePt + 8.5) * 2);
+  const sectionHeadingSize = Math.round((sizePt + 1) * 2);
+  const subTitleSize = Math.round((sizePt - 0.5) * 2);
 
   const children: Paragraph[] = [];
 
@@ -959,35 +1096,35 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
   children.push(
     new Paragraph({
       alignment: AlignmentType.CENTER,
-      children: [new TextRun({ text: user.profile?.displayName || user.fullName, bold: true, size: 36 })], // 18pt
+      children: [new TextRun({ text: user.profile?.displayName || user.fullName, bold: true, size: nameSize, font: fontFamily })],
     })
   );
 
-  // Header Links with Hyperlinks
+  // Header Links
   const headerNodes: (TextRun | ExternalHyperlink)[] = [];
   
   // Email
   headerNodes.push(
     new ExternalHyperlink({
-      children: [new TextRun({ text: user.email, size: 18, color: "3B82F6" })],
+      children: [new TextRun({ text: user.email, size: baseSize, color: "3B82F6", font: fontFamily })],
       link: `mailto:${user.email}`,
     })
   );
 
   // Phone
-  if (profile?.phoneNumber) {
-    headerNodes.push(new TextRun({ text: " | ", size: 18 }));
-    headerNodes.push(new TextRun({ text: profile.phoneNumber, size: 18 }));
+  if (user.profile?.phoneNumber) {
+    headerNodes.push(new TextRun({ text: " | ", size: baseSize, font: fontFamily }));
+    headerNodes.push(new TextRun({ text: user.profile.phoneNumber, size: baseSize, font: fontFamily }));
   }
 
   socialLinks.forEach((s) => {
-    headerNodes.push(new TextRun({ text: " | ", size: 18 }));
+    headerNodes.push(new TextRun({ text: " | ", size: baseSize, font: fontFamily }));
     const platform = s.platform.replace(/_/g, " ");
     const label = platform.charAt(0) + platform.slice(1).toLowerCase();
-    headerNodes.push(new TextRun({ text: `${label}: `, size: 18 }));
+    headerNodes.push(new TextRun({ text: `${platform === "OTHER" ? label : platform}: `, size: baseSize, font: fontFamily }));
     headerNodes.push(
       new ExternalHyperlink({
-        children: [new TextRun({ text: cleanUrl(s.url), size: 18, color: "3B82F6" })],
+        children: [new TextRun({ text: cleanUrl(s.url), size: baseSize, color: "3B82F6", font: fontFamily })],
         link: s.url,
       })
     );
@@ -1006,25 +1143,28 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       new Paragraph({
         spacing: { before: 120, after: 60 },
         border: { bottom: { color: "auto", space: 1, style: "single", size: 6 } },
-        children: [new TextRun({ text, bold: true, size: 20 })], // 10pt
+        children: [new TextRun({ text, bold: true, size: sectionHeadingSize, font: fontFamily })],
       })
     );
   };
 
-  // Sections in specific order: Experience, Education, Projects, Skills, Achievements
+  // Slice list based on limits config
+  const experiencesToShow = experiences.slice(0, config.limits.experiences);
+  const projectsToShow = projects.slice(0, config.limits.projects);
+  const educationsToShow = educations.slice(0, config.limits.educations);
+  const achievementsToShow = achievements.slice(0, config.limits.achievements);
 
-  // 0. Professional Summary (only when no experience; capped to first 2 sentences)
-  const docRawBio = profile?.bio || "";
-  const docSummary = experiences.length === 0 && docRawBio ? capToSentences(docRawBio) : "";
-  if (docSummary) {
+  // 0. Professional Summary
+  const docRawBio = user.profile?.bio || "";
+  if (config.sections.summary && docRawBio) {
     addHeading("PROFESSIONAL SUMMARY");
-    children.push(new Paragraph({ children: [new TextRun({ text: docSummary, size: 18 })], spacing: { after: 60 } }));
+    children.push(new Paragraph({ children: [new TextRun({ text: docRawBio, size: baseSize, font: fontFamily })], spacing: { after: 60 } }));
   }
 
   // 1. Experience
-  if (experiences.length) {
+  if (config.sections.experience && experiencesToShow.length) {
     addHeading("EXPERIENCE");
-    experiences.forEach((exp) => {
+    experiencesToShow.forEach((exp) => {
       const subtitle = `${exp.company}${exp.location ? ` • ${exp.location}` : ""}`;
       const bullets = Array.isArray(exp.bullets) ? (exp.bullets as string[]) : [];
       
@@ -1032,57 +1172,51 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
         new Paragraph({
           spacing: { before: 80 },
           children: [
-            new TextRun({ text: exp.role, bold: true, size: 20 }),
-            new TextRun({ text: `\t${range(exp.startDate, exp.endDate, exp.isCurrent)}` }),
+            new TextRun({ text: exp.role, bold: true, size: sectionHeadingSize, font: fontFamily }),
+            new TextRun({ text: `\t${range(exp.startDate, exp.endDate, exp.isCurrent)}`, font: fontFamily, size: baseSize }),
           ],
           tabStops: [{ type: "right", position: 9000 }],
         })
       );
       children.push(
         new Paragraph({
-          children: [new TextRun({ text: subtitle, size: 18, bold: true })],
+          children: [new TextRun({ text: subtitle, size: subTitleSize, bold: true, font: fontFamily })],
         })
       );
       bullets.forEach((b) => {
-        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 } }));
+        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 }, children: [new TextRun({ text: b, size: baseSize, font: fontFamily })] }));
       });
     });
   }
 
   // 2. Education
-  if (educations.length) {
+  if (config.sections.education && educationsToShow.length) {
     addHeading("EDUCATION");
-    educations.forEach((edu) => {
+    educationsToShow.forEach((edu) => {
       const subtitleParts = [[edu.degree, edu.fieldOfStudy].filter(Boolean).join(", ")];
       if (edu.score) {
         subtitleParts.push(`${edu.scoreType || "CGPA"}: ${edu.score}`);
       }
       const subtitle = subtitleParts.filter(Boolean).join(" | ");
-      const bullets = Array.isArray(edu.bullets) ? (edu.bullets as string[]) : [];
       
       children.push(
         new Paragraph({
           spacing: { before: 80 },
           children: [
-            new TextRun({ text: edu.school, bold: true, size: 20 }),
-            new TextRun({ text: `\t${range(edu.startDate, edu.endDate, edu.isCurrent)}` }),
+            new TextRun({ text: edu.school, bold: true, size: sectionHeadingSize, font: fontFamily }),
+            new TextRun({ text: `\t${range(edu.startDate, edu.endDate, edu.isCurrent)}`, font: fontFamily, size: baseSize }),
           ],
           tabStops: [{ type: "right", position: 9000 }],
         })
       );
       if (subtitle) {
-        children.push(new Paragraph({ children: [new TextRun({ text: subtitle, size: 18, bold: true })] }));
+        children.push(new Paragraph({ children: [new TextRun({ text: subtitle, size: subTitleSize, bold: true, font: fontFamily })] }));
       }
-      bullets.forEach((b) => {
-        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 } }));
-      });
     });
   }
 
-  // 3. Projects: 0 exp → 3, 1 exp → 2, 2+ exp → 1
-  const projectLimit = experiences.length === 0 ? 3 : experiences.length === 1 ? 2 : 1;
-  const projectsToShow = projects.slice(0, projectLimit);
-  if (projectsToShow.length) {
+  // 3. Projects
+  if (config.sections.projects && projectsToShow.length) {
     addHeading("PROJECTS");
     projectsToShow.forEach((p) => {
       const bullets = Array.isArray(p.bullets) ? (p.bullets as string[]) : [];
@@ -1090,23 +1224,23 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       children.push(
         new Paragraph({
           spacing: { before: 80 },
-          children: [new TextRun({ text: p.title, bold: true, size: 20 })],
+          children: [new TextRun({ text: p.title, bold: true, size: sectionHeadingSize, font: fontFamily })],
         })
       );
 
       const linkNodes: (TextRun | ExternalHyperlink)[] = [];
       if (p.liveUrl) {
-        linkNodes.push(new TextRun({ text: "Live Demo: ", size: 18, bold: true }));
+        linkNodes.push(new TextRun({ text: "Live Demo: ", size: subTitleSize, bold: true, font: fontFamily }));
         linkNodes.push(new ExternalHyperlink({
-          children: [new TextRun({ text: cleanUrl(p.liveUrl), size: 18, color: "3B82F6" })],
+          children: [new TextRun({ text: cleanUrl(p.liveUrl), size: subTitleSize, color: "3B82F6", font: fontFamily })],
           link: p.liveUrl,
         }));
       }
-      if (p.liveUrl && p.repoUrl) linkNodes.push(new TextRun({ text: " | ", size: 18 }));
+      if (p.liveUrl && p.repoUrl) linkNodes.push(new TextRun({ text: " | ", size: subTitleSize, font: fontFamily }));
       if (p.repoUrl) {
-        linkNodes.push(new TextRun({ text: "GitHub: ", size: 18, bold: true }));
+        linkNodes.push(new TextRun({ text: "GitHub: ", size: subTitleSize, bold: true, font: fontFamily }));
         linkNodes.push(new ExternalHyperlink({
-          children: [new TextRun({ text: cleanUrl(p.repoUrl), size: 18, color: "3B82F6" })],
+          children: [new TextRun({ text: cleanUrl(p.repoUrl), size: subTitleSize, color: "3B82F6", font: fontFamily })],
           link: p.repoUrl,
         }));
       }
@@ -1114,59 +1248,72 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
       if (linkNodes.length) {
         children.push(new Paragraph({ children: linkNodes }));
       }
-      // No description — bullets only
       bullets.forEach((b) => {
-        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 } }));
+        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 }, children: [new TextRun({ text: b, size: baseSize, font: fontFamily })] }));
       });
     });
   }
 
   // 4. Skills
-  const categoryLabels: Record<string, string> = {
-    LANGUAGE: "Programming Languages",
-    FRONTEND: "Frontend",
-    BACKEND: "Backend",
-    DATABASE: "Database",
-    DEVOPS: "Tools & Technologies",
-    TOOL: "Tools & Technologies",
-    CLOUD: "Tools & Technologies",
-    CS_CORE: "CS Core",
-    OTHER: "Other"
-  };
+  if (config.sections.skills) {
+    if (profileSkills && profileSkills.length > 0) {
+      addHeading("TECHNICAL SKILLS");
+      profileSkills.forEach((ps) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${ps.category}: `, bold: true, size: baseSize, font: fontFamily }),
+              new TextRun({ text: ps.skills.join(", "), size: baseSize, font: fontFamily }),
+            ],
+          })
+        );
+      });
+    } else {
+      const categoryLabels: Record<string, string> = {
+        LANGUAGE: "Programming Languages",
+        FRONTEND: "Frontend",
+        BACKEND: "Backend",
+        DATABASE: "Database",
+        DEVOPS: "Tools & Technologies",
+        TOOL: "Tools & Technologies",
+        CLOUD: "Tools & Technologies",
+        CS_CORE: "CS Core",
+        OTHER: "Other"
+      };
+      const groupedSkills: Record<string, string[]> = {};
+      (user.profile?.techStacks || []).forEach((ps) => {
+        const cat = ps.tech.category;
+        const label = categoryLabels[cat] || categoryLabels.OTHER;
+        if (!groupedSkills[label]) groupedSkills[label] = [];
+        groupedSkills[label].push(ps.tech.name);
+      });
 
-  const techStacks = profile?.techStacks || [];
-  const groupedSkills: Record<string, string[]> = {};
-  techStacks.forEach((ps) => {
-    const cat = ps.tech.category;
-    const label = categoryLabels[cat] || categoryLabels.OTHER;
-    if (!groupedSkills[label]) groupedSkills[label] = [];
-    groupedSkills[label].push(ps.tech.name);
-  });
-
-  if (Object.keys(groupedSkills).length > 0) {
-    addHeading("TECHNICAL SKILLS");
-    Object.entries(groupedSkills).forEach(([label, names]) => {
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({ text: `${label}: `, bold: true, size: 19 }),
-            new TextRun({ text: names.join(", "), size: 19 }),
-          ],
-        })
-      );
-    });
+      if (Object.keys(groupedSkills).length > 0) {
+        addHeading("TECHNICAL SKILLS");
+        Object.entries(groupedSkills).forEach(([label, names]) => {
+          children.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: `${label}: `, bold: true, size: baseSize, font: fontFamily }),
+                new TextRun({ text: names.join(", "), size: baseSize, font: fontFamily }),
+              ],
+            })
+          );
+        });
+      }
+    }
   }
 
-  // 5. Achievements (rendered as bullets with right-aligned dates)
-  if (achievements.length) {
+  // 5. Achievements
+  if (config.sections.achievements && achievementsToShow.length) {
     addHeading("ACHIEVEMENTS");
-    achievements.forEach((a) => {
+    achievementsToShow.forEach((a) => {
       const parts = [a.title, a.provider].filter(Boolean);
       children.push(
         new Paragraph({
           children: [
-            new TextRun({ text: parts.join(" | ") }),
-            new TextRun({ text: `\t${a.date ? monthYear(a.date.toISOString()) : ""}` }),
+            new TextRun({ text: parts.join(" | "), font: fontFamily, size: baseSize }),
+            new TextRun({ text: `\t${a.date ? monthYear(a.date.toISOString()) : ""}`, font: fontFamily, size: baseSize }),
           ],
           bullet: { level: 0 },
           spacing: { before: 20 },
@@ -1176,11 +1323,21 @@ async function renderDocx(data: Awaited<ReturnType<typeof getResumeData>>) {
     });
   }
 
+  // 6. Custom Sections
+  if (config.sections.customSections && customSections && customSections.length > 0) {
+    customSections.forEach((cs) => {
+      addHeading(cs.title.toUpperCase());
+      cs.bullets.forEach((b) => {
+        children.push(new Paragraph({ text: b, bullet: { level: 0 }, spacing: { before: 20 }, children: [new TextRun({ text: b, size: baseSize, font: fontFamily })] }));
+      });
+    });
+  }
+
   const doc = new Document({
     sections: [{ 
       properties: {
         page: {
-          margin: { top: 720, right: 720, bottom: 720, left: 720 }, // 0.5 inch (1440 twips = 1 inch)
+          margin: { top: 720, right: 720, bottom: 720, left: 720 },
         }
       }, 
       children 
@@ -1243,4 +1400,3 @@ export async function generateResumeFile(args: {
     contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   };
 }
-

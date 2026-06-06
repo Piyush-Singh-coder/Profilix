@@ -32,6 +32,48 @@ export interface TechStack {
   category: TechCategory;
 }
 
+export interface ResumeConfig {
+  sections: {
+    summary: boolean;
+    experience: boolean;
+    education: boolean;
+    projects: boolean;
+    skills: boolean;
+    achievements: boolean;
+    customSections: boolean;
+  };
+  limits: {
+    projects: number;
+    experiences: number;
+    achievements: number;
+    educations: number;
+  };
+  styling: {
+    fontFamily: string;
+    fontSize: string;
+  };
+}
+
+export interface ProfileSkill {
+  id: string;
+  userId: string;
+  category: string;
+  skills: string[];
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CustomSection {
+  id: string;
+  userId: string;
+  title: string;
+  bullets: string[];
+  displayOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ProfileTechStack {
   tech: TechStack;
   assignedAt: string;
@@ -50,6 +92,7 @@ export interface Profile {
   theme: ProfileTheme;
   cardTheme?: CardTheme;
   techStacks?: ProfileTechStack[];
+  resumeConfig?: ResumeConfig | null;
 }
 
 export interface Project {
@@ -173,4 +216,6 @@ export interface PublicProfileData {
   achievements: Achievement[];
   educations?: Education[];
   githubStats: GitHubStats | null;
+  customSections?: CustomSection[];
+  profileSkills?: ProfileSkill[];
 }

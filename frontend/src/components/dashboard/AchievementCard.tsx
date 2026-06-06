@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Trash2, Calendar, Building2 } from "lucide-react";
+import { ExternalLink, Trash2, Calendar, Building2, ArrowUp, ArrowDown } from "lucide-react";
 import { Achievement } from "@/types";
 import { SortableItem } from "@/components/ui/SortableItem";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,9 @@ interface AchievementCardProps {
   achievement: Achievement;
   onEdit: (achievement: Achievement) => void;
   onDelete: (id: string) => void;
+  onMove?: (direction: "up" | "down") => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -26,7 +29,7 @@ function formatDate(dateStr: string | null): string {
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
-export default function AchievementCard({ achievement, onEdit, onDelete }: AchievementCardProps) {
+export default function AchievementCard({ achievement, onEdit, onDelete, onMove, isFirst, isLast }: AchievementCardProps) {
   return (
     <SortableItem id={achievement.id}>
       <div className="pr-7 sm:pr-9">
@@ -68,6 +71,30 @@ export default function AchievementCard({ achievement, onEdit, onDelete }: Achie
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
+          {onMove && (
+            <div className="flex sm:hidden items-center gap-0.5 border-r border-border/50 pr-1.5 mr-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isFirst}
+                onClick={() => onMove("up")}
+                type="button"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isLast}
+                onClick={() => onMove("down")}
+                type="button"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           {achievement.url && (
             <a
               href={achievement.url}

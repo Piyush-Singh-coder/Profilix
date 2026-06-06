@@ -36,3 +36,10 @@ export const apiLimiter = createLimiter(
   1,
   "API rate limit exceeded. Please slow down."
 );
+
+// Heavy operations (AI parsing, Puppeteer PDF exports, GitHub syncing)
+export const heavyLimiter = createLimiter(
+  10,
+  1,
+  "Too many requests for resource-heavy operations. Please wait a minute before trying again."
+);

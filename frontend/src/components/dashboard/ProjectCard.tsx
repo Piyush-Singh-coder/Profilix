@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, ExternalLinkIcon, Pin, Trash2 } from "lucide-react";
+import { ExternalLink, ExternalLinkIcon, Pin, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { Project } from "@/types";
 import { SortableItem } from "@/components/ui/SortableItem";
@@ -11,18 +11,18 @@ interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (projectId: string) => void;
   onTogglePin: (projectId: string) => void;
+  onMove?: (direction: "up" | "down") => void;
+  isFirst?: boolean;
+  isLast?: boolean;
 }
 
-export default function ProjectCard({ project, onEdit, onDelete, onTogglePin }: ProjectCardProps) {
+export default function ProjectCard({ project, onEdit, onDelete, onTogglePin, onMove, isFirst, isLast }: ProjectCardProps) {
   return (
     <SortableItem id={project.id}>
       <div className="pr-7 sm:pr-9">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h3 className="font-heading text-lg font-bold text-text-primary overflow-hidden text-ellipsis whitespace-normal sm:whitespace-nowrap sm:truncate">{project.title}</h3>
-            <p className="mt-1 line-clamp-2 text-sm text-text-secondary break-words">
-              {project.description}
-            </p>
           </div>
           <div className="flex items-center gap-1 shrink-0">
             <button
@@ -50,6 +50,30 @@ export default function ProjectCard({ project, onEdit, onDelete, onTogglePin }: 
         ) : null}
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5 sm:gap-2">
+          {onMove && (
+            <div className="flex sm:hidden items-center gap-0.5 border-r border-border/50 pr-1.5 mr-0.5">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isFirst}
+                onClick={() => onMove("up")}
+                type="button"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-text-secondary disabled:opacity-30"
+                disabled={isLast}
+                onClick={() => onMove("down")}
+                type="button"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           {project.repoUrl ? (
             <a
               href={project.repoUrl}

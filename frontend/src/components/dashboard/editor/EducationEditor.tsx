@@ -6,6 +6,7 @@ import {
   DragEndEvent,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -34,7 +35,6 @@ interface EducationFormState {
   scoreType: "CGPA" | "PERCENTAGE";
   score: string;
   description: string;
-  bullets: string;
 }
 
 const EMPTY_FORM: EducationFormState = {
@@ -47,7 +47,6 @@ const EMPTY_FORM: EducationFormState = {
   scoreType: "CGPA",
   score: "",
   description: "",
-  bullets: "",
 };
 
 export function EducationEditor() {
@@ -69,6 +68,7 @@ export function EducationEditor() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -92,22 +92,11 @@ export function EducationEditor() {
       scoreType: education.scoreType || "CGPA",
       score: education.score || "",
       description: education.description || "",
-      bullets: (education.bullets || []).join("\n"),
     });
     setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
-    const payloadBullets = formState.bullets
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
-
-    if (payloadBullets.length > 10) {
-      toast.error("Maximum 10 bullet points allowed");
-      return;
-    }
-
     const payload = {
       school: formState.school.trim(),
       degree: formState.degree.trim() || undefined,
@@ -118,7 +107,7 @@ export function EducationEditor() {
       scoreType: formState.score.trim() ? formState.scoreType : null,
       score: formState.score.trim() || null,
       description: formState.description.trim() || undefined,
-      bullets: payloadBullets.length > 0 ? payloadBullets : undefined,
+      bullets: undefined, // bullets field removed from UI
     };
 
     if (!payload.school) {
@@ -157,6 +146,32 @@ export function EducationEditor() {
     }
   };
 
+  const moveEducation = async (index: number, direction: "up" | "down") => {
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= educationOrder.length) return;
+
+    const previousOrder = educationOrder;
+    const nextOrder = arrayMove(educationOrder, index, targetIndex);
+    setEducationOrder(nextOrder);
+
+    try {
+      // Parallel update logic
+      const updates = nextOrder.map((edu, idx) => ({ id: edu.id, displayOrder: idx }));
+      await Promise.all(
+        updates
+          .filter((item) => {
+            const original = previousOrder.find((e) => e.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) => updateEducation(id, { displayOrder }))
+      );
+      toast.success("Education order updated");
+    } catch {
+      setEducationOrder(previousOrder);
+      toast.error("Failed to reorder education");
+    }
+  };
+
   const onDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -170,12 +185,16 @@ export function EducationEditor() {
     setEducationOrder(nextOrder);
 
     try {
-      for (let index = 0; index < nextOrder.length; index += 1) {
-        const edu = nextOrder[index];
-        if (edu.displayOrder !== index) {
-          await updateEducation(edu.id, { displayOrder: index });
-        }
-      }
+      // Optimise to parallel update to match projects/experiences
+      const updates = nextOrder.map((edu, index) => ({ id: edu.id, displayOrder: index }));
+      await Promise.all(
+        updates
+          .filter((item) => {
+            const original = previousOrder.find((e) => e.id === item.id);
+            return original && original.displayOrder !== item.displayOrder;
+          })
+          .map(({ id, displayOrder }) => updateEducation(id, { displayOrder }))
+      );
       toast.success("Education order updated");
     } catch {
       setEducationOrder(previousOrder);
@@ -218,12 +237,15 @@ export function EducationEditor() {
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
               <SortableContext items={orderedIds} strategy={verticalListSortingStrategy}>
                 <div className="space-y-3">
-                  {educationOrder.map((education) => (
+                  {educationOrder.map((education, index) => (
                     <EducationCard
                       key={education.id}
                       education={education}
                       onEdit={openEditModal}
                       onDelete={handleDelete}
+                      onMove={(dir) => moveEducation(index, dir)}
+                      isFirst={index === 0}
+                      isLast={index === educationOrder.length - 1}
                     />
                   ))}
                 </div>
@@ -338,14 +360,6 @@ export function EducationEditor() {
               onChange={(event) => setFormState((prev) => ({ ...prev, description: event.target.value }))}
               rows={3}
               placeholder="GPA, Honors, Minor, or high-level coursework."
-            />
-            <Textarea
-              label="Specific Highlights (Bullets)"
-              value={formState.bullets}
-              onChange={(event) => setFormState((prev) => ({ ...prev, bullets: event.target.value }))}
-              rows={4}
-              placeholder={"Dean's List (3 semesters)\nRelevant coursework: Distributed Systems, ML\nTeaching Assistant for Data Structures"}
-              helperText="One bullet per line. Max 10 bullets."
             />
           </div>
 

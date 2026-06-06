@@ -9,8 +9,6 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useQRStore } from "@/store/useQRStore";
-import { useProfileStore } from "@/store/useProfileStore";
-import { OnboardingModal } from "@/components/dashboard/OnboardingModal";
 import type { CardTheme } from "@/types";
 
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -18,9 +16,6 @@ import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 export default function QRDashboardPage() {
   const { user } = useAuthStore();
   const { standardQR, lockScreenQR, isLoading, error, fetchQR } = useQRStore();
-  const { completeness, fetchProfileCompleteness } = useProfileStore();
-  const [showBlockerModal, setShowBlockerModal] = useState(false);
-  const [hasDismissedOnCurrentVisit, setHasDismissedOnCurrentVisit] = useState(false);
 
   const [copied, setCopied] = useState(false);
   const [viewMode, setViewMode] = useState<"default" | "hire">("default");
@@ -28,24 +23,13 @@ export default function QRDashboardPage() {
   useEffect(() => {
     fetchQR("STANDARD");
     fetchQR("LOCK_SCREEN");
-    fetchProfileCompleteness();
-  }, [fetchQR, fetchProfileCompleteness]);
+  }, [fetchQR]);
 
   useEffect(() => {
     if (error) {
       toast.error(error);
     }
   }, [error]);
-
-  useEffect(() => {
-    if (completeness) {
-      const requiredFields = ["identity", "projects", "skills", "experience", "achievements"];
-      const isMissingFields = requiredFields.some(field => !completeness[field]);
-      if (isMissingFields && !hasDismissedOnCurrentVisit) {
-        setShowBlockerModal(true);
-      }
-    }
-  }, [completeness, hasDismissedOnCurrentVisit]);
 
   const profileUrl = useMemo(() => {
     if (typeof window === "undefined" || !user?.username) return "";
@@ -203,15 +187,6 @@ export default function QRDashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      <OnboardingModal 
-        mode="BLOCKER" 
-        open={showBlockerModal} 
-        onClose={() => {
-          setShowBlockerModal(false);
-          setHasDismissedOnCurrentVisit(true);
-        }} 
-      />
     </div>
   );
 }
