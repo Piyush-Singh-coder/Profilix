@@ -253,9 +253,9 @@ export function CustomSectionEditor() {
                                 {section.title}
                               </span>
                             </h3>
-                            <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1">
+                            <ul className="list-disc pl-5 text-sm text-text-secondary space-y-1 w-full overflow-hidden break-words">
                               {section.bullets.map((bullet, bIdx) => (
-                                <li key={bIdx}>{bullet}</li>
+                                <li key={bIdx} className="break-words w-full">{bullet}</li>
                               ))}
                             </ul>
                           </div>

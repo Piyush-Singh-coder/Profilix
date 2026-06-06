@@ -36,9 +36,9 @@ export default function ExperienceCard({ experience, onEdit, onDelete, onMove, i
             </h3>
             <p className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary min-w-0">
               <Building2 className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{experience.company}</span>
+              <span className="truncate block min-w-0">{experience.company}</span>
             </p>
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-text-secondary">
+            <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-text-secondary w-full">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3 w-3 shrink-0" />
                 {formatDateRange(experience.startDate, experience.endDate, experience.isCurrent)}
@@ -46,7 +46,7 @@ export default function ExperienceCard({ experience, onEdit, onDelete, onMove, i
               {experience.location && (
                 <span className="flex items-center gap-1 min-w-0">
                   <MapPin className="h-3 w-3 shrink-0" />
-                  <span className="truncate">{experience.location}</span>
+                  <span className="truncate block min-w-0">{experience.location}</span>
                 </span>
               )}
             </div>

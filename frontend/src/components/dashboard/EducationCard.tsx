@@ -35,9 +35,9 @@ export default function EducationCard({ education, onEdit, onDelete, onMove, isF
           <div className="min-w-0 flex-1">
             <h3 className="font-heading text-lg font-bold text-text-primary overflow-hidden text-ellipsis whitespace-normal sm:whitespace-nowrap sm:truncate">{education.school}</h3>
             {subtitle || education.score ? (
-              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-text-secondary min-w-0">
+              <p className="mt-1 flex flex-wrap items-center gap-1.5 text-sm text-text-secondary min-w-0 w-full">
                 <GraduationCap className="h-3.5 w-3.5 shrink-0" />
-                {subtitle && <span className="truncate">{subtitle}</span>}
+                {subtitle && <span className="truncate block min-w-0">{subtitle}</span>}
                 {education.score && (
                   <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary shrink-0">
                     {education.scoreType || "CGPA"}: {education.score}

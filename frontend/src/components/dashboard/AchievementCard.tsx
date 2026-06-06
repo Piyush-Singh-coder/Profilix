@@ -44,9 +44,9 @@ export default function AchievementCard({ achievement, onEdit, onDelete, onMove,
               </Badge>
             </div>
             {achievement.provider && (
-              <p className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary">
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-text-secondary min-w-0 w-full">
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{achievement.provider}</span>
+                <span className="truncate block min-w-0">{achievement.provider}</span>
               </p>
             )}
             {achievement.date && (

@@ -14,7 +14,7 @@ import { User } from "lucide-react";
 
 export default function UnifiedProfileEditorPage() {
   return (
-    <div className="animate-in pb-24">
+    <div className="animate-in pb-24 w-full max-w-full overflow-hidden">
       <DashboardHeader 
         title="Profile Editor"
         subtitle="Manage your entire professional brand from a single, unified interface. Your updates are reflected instantly across your profile card and resume."
@@ -22,7 +22,7 @@ export default function UnifiedProfileEditorPage() {
         icon={User}
       />
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full min-w-0">
         <ResumeParserCard />
         
         <section id="identity">
