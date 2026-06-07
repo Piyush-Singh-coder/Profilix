@@ -30,8 +30,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const { data } = await api.get<ApiSuccessResponse<Project[]>>("/projects");
       set({ projects: data.data, isLoading: false });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to fetch projects", isLoading: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ error: err.response?.data?.error || err.response?.data?.message || "Failed to fetch projects", isLoading: false });
     }
   },
 
@@ -41,8 +41,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       const { data } = await api.post<ApiSuccessResponse<Project>>("/projects", project);
       set({ projects: [...get().projects, data.data], isSaving: false });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to create project", isSaving: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ error: err.response?.data?.error || err.response?.data?.message || "Failed to create project", isSaving: false });
       throw error;
     }
   },
@@ -56,8 +56,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         isSaving: false 
       });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to update project", isSaving: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ error: err.response?.data?.error || err.response?.data?.message || "Failed to update project", isSaving: false });
       throw error;
     }
   },
@@ -74,8 +74,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         isSaving: false,
       });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to toggle pin", isSaving: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ error: err.response?.data?.error || err.response?.data?.message || "Failed to toggle pin", isSaving: false });
       throw error;
     }
   },
@@ -89,8 +89,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
         isSaving: false 
       });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ error: err.response?.data?.message || "Failed to delete project", isSaving: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ error: err.response?.data?.error || err.response?.data?.message || "Failed to delete project", isSaving: false });
       throw error;
     }
   },
@@ -116,8 +116,8 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       });
       set({ isSaving: false });
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      set({ projects: originalOrder, error: err.response?.data?.message || "Failed to reorder projects", isSaving: false });
+      const err = error as { response?: { data?: { error?: string; message?: string } } };
+      set({ projects: originalOrder, error: err.response?.data?.error || err.response?.data?.message || "Failed to reorder projects", isSaving: false });
       throw error;
     }
   }

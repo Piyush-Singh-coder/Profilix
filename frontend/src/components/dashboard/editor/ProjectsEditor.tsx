@@ -106,7 +106,7 @@ export function ProjectsEditor() {
 
     const payload = {
       title: formState.title.trim(),
-      description: null,
+      description: undefined,
       repoUrl: formState.repoUrl.trim() || undefined,
       liveUrl: formState.liveUrl.trim() || undefined,
       videoUrl: formState.videoUrl.trim() || undefined,
@@ -129,8 +129,9 @@ export function ProjectsEditor() {
       setIsModalOpen(false);
       setFormState(EMPTY_FORM);
       setEditingProject(null);
-    } catch {
-      toast.error("Failed to save project");
+    } catch (error: any) {
+      const errMsg = error.response?.data?.error || "Failed to save project";
+      toast.error(errMsg);
     }
   };
 
