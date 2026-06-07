@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+const preprocessUrl = z.preprocess((val) => {
+  if (typeof val !== "string") return val;
+  const s = val.trim();
+  if (!s) return s;
+  if (!/^https?:\/\//i.test(s)) {
+    return `https://${s}`;
+  }
+  return s;
+}, z.string().url("Invalid URL"));
+
 export const createSocialLinkSchema = z.object({
   platform: z.enum([
     "GITHUB",
@@ -10,7 +20,7 @@ export const createSocialLinkSchema = z.object({
     "PERSONAL_WEBSITE",
     "OTHER",
   ]),
-  url: z.string().url("Invalid URL"),
+  url: preprocessUrl,
   visibleInDefault: z.boolean().default(true),
   visibleInRecruiter: z.boolean().default(true),
 });

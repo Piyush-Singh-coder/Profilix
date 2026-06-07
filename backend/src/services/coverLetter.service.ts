@@ -44,7 +44,7 @@ export async function composeCoverLetter(args: GenerateCoverLetterArgs): Promise
 
   // Fetch candidate's background data
   const data = await getResumeData(userId);
-  const { user, experiences, projects, educations, socialLinks } = data;
+  const { user, experiences, projects, educations, socialLinks, profileSkills } = data;
   const profile = user.profile;
 
   // Format experience bullet summaries for prompt injection
@@ -61,9 +61,12 @@ export async function composeCoverLetter(args: GenerateCoverLetterArgs): Promise
     .join("\n");
 
   // Format skills
-  const skillsList = profile?.techStacks
-    ? profile.techStacks.map((s) => s.tech.name).join(", ")
-    : "";
+  let skillsList = "";
+  if (profileSkills && profileSkills.length > 0) {
+    skillsList = profileSkills.flatMap((ps) => ps.skills).join(", ");
+  } else if (profile?.techStacks) {
+    skillsList = profile.techStacks.map((s) => s.tech.name).join(", ");
+  }
 
   const systemPrompt = `You are an elite, persuasive career consultant and cover letter writer. 
 Write a highly targeted, professional, and quantified cover letter that perfectly aligns the candidate's background with the job description.

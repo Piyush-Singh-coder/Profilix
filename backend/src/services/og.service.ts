@@ -39,12 +39,13 @@ export const generateOGImage = async (username: string): Promise<Buffer> => {
           displayName: true,
           headline: true,
           isPublic: true,
-          techStacks: {
-            include: { tech: { select: { name: true } } },
-            take: 8,
-            orderBy: { assignedAt: "asc" },
-          },
         },
+      },
+      profileSkills: {
+        select: {
+          skills: true,
+        },
+        orderBy: { displayOrder: "asc" },
       },
     },
   });
@@ -55,7 +56,7 @@ export const generateOGImage = async (username: string): Promise<Buffer> => {
 
   const displayName = truncate(user.profile.displayName ?? user.fullName, 40);
   const headline = truncate(user.profile.headline ?? "Developer", 64);
-  const techNames = user.profile.techStacks.map((pt) => pt.tech.name);
+  const techNames = user.profileSkills.flatMap((ps) => ps.skills).slice(0, 8);
   const profileUrl = `${env.FRONTEND_URL}/${username}`;
 
   // Build tech tag pills SVG elements

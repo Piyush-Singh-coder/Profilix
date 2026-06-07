@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   try {
-    const profile = await prisma.profile.findFirst({
-      select: { techStacks: { select: { techId: true }, take: 1 } }
+    const profile = await prisma.profileSkill.findFirst({
+      select: { skills: true }
     });
     console.log("Profile success", profile);
   } catch (e: any) {
