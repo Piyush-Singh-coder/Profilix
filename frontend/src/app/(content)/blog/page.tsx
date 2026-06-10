@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { absoluteUrl, getPublishedBlogs } from "@/lib/blogApi";
+import { absoluteUrl, getPublishedBlogs, isValidImageUrl } from "@/lib/blogApi";
 import { BlogPost } from "@/types";
 
 export const revalidate = 300;
@@ -121,7 +121,7 @@ export default async function BlogIndexPage() {
               <Link key={post.slug} href={`/blog/${post.slug}`} className="group block h-full">
                 <article className="group glass-panel rounded-[24px] border border-border/50 bg-surface p-5 transition-all hover:border-primary/40 hover:shadow-xl flex flex-col h-full">
                   <div className="mb-4 aspect-video w-full rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden relative bg-surface-low">
-                    {post.coverImage ? (
+                    {isValidImageUrl(post.coverImage) ? (
                       <img
                         src={post.coverImage}
                         alt={post.coverImageAlt || post.title}

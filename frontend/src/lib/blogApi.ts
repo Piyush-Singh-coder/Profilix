@@ -25,3 +25,10 @@ export const absoluteUrl = (path = "") => {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site";
   return `${baseUrl}${path}`;
 };
+
+export const isValidImageUrl = (url: string | null | undefined): url is string => {
+  if (!url) return false;
+  const u = url.trim().toLowerCase();
+  if (u === "" || u === "null" || u === "undefined") return false;
+  return u.startsWith("http://") || u.startsWith("https://") || u.startsWith("/");
+};

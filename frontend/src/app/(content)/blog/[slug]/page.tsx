@@ -6,7 +6,7 @@ import { ArrowLeft, BookOpen } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CTABanner } from "@/components/landing/CTABanner";
-import { absoluteUrl, getPublishedBlogBySlug, getPublishedBlogs } from "@/lib/blogApi";
+import { absoluteUrl, getPublishedBlogBySlug, getPublishedBlogs, isValidImageUrl } from "@/lib/blogApi";
 import { BlogPost } from "@/types";
 
 interface Props {
@@ -199,7 +199,7 @@ export default async function BlogPostPage({ params }: Props) {
               ) : null}
             </header>
 
-            {post.coverImage ? (
+            {isValidImageUrl(post.coverImage) ? (
               <div className="mb-8 aspect-video w-full overflow-hidden rounded-2xl border border-border/50 bg-surface-low relative">
                 <img
                   src={post.coverImage}
@@ -265,7 +265,7 @@ export default async function BlogPostPage({ params }: Props) {
                   recentPosts.map((rPost) => (
                     <Link key={rPost.slug} href={`/blog/${rPost.slug}`} className="group flex gap-3 items-center">
                       <div className="w-20 h-14 rounded-lg border border-border/50 overflow-hidden shrink-0 bg-surface-low relative aspect-video">
-                        {rPost.coverImage ? (
+                        {isValidImageUrl(rPost.coverImage) ? (
                           <img
                             src={rPost.coverImage}
                             alt={rPost.coverImageAlt || rPost.title}
