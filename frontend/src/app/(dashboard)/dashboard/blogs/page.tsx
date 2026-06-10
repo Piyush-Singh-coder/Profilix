@@ -337,21 +337,23 @@ export default function BlogAdminPage() {
                   </Link>
                 ) : null}
                 {selectedPost ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      setStatus(selectedPost, selectedPost.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED")
-                    }
-                  >
-                    {selectedPost.status === "PUBLISHED" ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
-                    {selectedPost.status === "PUBLISHED" ? "Unpublish" : "Publish"}
-                  </Button>
+                  <>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setStatus(selectedPost, selectedPost.status === "PUBLISHED" ? "DRAFT" : "PUBLISHED")
+                      }
+                    >
+                      {selectedPost.status === "PUBLISHED" ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+                      {selectedPost.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                    </Button>
+                    <Button type="button" variant="danger" size="sm" onClick={() => deletePost(selectedPost)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Post
+                    </Button>
+                  </>
                 ) : null}
-                <Button type="submit" size="sm" isLoading={isSaving}>
-                  <Save className="mr-2 h-4 w-4" /> Save
-                </Button>
               </div>
             </div>
 
@@ -457,13 +459,11 @@ export default function BlogAdminPage() {
             </div>
           </section>
 
-          {selectedPost ? (
-            <div className="flex justify-end">
-              <Button type="button" variant="danger" size="sm" onClick={() => deletePost(selectedPost)}>
-                <Trash2 className="mr-2 h-4 w-4" /> Delete Post
-              </Button>
-            </div>
-          ) : null}
+          <div className="flex justify-end">
+            <Button type="submit" size="sm" isLoading={isSaving}>
+              <Save className="mr-2 h-4 w-4" /> Save Post
+            </Button>
+          </div>
         </form>
       </div>
     </div>
