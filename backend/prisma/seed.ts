@@ -1,6 +1,50 @@
 import { PrismaClient } from "@prisma/client";
+import { BLOG_POSTS } from "../../frontend/src/lib/blogData";
 
 const prisma = new PrismaClient();
+
+const blogSeo: Record<string, { tags: string[]; keywords: string[] }> = {
+  "ats-friendly-resume-best-practices": {
+    tags: ["ATS Resume", "Resume Builder", "Developer Careers"],
+    keywords: [
+      "ATS friendly resume",
+      "developer resume best practices",
+      "software engineer resume",
+      "resume keywords",
+      "Profilix ATS resume",
+    ],
+  },
+  "how-to-share-portfolio-qr": {
+    tags: ["QR Portfolio", "Networking", "Developer Portfolio"],
+    keywords: [
+      "QR portfolio",
+      "share developer portfolio",
+      "portfolio QR code",
+      "hackathon networking",
+      "developer business card",
+    ],
+  },
+  "best-portfolio-formats": {
+    tags: ["Developer Portfolio", "Portfolio Design", "Career"],
+    keywords: [
+      "developer portfolio ideas",
+      "best portfolio formats",
+      "software engineer portfolio",
+      "portfolio design",
+      "student developer portfolio",
+    ],
+  },
+  "stand-out-tech-interviews": {
+    tags: ["Tech Interviews", "Portfolio Strategy", "Career"],
+    keywords: [
+      "tech interview portfolio",
+      "developer portfolio interview",
+      "one page portfolio",
+      "software engineer interview",
+      "stand out in tech interviews",
+    ],
+  },
+};
 
 // Using string literals for category to avoid @prisma/client enum dependency
 // before `prisma generate` is run. After generate, these will be type-safe.
@@ -100,6 +144,51 @@ async function main() {
   }
 
   console.log(`✅ Seeded ${techStacks.length} tech stacks`);
+  console.log("Seeding blog posts...");
+
+  const adminUser = await prisma.user.findFirst({
+    where: {
+      OR: [{ username: "pmiaynushi" }, { email: "pmiaynushi@gmail.com" }],
+    },
+    select: { id: true },
+  });
+
+  for (const post of BLOG_POSTS) {
+    const seo = blogSeo[post.slug] || { tags: [], keywords: [] };
+    const publishedAt = new Date(post.date);
+    const authorData = adminUser ? { authorId: adminUser.id } : {};
+
+    await prisma.blogPost.upsert({
+      where: { slug: post.slug },
+      update: {
+        ...authorData,
+        title: post.title,
+        excerpt: post.description,
+        content: post.content.trim(),
+        metaTitle: post.title.slice(0, 70),
+        metaDescription: post.description.slice(0, 170),
+        keywords: seo.keywords,
+        tags: seo.tags,
+        status: "PUBLISHED",
+        publishedAt,
+      },
+      create: {
+        ...authorData,
+        slug: post.slug,
+        title: post.title,
+        excerpt: post.description,
+        content: post.content.trim(),
+        metaTitle: post.title.slice(0, 70),
+        metaDescription: post.description.slice(0, 170),
+        keywords: seo.keywords,
+        tags: seo.tags,
+        status: "PUBLISHED",
+        publishedAt,
+      },
+    });
+  }
+
+  console.log(`Seeded ${BLOG_POSTS.length} blog posts`);
 }
 
 main()

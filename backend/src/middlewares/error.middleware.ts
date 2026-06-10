@@ -17,6 +17,7 @@ export const errorMiddleware = (
     res.status(err.statusCode).json({
       success: false,
       error: err.message,
+      message: err.message,
       meta: { timestamp: new Date().toISOString() },
     });
     return;
@@ -27,6 +28,7 @@ export const errorMiddleware = (
     res.status(400).json({
       success: false,
       error: "Validation failed",
+      message: "Validation failed",
       details: err.flatten().fieldErrors,
       meta: { timestamp: new Date().toISOString() },
     });
@@ -37,9 +39,11 @@ export const errorMiddleware = (
   if (err instanceof PrismaClientKnownRequestError) {
     if (err.code === "P2002") {
       const field = (err.meta?.target as string[])?.join(", ") ?? "field";
+      const errMsg = `A record with this ${field} already exists`;
       res.status(409).json({
         success: false,
-        error: `A record with this ${field} already exists`,
+        error: errMsg,
+        message: errMsg,
         meta: { timestamp: new Date().toISOString() },
       });
       return;
@@ -48,6 +52,7 @@ export const errorMiddleware = (
       res.status(404).json({
         success: false,
         error: "Record not found",
+        message: "Record not found",
         meta: { timestamp: new Date().toISOString() },
       });
       return;
@@ -58,6 +63,7 @@ export const errorMiddleware = (
   res.status(500).json({
     success: false,
     error: "Internal server error",
+    message: "Internal server error",
     meta: { timestamp: new Date().toISOString() },
   });
 };

@@ -1,27 +1,31 @@
 import { MetadataRoute } from "next";
-import { BLOG_POSTS } from "@/lib/blogData";
+import { getPublishedBlogs } from "@/lib/blogApi";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site";
   const now = new Date();
 
-  const blogEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
-    url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  let blogEntries: MetadataRoute.Sitemap = [];
+
+  try {
+    const posts = await getPublishedBlogs();
+    blogEntries = posts.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt || post.publishedAt || post.createdAt),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+  } catch {
+    blogEntries = [];
+  }
 
   return [
-    // ── Core / Homepage ─────────────────────────────────────────
     {
       url: baseUrl,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
     },
-
-    // ── Primary Product Pages (highest-value) ────────────────────
     {
       url: `${baseUrl}/ats-resume-generator`,
       lastModified: now,
@@ -38,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${baseUrl}/qr-portfolio`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.90,
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/student-portfolio-creator`,
@@ -46,8 +50,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.88,
     },
-
-    // ── Feature Pages ────────────────────────────────────────────
     {
       url: `${baseUrl}/features`,
       lastModified: now,
@@ -78,34 +80,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.78,
     },
-
-    // ── Content ──────────────────────────────────────────────────
     {
       url: `${baseUrl}/blog`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.80,
+      priority: 0.8,
     },
     ...blogEntries,
-
-    // ── Static Pages ─────────────────────────────────────────────
     {
       url: `${baseUrl}/contact`,
       lastModified: now,
       changeFrequency: "yearly",
-      priority: 0.30,
+      priority: 0.3,
     },
     {
       url: `${baseUrl}/privacy`,
       lastModified: now,
       changeFrequency: "yearly",
-      priority: 0.20,
+      priority: 0.2,
     },
     {
       url: `${baseUrl}/terms`,
       lastModified: now,
       changeFrequency: "yearly",
-      priority: 0.20,
+      priority: 0.2,
     },
   ];
 }

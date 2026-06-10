@@ -1,85 +1,118 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { BLOG_POSTS } from "@/lib/blogData";
+import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import { ArrowLeft, BookOpen } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CTABanner } from "@/components/landing/CTABanner";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { absoluteUrl, getPublishedBlogBySlug, getPublishedBlogs } from "@/lib/blogApi";
+import { BlogPost } from "@/types";
 
 interface Props {
-  params: Promise<{
-    slug: string;
-  }>;
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  return BLOG_POSTS.map((post) => ({
-    slug: post.slug,
-  }));
+export const revalidate = 300;
+
+function formatDate(date: string | null) {
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
 }
+
+function readingTime(content: string) {
+  const words = content.trim().split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.ceil(words / 220))} min read`;
+}
+
+const withoutMarkdownNode = <T extends { node?: unknown }>(props: T) => {
+  const { node, ...rest } = props;
+  void node;
+  return rest;
+};
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
 
-  if (!post) {
-    return { title: "Post Not Found" };
+  try {
+    const post = await getPublishedBlogBySlug(slug);
+    const canonicalUrl = `/blog/${post.slug}`;
+    const image = post.coverImage || "/og-default.png";
+    const title = post.metaTitle || post.title;
+    const description = post.metaDescription || post.excerpt;
+
+    return {
+      title,
+      description,
+      keywords: post.keywords.length > 0 ? post.keywords : post.tags,
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        title,
+        description,
+        type: "article",
+        url: canonicalUrl,
+        publishedTime: post.publishedAt || post.createdAt,
+        modifiedTime: post.updatedAt,
+        tags: post.tags,
+        images: [{ url: image, width: 1200, height: 630, alt: post.coverImageAlt || post.title }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [image],
+      },
+    };
+  } catch {
+    return {
+      title: "Post Not Found",
+      robots: { index: false, follow: false },
+    };
   }
-
-  const ogUrl = `/og-default.png`;
-  const canonicalUrl = `/blog/${slug}`;
-
-  return {
-    title: post.title,
-    description: post.description,
-    keywords: post.title
-      .toLowerCase()
-      .replace(/[^a-z0-9 ]/g, "")
-      .split(" ")
-      .filter((w) => w.length > 3)
-      .slice(0, 8),
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: "article",
-      url: canonicalUrl,
-      publishedTime: new Date(post.date).toISOString(),
-      images: [{ url: ogUrl, width: 1200, height: 630, alt: post.title }],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: post.title,
-      description: post.description,
-      images: [ogUrl],
-    },
-  };
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  let post;
+  let allPosts: BlogPost[] = [];
 
-  if (!post) {
+  try {
+    post = await getPublishedBlogBySlug(slug);
+  } catch {
     notFound();
   }
 
-  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site"}/blog/${slug}`;
-  const ogUrl = `${process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site"}/og-default.png`;
+  try {
+    allPosts = await getPublishedBlogs();
+  } catch {
+    allPosts = [];
+  }
 
-  const jsonLd = {
+  const recentPosts = allPosts
+    .filter((p) => p.slug !== slug)
+    .slice(0, 4);
+
+  const canonicalUrl = absoluteUrl(`/blog/${post.slug}`);
+  const image = post.coverImage || absoluteUrl("/og-default.png");
+  const description = post.metaDescription || post.excerpt;
+
+  const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
-    description: post.description,
-    image: ogUrl,
-    datePublished: new Date(post.date).toISOString(),
+    description,
+    image,
+    datePublished: post.publishedAt || post.createdAt,
+    dateModified: post.updatedAt,
+    keywords: post.keywords.join(", "),
     author: {
       "@type": "Organization",
       name: "Profilix",
-      url: process.env.NEXT_PUBLIC_APP_URL || "https://profilix.site",
+      url: absoluteUrl(),
     },
     publisher: {
       "@type": "Organization",
@@ -95,62 +128,171 @@ export default async function BlogPostPage({ params }: Props) {
     },
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: absoluteUrl(),
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Blog",
+        item: absoluteUrl("/blog"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: post.title,
+        item: canonicalUrl,
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-background text-text-primary">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
       <Navbar />
 
-      <article className="relative py-24 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Background Accent */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
+      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full -translate-x-1/2 bg-gradient-to-b from-primary/5 to-transparent" />
 
-        <Link href="/blog" className="inline-flex items-center text-text-secondary hover:text-primary transition-colors mb-12 text-sm font-medium group">
-          <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" /> Back to Blog
+        <Link href="/blog" className="group mb-8 inline-flex items-center text-sm font-medium text-text-secondary transition-colors hover:text-primary">
+          <ArrowLeft className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1" /> Back to Blog
         </Link>
-        
-        <header className="mb-16 border-b border-border/50 pb-12">
-          <div className="flex items-center gap-4 text-sm font-semibold uppercase tracking-wider text-primary mb-6">
-            <span>{post.date}</span>
-            <span className="w-1 h-1 rounded-full bg-border" />
-            <span>{post.readTime}</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-bold text-text-primary mb-8 leading-[1.1]">
-            {post.title}
-          </h1>
-          <p className="text-xl text-text-secondary leading-relaxed max-w-2xl">
-            {post.description}
-          </p>
-        </header>
 
-        <div className="text-lg leading-[1.8] text-text-secondary w-full max-w-none">
-          <ReactMarkdown
-            components={{
-              h2: ({ node, ...props }) => <h2 className="text-3xl font-heading font-bold text-text-primary mt-16 mb-8" {...props} />,
-              h3: ({ node, ...props }) => <h3 className="text-2xl font-heading font-bold text-text-primary mt-12 mb-6" {...props} />,
-              p: ({ node, ...props }) => <p className="mb-8 last:mb-0" {...props} />,
-              ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-8 space-y-3" {...props} />,
-              ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-8 space-y-3" {...props} />,
-              li: ({ node, ...props }) => <li className="text-text-secondary pl-2" {...props} />,
-              strong: ({ node, ...props }) => <strong className="font-bold text-text-primary" {...props} />,
-              a: ({ node, ...props }) => <a className="text-primary hover:text-primary/80 transition-colors underline underline-offset-4 decoration-primary/30 hover:decoration-primary font-medium" {...props} />,
-              blockquote: ({ node, ...props }) => (
-                <blockquote className="border-l-4 border-primary bg-primary/5 pl-8 py-6 pr-6 my-12 rounded-r-2xl italic text-text-primary text-xl" {...props} />
-              ),
-              code: ({ node, inline, ...props }: any) => 
-                inline ? (
-                  <code className="bg-surface-high px-1.5 py-0.5 rounded text-primary text-sm font-mono" {...props} />
+        {/* 2-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Main Article Content */}
+          <article className="lg:col-span-8 bg-surface border border-border/50 rounded-[24px] p-6 sm:p-8 shadow-sm">
+            <header className="mb-8 border-b border-border/50 pb-6">
+              <div className="mb-4 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-primary">
+                <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span>{readingTime(post.content || "")}</span>
+              </div>
+              <h1 className="mb-4 font-heading text-3xl font-bold leading-[1.2] text-text-primary md:text-4xl lg:text-5xl">
+                {post.title}
+              </h1>
+              <p className="max-w-2xl text-base leading-relaxed text-text-secondary">
+                {post.excerpt}
+              </p>
+              {post.tags.length > 0 ? (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {post.tags.map((tag) => (
+                    <span key={tag} className="rounded-full border border-border bg-surface-low px-2.5 py-0.5 text-xs font-medium text-text-secondary">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </header>
+
+            {post.coverImage ? (
+              <div className="mb-8 aspect-video w-full overflow-hidden rounded-2xl border border-border/50 bg-surface-low relative">
+                <img
+                  src={post.coverImage}
+                  alt={post.coverImageAlt || post.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            ) : null}
+
+            <div className="w-full max-w-none text-base leading-[1.6] text-text-secondary">
+              <ReactMarkdown
+                components={{
+                  h2: (props) => <h2 className="mb-4 mt-10 font-heading text-2xl font-bold text-text-primary" {...withoutMarkdownNode(props)} />,
+                  h3: (props) => <h3 className="mb-3 mt-8 font-heading text-xl font-bold text-text-primary" {...withoutMarkdownNode(props)} />,
+                  p: (props) => <p className="mb-4 last:mb-0" {...withoutMarkdownNode(props)} />,
+                  ul: (props) => <ul className="mb-4 list-disc space-y-2 pl-6" {...withoutMarkdownNode(props)} />,
+                  ol: (props) => <ol className="mb-4 list-decimal space-y-2 pl-6" {...withoutMarkdownNode(props)} />,
+                  li: (props) => <li className="pl-2 text-text-secondary" {...withoutMarkdownNode(props)} />,
+                  strong: (props) => <strong className="font-bold text-text-primary" {...withoutMarkdownNode(props)} />,
+                  a: (props) => <a className="font-medium text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:text-primary/80 hover:decoration-primary" {...withoutMarkdownNode(props)} />,
+                  blockquote: (props) => (
+                    <blockquote className="my-8 rounded-r-[var(--radius-md)] border-l-4 border-primary bg-primary/5 py-4 pl-6 pr-4 text-lg italic text-text-primary" {...withoutMarkdownNode(props)} />
+                  ),
+                  code: (props) => (
+                    <code className="rounded bg-surface-high px-1.5 py-0.5 font-mono text-sm text-primary" {...withoutMarkdownNode(props)} />
+                  ),
+                  pre: (props) => (
+                    <pre className="my-8 overflow-x-auto rounded-[var(--radius-md)] border border-border/50 bg-surface-high p-6 font-mono text-sm text-text-primary" {...withoutMarkdownNode(props)} />
+                  ),
+                }}
+              >
+                {post.content || ""}
+              </ReactMarkdown>
+            </div>
+          </article>
+
+          {/* Sidebar */}
+          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-6">
+            {/* Search Widget */}
+            <div className="bg-surface border border-border/50 rounded-[20px] p-5 shadow-sm">
+              <h4 className="font-heading font-bold text-sm text-text-primary mb-3">Search</h4>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  className="w-full h-10 px-3 pr-10 rounded-xl border border-border bg-surface-low text-sm outline-none focus:border-primary/60 text-text-primary"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </span>
+              </div>
+            </div>
+
+            {/* Recent Posts Widget */}
+            <div className="bg-surface border border-border/50 rounded-[20px] p-5 shadow-sm">
+              <h4 className="font-heading font-bold text-sm text-text-primary mb-4 border-b border-border/50 pb-2">Recent Posts</h4>
+              <div className="space-y-4">
+                {recentPosts.length === 0 ? (
+                  <p className="text-xs text-text-secondary">No other posts found.</p>
                 ) : (
-                  <code className="block bg-surface-high p-6 rounded-xl text-text-primary text-sm font-mono my-8 overflow-x-auto border border-border/50" {...props} />
-                ),
-            }}
-          >
-            {post.content}
-          </ReactMarkdown>
+                  recentPosts.map((rPost) => (
+                    <Link key={rPost.slug} href={`/blog/${rPost.slug}`} className="group flex gap-3 items-center">
+                      <div className="w-20 h-14 rounded-lg border border-border/50 overflow-hidden shrink-0 bg-surface-low relative aspect-video">
+                        {rPost.coverImage ? (
+                          <img
+                            src={rPost.coverImage}
+                            alt={rPost.coverImageAlt || rPost.title}
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center">
+                            <BookOpen className="w-5 h-5 text-primary/40" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h5 className="font-bold text-sm text-text-primary group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                          {rPost.title}
+                        </h5>
+                        <span className="text-xs text-text-secondary block mt-1">
+                          {formatDate(rPost.publishedAt || rPost.createdAt)}
+                        </span>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
-      </article>
+      </div>
 
       <CTABanner />
       <Footer />

@@ -11,6 +11,7 @@ import {
   IdCard,
   QrCode,
   PenTool,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -26,10 +27,16 @@ const NAV_ITEMS = [
   { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
 
+const ADMIN_NAV_ITEM = { name: "Blogs", path: "/dashboard/blogs", icon: BookOpen };
+
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
+  const navItems =
+    user?.username === "pmiaynushi" || user?.email === "pmiaynushi@gmail.com"
+      ? [...NAV_ITEMS.slice(0, -1), ADMIN_NAV_ITEM, NAV_ITEMS[NAV_ITEMS.length - 1]]
+      : NAV_ITEMS;
 
   const handleLogout = async () => {
     await logout();
@@ -51,7 +58,7 @@ export default function DashboardSidebar() {
           </Link>
 
           <nav className="space-y-1">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.path;
 
@@ -85,7 +92,7 @@ export default function DashboardSidebar() {
       </aside>
 
       <nav className="fixed bottom-0 left-0 z-40 flex h-[72px] w-full items-center gap-1 overflow-x-auto border-t border-border bg-surface/95 px-4 backdrop-blur-xl md:hidden scrollbar-hide">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.path;
 

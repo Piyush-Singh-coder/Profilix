@@ -31,6 +31,7 @@ model User {
   socialLinks  SocialLink[]
   profileSkills  ProfileSkill[]
   customSections CustomSection[]
+  blogPosts     BlogPost[]
 
 
   @@index([username])
@@ -320,6 +321,11 @@ enum AchievementType {
   OTHER
 }
 
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model ProfileSkill {
   id           String   @id @default(uuid()) @db.Uuid
   userId       String   @map("user_id") @db.Uuid
@@ -348,3 +354,26 @@ model CustomSection {
   @@map("custom_sections")
 }
 
+model BlogPost {
+  id              String     @id @default(uuid()) @db.Uuid
+  authorId        String?    @map("author_id") @db.Uuid
+  slug            String     @unique @db.VarChar(140)
+  title           String     @db.VarChar(180)
+  excerpt         String     @db.VarChar(320)
+  content         String
+  coverImage      String?    @map("cover_image")
+  coverImageAlt   String?    @map("cover_image_alt") @db.VarChar(160)
+  metaTitle       String?    @map("meta_title") @db.VarChar(70)
+  metaDescription String?    @map("meta_description") @db.VarChar(170)
+  keywords        String[]   @default([])
+  tags            String[]   @default([])
+  status          BlogStatus @default(DRAFT)
+  publishedAt     DateTime?  @map("published_at") @db.Timestamptz(3)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  author          User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  @@index([status, publishedAt])
+  @@index([authorId])
+  @@map("blog_posts")
+}

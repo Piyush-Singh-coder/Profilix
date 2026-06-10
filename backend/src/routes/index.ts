@@ -14,6 +14,7 @@ import educationRoutes from "./education.routes";
 import coverLetterRoutes from "./coverLetter.routes";
 import profileSkillRoutes from "./profileSkill.routes";
 import customSectionRoutes from "./customSection.routes";
+import blogRoutes from "./blog.routes";
 
 const router = Router();
 
@@ -31,6 +32,7 @@ router.use("/achievements", achievementRoutes);
 router.use("/education", educationRoutes);
 router.use("/profile-skills", profileSkillRoutes);
 router.use("/custom-sections", customSectionRoutes);
+router.use("/blogs", blogRoutes);
 router.use("/u", publicRoutes);
 
 export default router;

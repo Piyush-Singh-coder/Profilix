@@ -6,6 +6,7 @@ export type CardTheme = "GLASS" | "BRUTAL" | "APPLE";
 export type SocialPlatform = "GITHUB" | "LINKEDIN" | "TWITTER" | "LEETCODE" | "HACKERRANK" | "PERSONAL_WEBSITE" | "OTHER";
 export type AnalyticsEventType = "PROFILE_VIEW" | "RESUME_DOWNLOAD" | "SOCIAL_LINK_CLICK" | "QR_SCAN" | "OG_IMAGE_RENDER";
 export type AchievementType = "HACKATHON" | "COMPETITION" | "CERTIFICATE" | "AWARD" | "OTHER";
+export type BlogStatus = "DRAFT" | "PUBLISHED";
 
 export interface ApiSuccessResponse<T> {
   success: boolean;
@@ -166,6 +167,25 @@ export interface Education {
   description: string | null;
   bullets: string[] | null;
   displayOrder: number;
+}
+
+export interface BlogPost {
+  id: string;
+  authorId?: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content?: string;
+  coverImage: string | null;
+  coverImageAlt: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  keywords: string[];
+  tags: string[];
+  status: BlogStatus;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface GitHubStats {

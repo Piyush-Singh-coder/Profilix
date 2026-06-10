@@ -43,7 +43,13 @@ export default function RegisterPage() {
       toast.success("Successfully registered! Please verify your email.");
       router.push("/verify");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Registration failed.");
+      const serverError = error.response?.data;
+      if (serverError?.details) {
+        const messages = Object.values(serverError.details).flat().join(" ");
+        toast.error(messages || "Registration failed.");
+      } else {
+        toast.error(serverError?.message || serverError?.error || "Registration failed.");
+      }
     } finally {
       setIsPending(false);
     }
