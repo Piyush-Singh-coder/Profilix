@@ -5,8 +5,10 @@ import { sendSuccess } from "../utils/response";
 
 export const listPublishedBlogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const posts = await blogService.listPublishedBlogs();
-    sendSuccess(res, posts);
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+    const result = await blogService.listPublishedBlogs(page, limit);
+    sendSuccess(res, result);
   } catch (error) {
     next(error);
   }
@@ -31,8 +33,10 @@ export const listAllBlogsForAdmin = async (
   next: NextFunction
 ) => {
   try {
-    const posts = await blogService.listAllBlogsForAdmin();
-    sendSuccess(res, posts);
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : undefined;
+    const result = await blogService.listAllBlogsForAdmin(page, limit);
+    sendSuccess(res, result);
   } catch (error) {
     next(error);
   }

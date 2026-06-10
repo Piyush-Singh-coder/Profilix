@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { absoluteUrl, getPublishedBlogs, isValidImageUrl } from "@/lib/blogApi";
+import { absoluteUrl, getPublishedBlogs, isValidImageUrl, PaginatedBlogs } from "@/lib/blogApi";
 import { BlogPost } from "@/types";
 
 export const revalidate = 300;
@@ -52,14 +52,32 @@ function readingTime(content?: string) {
   return `${Math.max(1, Math.ceil(words / 220))} min read`;
 }
 
-export default async function BlogIndexPage() {
-  let posts: BlogPost[] = [];
+export default async function BlogIndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageStr } = await searchParams;
+  const currentPage = pageStr ? parseInt(pageStr, 10) : 1;
+  const limit = 6;
+
+  let paginatedResult: PaginatedBlogs;
 
   try {
-    posts = await getPublishedBlogs();
+    paginatedResult = await getPublishedBlogs(currentPage, limit);
   } catch {
-    posts = [];
+    paginatedResult = {
+      posts: [],
+      pagination: {
+        total: 0,
+        page: 1,
+        limit,
+        totalPages: 1,
+      },
+    };
   }
+
+  const { posts, pagination } = paginatedResult;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -116,51 +134,106 @@ export default async function BlogIndexPage() {
             <p className="mt-3 text-text-secondary">Fresh guides will appear here as soon as they are published.</p>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`} className="group block h-full">
-                <article className="group glass-panel rounded-[24px] border border-border/50 bg-surface p-5 transition-all hover:border-primary/40 hover:shadow-xl flex flex-col h-full">
-                  <div className="mb-4 aspect-video w-full rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden relative bg-surface-low">
-                    {isValidImageUrl(post.coverImage) ? (
-                      <img
-                        src={post.coverImage}
-                        alt={post.coverImageAlt || post.title}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        loading="lazy"
-                      />
+          <div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post) => (
+                <Link key={post.slug} href={`/blog/${post.slug}`} className="group block h-full">
+                  <article className="group glass-panel rounded-[24px] border border-border/50 bg-surface p-5 transition-all hover:border-primary/40 hover:shadow-xl flex flex-col h-full">
+                    <div className="mb-4 aspect-video w-full rounded-2xl border border-border/50 flex items-center justify-center overflow-hidden relative bg-surface-low">
+                      {isValidImageUrl(post.coverImage) ? (
+                        <img
+                          src={post.coverImage}
+                          alt={post.coverImageAlt || post.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center">
+                          <BookOpen className="w-10 h-10 text-primary/40" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col flex-grow">
+                      <div className="mb-2 flex items-center justify-between gap-3 text-xs text-text-secondary">
+                        <span>{formatDate(post.publishedAt)}</span>
+                        <span>{readingTime(post.content)}</span>
+                      </div>
+                      <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold text-text-primary transition-colors group-hover:text-primary">
+                        {post.title}
+                      </h3>
+                      <p className="mb-4 line-clamp-2 flex-grow leading-relaxed text-sm text-text-secondary">
+                        {post.excerpt}
+                      </p>
+                      {post.tags.length > 0 ? (
+                        <div className="mb-4 flex flex-wrap gap-2">
+                          {post.tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="rounded-full border border-border bg-surface-low px-2 py-0.5 text-xs text-text-secondary">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="mt-auto flex items-center text-sm font-semibold text-primary">
+                        Read article <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="mt-12 flex items-center justify-center gap-2">
+                {currentPage > 1 ? (
+                  <Link
+                    href={`/blog?page=${currentPage - 1}`}
+                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    Previous
+                  </Link>
+                ) : (
+                  <span className="inline-flex h-10 items-center justify-center rounded-xl border border-border/40 bg-surface/50 px-4 text-sm font-medium text-text-disabled cursor-not-allowed">
+                    Previous
+                  </span>
+                )}
+
+                <div className="flex items-center gap-1.5">
+                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((pNum) => {
+                    const isCurrent = pNum === currentPage;
+                    return isCurrent ? (
+                      <span
+                        key={pNum}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white shadow-md shadow-primary/20"
+                      >
+                        {pNum}
+                      </span>
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-blue-500/10 flex items-center justify-center">
-                        <BookOpen className="w-10 h-10 text-primary/40" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-col flex-grow">
-                    <div className="mb-2 flex items-center justify-between gap-3 text-xs text-text-secondary">
-                      <span>{formatDate(post.publishedAt)}</span>
-                      <span>{readingTime(post.content)}</span>
-                    </div>
-                    <h3 className="mb-2 line-clamp-2 font-heading text-lg font-bold text-text-primary transition-colors group-hover:text-primary">
-                      {post.title}
-                    </h3>
-                    <p className="mb-4 line-clamp-2 flex-grow leading-relaxed text-sm text-text-secondary">
-                      {post.excerpt}
-                    </p>
-                    {post.tags.length > 0 ? (
-                      <div className="mb-4 flex flex-wrap gap-2">
-                        {post.tags.slice(0, 3).map((tag) => (
-                          <span key={tag} className="rounded-full border border-border bg-surface-low px-2 py-0.5 text-xs text-text-secondary">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="mt-auto flex items-center text-sm font-semibold text-primary">
-                      Read article <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                  </div>
-                </article>
-              </Link>
-            ))}
+                      <Link
+                        key={pNum}
+                        href={`/blog?page=${pNum}`}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+                      >
+                        {pNum}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                {currentPage < pagination.totalPages ? (
+                  <Link
+                    href={`/blog?page=${currentPage + 1}`}
+                    className="inline-flex h-10 items-center justify-center rounded-xl border border-border bg-surface px-4 text-sm font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-primary"
+                  >
+                    Next
+                  </Link>
+                ) : (
+                  <span className="inline-flex h-10 items-center justify-center rounded-xl border border-border/40 bg-surface/50 px-4 text-sm font-medium text-text-disabled cursor-not-allowed">
+                    Next
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
       </section>

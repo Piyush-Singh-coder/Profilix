@@ -16,7 +16,24 @@ const fetchJson = async <T>(path: string): Promise<T> => {
   return payload.data;
 };
 
-export const getPublishedBlogs = () => fetchJson<BlogPost[]>("/blogs");
+export interface PaginatedBlogs {
+  posts: BlogPost[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export function getPublishedBlogs(): Promise<BlogPost[]>;
+export function getPublishedBlogs(page: number, limit: number): Promise<PaginatedBlogs>;
+export function getPublishedBlogs(page?: number, limit?: number): Promise<BlogPost[] | PaginatedBlogs> {
+  if (page !== undefined && limit !== undefined) {
+    return fetchJson<PaginatedBlogs>(`/blogs?page=${page}&limit=${limit}`);
+  }
+  return fetchJson<BlogPost[]>("/blogs");
+}
 
 export const getPublishedBlogBySlug = (slug: string) =>
   fetchJson<BlogPost>(`/blogs/${encodeURIComponent(slug)}`);

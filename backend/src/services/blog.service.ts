@@ -28,7 +28,47 @@ const ensureUniqueSlug = async (slug: string, excludeId?: string) => {
   }
 };
 
-export const listPublishedBlogs = async () => {
+export const listPublishedBlogs = async (page?: number, limit?: number) => {
+  if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
+    const skip = (page - 1) * limit;
+    const [posts, total] = await Promise.all([
+      prisma.blogPost.findMany({
+        where: { status: BlogStatus.PUBLISHED },
+        orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          excerpt: true,
+          coverImage: true,
+          coverImageAlt: true,
+          metaTitle: true,
+          metaDescription: true,
+          keywords: true,
+          tags: true,
+          status: true,
+          publishedAt: true,
+          updatedAt: true,
+          createdAt: true,
+        },
+      }),
+      prisma.blogPost.count({
+        where: { status: BlogStatus.PUBLISHED },
+      }),
+    ]);
+    return {
+      posts,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   return prisma.blogPost.findMany({
     where: { status: BlogStatus.PUBLISHED },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
@@ -60,7 +100,28 @@ export const getPublishedBlogBySlug = async (slug: string) => {
   return post;
 };
 
-export const listAllBlogsForAdmin = async () => {
+export const listAllBlogsForAdmin = async (page?: number, limit?: number) => {
+  if (page !== undefined && limit !== undefined && page > 0 && limit > 0) {
+    const skip = (page - 1) * limit;
+    const [posts, total] = await Promise.all([
+      prisma.blogPost.findMany({
+        orderBy: [{ updatedAt: "desc" }],
+        skip,
+        take: limit,
+      }),
+      prisma.blogPost.count(),
+    ]);
+    return {
+      posts,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   return prisma.blogPost.findMany({
     orderBy: [{ updatedAt: "desc" }],
   });
