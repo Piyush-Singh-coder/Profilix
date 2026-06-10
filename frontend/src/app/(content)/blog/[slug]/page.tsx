@@ -264,7 +264,7 @@ export default async function BlogPostPage({ params }: Props) {
                 ) : (
                   recentPosts.map((rPost) => (
                     <Link key={rPost.slug} href={`/blog/${rPost.slug}`} className="group flex gap-3 items-center">
-                      <div className="w-20 h-14 rounded-lg border border-border/50 overflow-hidden shrink-0 bg-surface-low relative aspect-video">
+                      <div className="hidden sm:block w-20 h-14 rounded-lg border border-border/50 overflow-hidden shrink-0 bg-surface-low relative">
                         {isValidImageUrl(rPost.coverImage) ? (
                           <img
                             src={rPost.coverImage}
