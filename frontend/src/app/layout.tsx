@@ -165,6 +165,12 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@graph": [
                 {
+                  "@type": "WebSite",
+                  "@id": "https://profilix.site/#website",
+                  "name": "Profilix",
+                  "url": "https://profilix.site"
+                },
+                {
                   "@type": "WebApplication",
                   "@id": "https://profilix.site/#app",
                   "name": "Profilix",
