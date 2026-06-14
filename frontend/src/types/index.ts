@@ -82,6 +82,7 @@ export interface ProfileTechStack {
 
 export interface Profile {
   id: string;
+  userId: string;
   displayName: string;
   headline: string | null;
   bio: string | null;
@@ -238,4 +239,6 @@ export interface PublicProfileData {
   githubStats: GitHubStats | null;
   customSections?: CustomSection[];
   profileSkills?: ProfileSkill[];
+  upvoteCount: number;
+  hasLiked: boolean;
 }

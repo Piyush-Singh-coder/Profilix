@@ -18,12 +18,18 @@ const manrope = Manrope({
 export const metadata: Metadata = {
   title: {
     template: "%s | Profilix",
-    default: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
+    default: "Developer Portfolio Builder, ATS Resume Maker & Community Directory | Profilix",
   },
   description:
-    "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub activity, parse PDF resumes, write cover letters with AI, track analytics, and export ATS-friendly resume templates in PDF & Word DOCX formats.",
+    "Profilix is the best free developer portfolio builder, ATS resume maker, and developer community directory. Sync GitHub activity, write AI resumes, generate custom mobile Lock Screen QR wallpapers, upvote profiles, and track visitor analytics.",
   keywords: [
     // High-intent primary keywords
+    "developer community directory",
+    "peer profile upvotes",
+    "discover developers for hackathons",
+    "lock screen QR code wallpaper",
+    "recruiter specific QR wallpaper",
+    "upvote developer profiles",
     "developer portfolio builder",
     "ATS resume maker",
     "ATS resume builder",
@@ -89,9 +95,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "/",
-    title: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
+    title: "Developer Portfolio Builder, ATS Resume Maker & Community Directory | Profilix",
     description:
-      "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub, write resumes/cover letters with AI, track analytics, and share via QR code.",
+      "Profilix is the best free developer portfolio builder, ATS resume maker, and developer community directory. Sync GitHub, write AI resumes, generate custom lock screen QR wallpapers, and track analytics.",
     siteName: "Profilix",
     images: [
       {
@@ -106,9 +112,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@profilix_site",
     creator: "@profilix_site",
-    title: "Developer Portfolio Builder & ATS Resume Maker | Profilix",
+    title: "Developer Portfolio Builder, ATS Resume Maker & Community Directory | Profilix",
     description:
-      "Profilix is the best free developer portfolio builder & ATS resume maker. Sync GitHub, write resumes/cover letters with AI, track analytics, and share via QR code.",
+      "Profilix is the best free developer portfolio builder, ATS resume maker, and developer community directory. Sync GitHub, write AI resumes, generate custom lock screen QR wallpapers, and track analytics.",
     images: ["/og-default.png"],
   },
   icons: {
@@ -177,7 +183,8 @@ export default function RootLayout({
                   "featureList": [
                     "Free ATS Resume Generator",
                     "Professional Profile Card Generator",
-                    "QR Code Portfolio Sharing",
+                    "QR Code Portfolio Sharing & Lock Screen Wallpapers",
+                    "Developer Community Directory & Peer Upvotes",
                     "Premium Resume Templates",
                     "AI-Powered Resume Writing",
                     "GitHub Stats Integration",

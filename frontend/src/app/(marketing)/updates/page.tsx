@@ -233,7 +233,7 @@ export default function UpdatesPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/50 bg-surface-low py-24 md:py-32">
+      <section className="relative overflow-hidden border-b border-border/50 bg-surface-low pt-24 pb-8 md:pt-28 md:pb-10">
         <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
 
         <div className="container relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">

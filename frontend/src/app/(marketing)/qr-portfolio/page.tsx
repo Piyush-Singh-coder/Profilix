@@ -51,7 +51,7 @@ export default function QrPortfolioPage() {
       <Navbar />
       
       {/* Hero */}
-      <section className="py-24 bg-surface-low border-b border-border/50 relative overflow-hidden">
+      <section className="pt-24 pb-8 md:pt-28 md:pb-10 bg-surface-low border-b border-border/50 relative overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border text-sm text-text-secondary mb-6 font-medium">

@@ -226,6 +226,7 @@ export function IdentityEditor() {
             value={formData.phoneNumber}
             onChange={(event) => setFormData((prev) => ({ ...prev, phoneNumber: event.target.value }))}
             placeholder="+91 98765 43210"
+            info="You can safely add your phone number. We respect your privacy and keep it secure."
           />
           <div className="grid gap-4 md:grid-cols-2">
               <Select

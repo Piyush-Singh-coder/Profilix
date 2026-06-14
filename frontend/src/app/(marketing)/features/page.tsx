@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CTABanner } from "@/components/landing/CTABanner";
-import { FileText, IdCard, QrCode, BarChart3, Sparkles, Layout, ArrowRight, CheckCircle2, ShieldCheck, Zap, PenTool, Globe } from "lucide-react";
+import { FileText, IdCard, QrCode, BarChart3, Sparkles, Layout, ArrowRight, CheckCircle2, ShieldCheck, Zap, PenTool, Globe, Users } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
@@ -57,10 +57,10 @@ const FEATURES = [
     href: "/features/github-sync",
   },
   {
-    icon: QrCode,
-    title: "Dynamic QR Sharing",
-    description: "Instantly share your professional identity with a custom QR code that links directly to your portfolio.",
-    href: "/features/qr-code",
+    icon: Users,
+    title: "Developer Community",
+    description: "Explore public developer profiles, find teammates for hackathons, and receive profile upvotes.",
+    href: "/features/community",
   },
   {
     icon: BarChart3,
@@ -103,17 +103,16 @@ export default function FeaturesPage() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/50 bg-surface-low py-24 md:py-32">
-        {/* Ambient Blurs */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[140px]" />
-        <div className="pointer-events-none absolute left-[10%] top-[10%] h-[300px] w-[300px] rounded-full bg-secondary/5 blur-[100px]" />
+      <section className="relative overflow-hidden border-b border-border/30 bg-background/35 pt-24 pb-8 md:pt-28 md:pb-10">
+        {/* Radial Background Glow */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[110px]" />
 
         <div className="container relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-text-primary md:text-6xl">
-              Tools to Build Your <span className="text-primary">Future Identity</span>
+            <h1 className="font-heading text-4xl font-black leading-tight tracking-tight text-text-primary md:text-6xl">
+              Tools to Build Your <span className="animated-gradient-text">Future Identity</span>
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-text-secondary md:text-xl">
+            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-text-secondary md:text-xl font-medium">
               From the first scan of an ATS to the final review by a hiring manager, Profilix provides the data and design you need to win.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

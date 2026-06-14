@@ -37,6 +37,10 @@ const FAQS = [
     question: "Can I use my own domain?",
     answer: "By default, your profile is hosted at profilix.site/yourname. Custom domain support (mapping your-name.com to your Profilix profile) is coming soon.",
   },
+  {
+    question: "What is the Developer Community Directory?",
+    answer: "It is a public directory where users can showcase their professional profile cards, discover other developers, filter by skills or availability (such as 'Open to Hackathons'), and upvote their peers to endorse their expertise.",
+  },
 ];
 
 export function FAQ() {

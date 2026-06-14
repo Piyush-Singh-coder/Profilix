@@ -23,12 +23,12 @@ export function InfoLayout({
     <div className="min-h-screen bg-background text-text-primary flex flex-col">
       <Navbar />
 
-      <main className="flex-grow pt-32 pb-24">
+      <main className="flex-grow pt-24 pb-12">
         {/* Subtle Background Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent pointer-events-none -z-10" />
 
         <article className={cn("container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl", className)}>
-          <header className="mb-16 text-center">
+          <header className="mb-8 text-center">
             <h1 className="text-4xl md:text-6xl font-heading font-bold mb-6 tracking-tight">
               {title}
             </h1>

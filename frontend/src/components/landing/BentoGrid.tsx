@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, IdCard, QrCode, BarChart3, Sparkles, LayoutTemplate, ArrowRight, PenTool } from "lucide-react";
+import { FileText, IdCard, QrCode, BarChart3, Sparkles, LayoutTemplate, ArrowRight, PenTool, Users } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +9,7 @@ const features = [
     description: "Build ATS-optimized resumes that pass hiring scans. Upload your existing PDF resume via our AI Resume Parser to instantly auto-fill your profile details.",
     icon: <FileText className="h-5 w-5 text-primary" />,
     href: "/ats-resume-generator",
-    className: "lg:col-span-2",
+    className: "",
   },
   {
     title: "AI Cover Letters",
@@ -58,6 +58,13 @@ const features = [
     description: "Choose from multiple professional resume templates and export them in high-quality PDF or Microsoft Word formats.",
     icon: <LayoutTemplate className="h-5 w-5 text-primary" />,
     href: "/features/templates",
+    className: "",
+  },
+  {
+    title: "Developer Community",
+    description: "Explore public developer profiles, discover teammates, network with peers, and receive profile upvotes.",
+    icon: <Users className="h-5 w-5 text-primary" />,
+    href: "/community",
     className: "",
   },
 ];

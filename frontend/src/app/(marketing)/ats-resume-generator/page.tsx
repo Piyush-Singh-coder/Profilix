@@ -175,19 +175,19 @@ export default function ATSResumeGeneratorPage() {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-border/50 bg-surface-low py-24 md:py-32">
-        {/* Ambient Blur */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[120px]" />
+      <section className="relative overflow-hidden border-b border-border/30 bg-background/35 pt-24 pb-8 md:pt-28 md:pb-10">
+        {/* Radial Background Glow */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]" />
         
         <div className="container relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-sm font-semibold text-primary">
-              <CheckCircle2 className="h-4 w-4" /> 100% ATS Optimized
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary uppercase tracking-widest shadow-lg shadow-primary/5">
+              <CheckCircle2 className="h-3.5 w-3.5" /> 100% ATS Optimized
             </div>
-            <h1 className="font-heading text-4xl font-bold leading-tight tracking-tight text-text-primary md:text-6xl">
-              Stop Fighting <span className="text-primary">ATS Systems</span>. Start Landing Interviews.
+            <h1 className="font-heading text-4xl font-black leading-tight tracking-tight text-text-primary md:text-6xl">
+              Stop Fighting <span className="animated-gradient-text">ATS Systems</span>. Start Landing Interviews.
             </h1>
-            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-text-secondary md:text-xl">
+            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-text-secondary md:text-xl font-medium">
               Most resumes get rejected by robots before a human even sees them. Profilix builds resumes specifically designed to pass through ATS filters while looking premium to recruiters.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">

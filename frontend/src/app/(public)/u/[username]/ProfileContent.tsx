@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -32,7 +36,8 @@ import {
   TrendingUp,
   Laptop,
   Layers,
-  Flag
+  Flag,
+  ThumbsUp
 } from "lucide-react";
 import { FaYoutube, FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
 import { PublicProfileData } from "@/types";
@@ -193,6 +198,47 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
   const { fullName, avatarUrl, profile, socialLinks, projects, experiences, resume, githubStats, achievements, educations, customSections, profileSkills } =
     initialProfile;
 
+  const { isAuthenticated, user: currentUser } = useAuthStore();
+  const [upvoteCount, setUpvoteCount] = useState(initialProfile?.upvoteCount || 0);
+  const [hasLiked, setHasLiked] = useState(initialProfile?.hasLiked || false);
+  const [isLiking, setIsLiking] = useState(false);
+
+  const handleUpvote = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please sign in to upvote profiles");
+      return;
+    }
+    if (currentUser?.id === profile.userId) {
+      toast.error("You cannot upvote your own profile");
+      return;
+    }
+
+    setIsLiking(true);
+    const originalCount = upvoteCount;
+    const originalLiked = hasLiked;
+
+    // Optimistic Update
+    setHasLiked(!hasLiked);
+    setUpvoteCount(hasLiked ? upvoteCount - 1 : upvoteCount + 1);
+
+    try {
+      if (hasLiked) {
+        await api.delete(`/profile/${profile.id}/like`);
+        toast.success("Upvote removed");
+      } else {
+        await api.post(`/profile/${profile.id}/like`);
+        toast.success("Profile upvoted");
+      }
+    } catch (error: any) {
+      // Rollback
+      setHasLiked(originalLiked);
+      setUpvoteCount(originalCount);
+      toast.error(error.response?.data?.message || "Failed to update upvote");
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
   const displayFullName = profile?.displayName || fullName;
   const isDark = profile?.theme === "DARK";
 
@@ -259,6 +305,23 @@ export default function ProfileContent({ initialUsername, initialProfile }: Prof
           </div>
 
           <div className="flex flex-col gap-3 w-full md:w-auto md:min-w-[260px] shrink-0">
+            <button
+              onClick={handleUpvote}
+              disabled={isLiking}
+              className={cn(
+                "inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-bold transition-all hover:scale-[1.01] w-full text-center cursor-pointer disabled:opacity-50",
+                hasLiked
+                  ? "bg-primary/20 border-primary text-primary shadow-lg shadow-primary/10"
+                  : "bg-surface-low/50 border-border/40 hover:bg-surface-low hover:border-primary/30 text-text-primary"
+              )}
+            >
+              <ThumbsUp className={cn("h-4 w-4", hasLiked ? "fill-primary/25" : "")} />
+              {hasLiked ? "Upvoted" : "Upvote Profile"}
+              <span className="ml-1 rounded-full bg-surface-high/50 border border-border/20 px-2 py-0.5 text-xs text-text-secondary">
+                {upvoteCount}
+              </span>
+            </button>
+
             {profile.location && (
               <div className="flex items-start gap-2 text-sm text-slate-400 px-1 mb-1 w-full break-words">
                 <MapPin className="h-4 w-4 text-sky-400 shrink-0 mt-0.5" />

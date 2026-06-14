@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FileText, LayoutTemplate, IdCard, QrCode, BarChart3, PenTool } from "lucide-react";
+import { FileText, LayoutTemplate, IdCard, QrCode, BarChart3, PenTool, Users } from "lucide-react";
 
 const features = [
   {
@@ -24,7 +24,11 @@ const features = [
     description: "Share your profile with a scan.",
     icon: <QrCode className="h-6 w-6 text-primary" />,
   },
-  
+  {
+    title: "Developer Community",
+    description: "Discover teammates, network with peers, and get profile upvotes.",
+    icon: <Users className="h-6 w-6 text-primary" />,
+  },
 ];
 
 export function HowItWorks() {
@@ -43,7 +47,7 @@ export function HowItWorks() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
           {features.map((feature, idx) => (
             <motion.div
               key={idx}
@@ -51,22 +55,22 @@ export function HowItWorks() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ delay: idx * 0.1 }}
-              className="group h-full"
+              className="group"
             >
-              <div className="relative overflow-hidden bg-surface-low/20 backdrop-blur-sm border border-border/40 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex flex-col items-center text-center h-full hover:border-primary/40 hover:bg-surface-low/40 transition-all duration-500 shadow-2xl shadow-black/10">
+              <div className="relative overflow-hidden bg-surface-low/20 backdrop-blur-sm border border-border/40 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 flex flex-col items-center justify-center text-center aspect-square w-full hover:border-primary/40 hover:bg-surface-low/40 transition-all duration-500 shadow-2xl shadow-black/10">
                 {/* Subtle Glow */}
                 <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="mb-6 md:mb-10 flex h-14 w-14 md:h-20 md:w-20 items-center justify-center rounded-2xl md:rounded-3xl bg-surface-high border border-border group-hover:border-primary/30 group-hover:bg-primary/5 transition-all duration-500 shadow-xl shadow-black/20">
-                    <div className="scale-100 md:scale-125 transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-1">
+                <div className="relative z-10 flex flex-col items-center justify-center">
+                  <div className="mb-3 md:mb-4 flex h-10 w-10 md:h-14 md:w-14 items-center justify-center rounded-xl md:rounded-2xl bg-surface-high border border-border group-hover:border-primary/30 group-hover:bg-primary/5 transition-all duration-500 shadow-xl shadow-black/20">
+                    <div className="scale-90 md:scale-100 transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-0.5">
                       {feature.icon}
                     </div>
                   </div>
-                  <h3 className="font-heading text-base md:text-2xl font-bold text-text-primary mb-2 md:mb-4 group-hover:text-primary transition-colors tracking-tight">
+                  <h3 className="font-heading text-sm md:text-lg font-bold text-text-primary mb-1 md:mb-2 group-hover:text-primary transition-colors tracking-tight">
                     {feature.title}
                   </h3>
-                  <p className="text-xs md:text-base leading-relaxed text-text-secondary opacity-70 group-hover:opacity-100 transition-opacity">
+                  <p className="text-[10px] md:text-xs leading-normal text-text-secondary opacity-70 group-hover:opacity-100 transition-opacity max-w-[150px] md:max-w-none">
                     {feature.description}
                   </p>
                 </div>

@@ -113,7 +113,7 @@ export default async function BlogIndexPage({
       />
       <Navbar />
 
-      <section className="border-b border-border/50 bg-surface-low py-24">
+      <section className="border-b border-border/50 bg-surface-low pt-24 pb-8 md:pt-28 md:pb-10">
         <div className="container mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text-secondary">
             <BookOpen className="h-4 w-4 text-primary" /> Resources

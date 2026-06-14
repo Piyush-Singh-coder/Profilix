@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as profileController from "../controllers/profile.controller";
+import * as likeController from "../controllers/like.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { apiLimiter } from "../middlewares/rateLimiter.middleware";
@@ -14,5 +15,9 @@ router.post("/avatar", profileController.multerMiddleware, profileController.upl
 router.put("/tech-stack", validate(updateTechStackSchema), profileController.updateTechStack);
 router.get("/tech-stack/options", profileController.getTechStackOptions);
 router.get("/completeness", profileController.getCompleteness);
+
+// Upvote / Like endpoints
+router.post("/:profileId/like", likeController.likeProfile);
+router.delete("/:profileId/like", likeController.unlikeProfile);
 
 export default router;

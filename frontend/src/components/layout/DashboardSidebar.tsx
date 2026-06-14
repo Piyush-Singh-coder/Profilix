@@ -12,6 +12,7 @@ import {
   QrCode,
   PenTool,
   BookOpen,
+  Users,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
   { name: "Profile Card", path: "/dashboard/profile-card", icon: IdCard },
   { name: "QR & Share", path: "/dashboard/qr", icon: QrCode },
   { name: "Analytics", path: "/dashboard/analytics", icon: BarChart3 },
+  { name: "Community", path: "/community", icon: Users },
   { name: "Settings", path: "/dashboard/settings", icon: Settings },
 ];
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Users } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
@@ -24,7 +24,7 @@ const GRID_OPACITY = [
   [0.35, 0.3, 0.2, 0.44],
 ];
 
-import { DashboardMockup } from "./DashboardMockup";
+import { HeroProfileMockup } from "./HeroProfileMockup";
 
 export function Hero() {
   const { isAuthenticated, user } = useAuthStore();
@@ -55,7 +55,7 @@ export function Hero() {
             Builder & <span className="animated-gradient-text">ATS Resume Maker.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">
-            Sync GitHub activity, parse PDF resumes, write cover letters with AI, track real-time analytics, and export ATS-friendly resume templates in PDF & Word DOCX formats.
+            Sync GitHub activity, showcase your profile in our public developer directory, parse PDF resumes, write cover letters with AI, track analytics, and export ATS-friendly resume templates in PDF & Word DOCX formats.
           </p>
 
           <div className="mt-6 md:mt-10 flex flex-col gap-4 sm:flex-row">
@@ -64,10 +64,10 @@ export function Hero() {
                 <Link href={`/u/${user?.username}`}>
                   <Button size="lg" className="w-full sm:w-auto">View My Profile</Button>
                 </Link>
-                <Link href="/dashboard/resume">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto group border-transparent bg-surface-low hover:bg-surface-high">
-                    <svg className="mr-2 h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    See How It Works
+                <Link href="/community">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto group border-transparent bg-surface-low hover:bg-surface-high gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Explore Community
                   </Button>
                 </Link>
               </>
@@ -76,10 +76,10 @@ export function Hero() {
                 <Link href="/register">
                   <Button size="lg" className="w-full sm:w-auto">Create Your Profile</Button>
                 </Link>
-                <Link href="/ats-resume-generator">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto group border-transparent bg-surface-low hover:bg-surface-high">
-                    <svg className="mr-2 h-4 w-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                    See How It Works
+                <Link href="/community">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto group border-transparent bg-surface-low hover:bg-surface-high gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Explore Community
                   </Button>
                 </Link>
               </>
@@ -109,8 +109,8 @@ export function Hero() {
           transition={{ duration: 0.75, delay: 0.15, ease: "easeOut" }}
           className="relative hidden lg:block"
         >
-          <div className="relative translate-x-6 scale-100 xl:scale-110">
-             <DashboardMockup />
+          <div className="relative translate-x-6 -translate-y-8 lg:-translate-y-12 scale-100 xl:scale-110">
+             <HeroProfileMockup />
              
              {/* Decorative blob behind mockup for better blending */}
              <div className="absolute -inset-10 -z-10 bg-primary/5 blur-3xl rounded-full" />

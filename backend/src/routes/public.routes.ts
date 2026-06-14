@@ -6,6 +6,12 @@ import * as cardController from "../controllers/card.controller";
 
 const router = Router();
 
+// GET /api/u/community — Paginated community list
+router.get("/community", publicController.getCommunityProfiles);
+
+// GET /api/u/tech-stacks — All tech stacks for community filtering
+router.get("/tech-stacks", publicController.getTechStacks);
+
 // GET /api/u/:username and /api/u/:username?mode=hire
 router.get("/:username", publicProfileLimiter, publicController.getPublicProfile);
 

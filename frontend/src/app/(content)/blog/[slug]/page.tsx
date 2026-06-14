@@ -165,7 +165,7 @@ export default async function BlogPostPage({ params }: Props) {
       />
       <Navbar />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 pt-24 pb-8 sm:px-6 lg:px-8">
         <div className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[500px] w-full -translate-x-1/2 bg-gradient-to-b from-primary/5 to-transparent" />
 
         <Link href="/blog" className="group mb-8 inline-flex items-center text-sm font-medium text-text-secondary transition-colors hover:text-primary">

@@ -71,6 +71,14 @@ const faqJsonLd = {
         text: "Yes! Profilix includes a free AI Cover Letter Writer. Input your target job details and select from 4 layout styles (Classic, Modern, Creative, Minimalist). The AI matches your specific developer skills and experiences with the job description in seconds to output a polished, single-page cover letter ready to download as PDF or Word (.docx).",
       },
     },
+    {
+      "@type": "Question",
+      name: "What is the Developer Community Directory?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "The Developer Community Directory is a public space where Profilix users can showcase their professional profile cards, discover other developers, filter by skills or availability (such as 'Open to Hackathons'), and upvote their peers to endorse their expertise.",
+      },
+    },
   ],
 };
 
@@ -78,10 +86,10 @@ const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Profilix",
-  "alternateName": ["Profilix Resume", "Profilix Portfolio"],
+  "alternateName": ["Profilix Resume", "Profilix Portfolio", "Profilix Community"],
   "url": "https://profilix.site/",
   "description":
-    "The best ATS resume generator and portfolio card creator for developers. Sync your GitHub, showcase your projects, and share via QR code.",
+    "The best ATS resume generator, portfolio card creator, and developer community directory. Sync your GitHub, showcase your projects, generate custom lock screen QR wallpapers, and connect with peers.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": "https://profilix.site/u/{search_term_string}",

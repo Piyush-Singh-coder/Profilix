@@ -13,7 +13,8 @@ import {
   Settings,
   Sparkles,
   Sun,
-  Moon
+  Moon,
+  Users
 } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { api } from "@/lib/api";
@@ -84,46 +85,40 @@ export function Navbar() {
         {/* Desktop Navigation */}
         <div className="hidden items-center gap-6 md:flex">
           {mounted && (
-            <>
-              <button
-                onClick={handleThemeToggle}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-low text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
-                title="Toggle Theme"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5" />
-                ) : (
-                  <Moon className="h-5 w-5" />
-                )}
-              </button>
-
-              {isAuthenticated ? (
-                <div className="flex items-center gap-3">
-                  <Link href="/dashboard">
-                    <Button variant="ghost" className="gap-2">
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard/resume">
-                    <Button className="gap-2">
-                      <Plus className="h-4 w-4" />
-                      Create New
-                    </Button>
-                  </Link>
-                </div>
+            <button
+              onClick={handleThemeToggle}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-low text-text-secondary transition-all hover:border-primary/40 hover:text-primary"
+              title="Toggle Theme"
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5" />
               ) : (
-                <div className="flex items-center gap-3">
-                  <Link href="/login">
-                    <Button variant="ghost">Sign In</Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button variant="primary" className="gap-2">
-                      <Sparkles className="h-4 w-4" />
-                      Get Started
-                    </Button>
-                  </Link>
-                </div>
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
+          )}
+
+          <Link href="/community">
+            <Button variant="ghost" className="relative gap-2 text-text-primary hover:text-primary transition-all font-medium px-4.5 py-2.5 bg-primary/5 hover:bg-primary/10 border border-primary/20 hover:border-primary/45 rounded-xl">
+              <Users className="h-4 w-4 text-primary" />
+              Community
+              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            </Button>
+          </Link>
+
+          {mounted && (
+            <>
+              {isAuthenticated ? (
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/login">
+                  <Button variant="ghost">Sign In</Button>
+                </Link>
               )}
             </>
           )}
@@ -156,33 +151,24 @@ export function Navbar() {
       {isMenuOpen && (
         <div className="border-t border-border bg-surface/95 p-4 backdrop-blur-xl md:hidden">
           <div className="flex flex-col gap-2">
+            <Link href="/community" onClick={() => setIsMenuOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start gap-2 text-primary bg-primary/5 hover:bg-primary/10 border border-primary/25 rounded-xl">
+                <Users className="h-4 w-4 text-primary" />
+                Community Directory
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </Button>
+            </Link>
             {isAuthenticated ? (
-              <>
-                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start gap-2">
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </Button>
-                </Link>
-                <Link href="/dashboard/resume" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full justify-start gap-2">
-                    <Plus className="h-4 w-4" />
-                    Create New
-                  </Button>
-                </Link>
-              </>
+              <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start gap-2">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              </Link>
             ) : (
-              <>
-                <Link href="/login" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">Sign In</Button>
-                </Link>
-                <Link href="/register" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full justify-start gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Get Started
-                  </Button>
-                </Link>
-              </>
+              <Link href="/login" onClick={() => setIsMenuOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">Sign In</Button>
+              </Link>
             )}
           </div>
         </div>

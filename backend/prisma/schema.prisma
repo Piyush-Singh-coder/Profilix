@@ -32,6 +32,7 @@ model User {
   profileSkills  ProfileSkill[]
   customSections CustomSection[]
   blogPosts     BlogPost[]
+  likesGiven    ProfileLike[]    @relation("LikesGiven")
 
 
   @@index([username])
@@ -57,6 +58,7 @@ model Profile {
   techStacks       ProfileTechStack[]
   resumeConfig     Json?              @map("resume_config")
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likesReceived    ProfileLike[]      @relation("LikesReceived")
 
   @@map("profiles")
 }
@@ -376,4 +378,17 @@ model BlogPost {
   @@index([status, publishedAt])
   @@index([authorId])
   @@map("blog_posts")
+}
+
+model ProfileLike {
+  id        String   @id @default(uuid()) @db.Uuid
+  likerId   String   @map("liker_id") @db.Uuid
+  profileId String   @map("profile_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  liker     User     @relation("LikesGiven", fields: [likerId], references: [id], onDelete: Cascade)
+  profile   Profile  @relation("LikesReceived", fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([likerId, profileId])
+  @@map("profile_likes")
 }
