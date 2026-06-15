@@ -21,6 +21,20 @@ type Update = {
 
 const UPDATES: Update[] = [
   {
+    version: "2.3.0",
+    date: "June 2026",
+    badge: "new",
+    title: "Developer Community Directory & Peer Upvotes",
+    description: "Discover other developers and get endorsed! We've launched a public Developer Community Directory and a peer upvoting system to showcase talent and foster networking.",
+    changes: [
+      "Launched the Developer Community Directory (/community) to browse public developer portfolios",
+      "Added a peer upvote/like system allowing logged-in users to upvote and endorse profiles",
+      "Implemented filters to sort by availability status (Looking for roles, Open to hackathons, Freelancing, etc.)",
+      "Added technology-specific filtering and full-text search across locations, bios, names, and handles",
+      "Redesigned the homepage and site navigation to integrate the community showcase experience",
+    ],
+  },
+  {
     version: "2.2.0",
     date: "June 2026",
     badge: "new",
