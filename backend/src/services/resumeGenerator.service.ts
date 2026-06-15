@@ -1364,39 +1364,37 @@ export async function generateResumeFile(args: {
     useAI: args.useAI,
   });
 
+  const displayName = data.user.profile?.displayName || data.user.fullName;
+  const formattedName = displayName.trim().replace(/\s+/g, "_");
+
   if (args.format === "pdf") {
     const template = String(args.templateType).toUpperCase();
     let html: string;
-    let filename: string;
 
     switch (template) {
       case "DESIGN":
         html = buildDesignResumeHtml(data, args.activeTheme || "SKEUOMORPHIC");
-        filename = "design-resume.pdf";
         break;
       case "MODERN":
         html = buildModernResumeHtml(data);
-        filename = "modern-resume.pdf";
         break;
       case "ENHANCV":
         html = buildEnhancvResumeHtml(data, args.activeTheme || "GLASS");
-        filename = "premium-resume.pdf";
         break;
       case "ATS":
       default:
         html = buildResumeHtml(data);
-        filename = "resume.pdf";
         break;
     }
 
     const buffer = await renderPdfFromHtml(html);
-    return { buffer, filename, contentType: "application/pdf" };
+    return { buffer, filename: `Resume-${formattedName}.pdf`, contentType: "application/pdf" };
   }
 
   const buffer = await renderDocx(data);
   return {
     buffer,
-    filename: "resume.docx",
+    filename: `Resume-${formattedName}.docx`,
     contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   };
 }

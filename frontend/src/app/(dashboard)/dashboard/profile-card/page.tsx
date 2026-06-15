@@ -98,8 +98,10 @@ export default function ProfileCardPage() {
     if (!user?.username || isExporting) return;
     try {
       setIsExporting(true);
+      const displayName = profile?.displayName || user?.fullName || user?.username || "user";
+      const formattedName = displayName.trim().replace(/\s+/g, "_");
       const exportUrl = `${API_BASE_URL}/u/${user.username}/card-export?size=${exportSize}&theme=${cardTheme}`;
-      await downloadUrlAsFile(exportUrl, `profilix-card-${cardTheme.toLowerCase()}-${exportSize}.png`);
+      await downloadUrlAsFile(exportUrl, `ProfileCard-${formattedName}-${exportSize}.png`);
       toast.success("Card exported successfully!");
     } finally {
       setIsExporting(false);

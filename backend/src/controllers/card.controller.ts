@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { generateProfileCard } from "../services/card.service";
+import { prisma } from "../config/database";
 
 type CardSize = "1080x1080" | "1200x628" | "1200x675" | "1920x1080";
 type CardTheme = "GLASS" | "BRUTAL" | "APPLE" | "GLASSMORPHISM" | "NEOBRUTALISM";
@@ -38,11 +39,29 @@ export const exportCard = async (
 
     const buffer = await generateProfileCard(username, size, theme);
 
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { username: { equals: username, mode: "insensitive" } },
+          { username: { equals: username.toLowerCase(), mode: "insensitive" } }
+        ]
+      },
+      select: {
+        fullName: true,
+        profile: {
+          select: { displayName: true }
+        }
+      }
+    });
+
+    const displayName = user?.profile?.displayName || user?.fullName || username;
+    const formattedName = displayName.trim().replace(/\s+/g, "_");
+
     res.set({
       "Content-Type": "image/png",
       "Content-Length": buffer.length,
       "Cache-Control": "public, s-maxage=300, max-age=60",
-      "Content-Disposition": `inline; filename="profile-card-${size}.png"`,
+      "Content-Disposition": `inline; filename="ProfileCard-${formattedName}-${size}.png"`,
     });
     res.end(buffer);
   } catch (error) {

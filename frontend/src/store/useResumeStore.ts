@@ -98,13 +98,11 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         useAI 
       }, { responseType: "blob" });
       const contentDisposition = response.headers["content-disposition"] as string | undefined;
-      const ts = Date.now();
-      let filename = format === "pdf" ? `resume-${ts}.pdf` : `resume-${ts}.docx`;
+      let filename = format === "pdf" ? "Resume.pdf" : "Resume.docx";
       if (contentDisposition) {
         const match = contentDisposition.match(/filename="?([^"]+)"?/);
         if (match?.[1]) {
-          // Inject timestamp before extension to guarantee uniqueness
-          filename = match[1].replace(/(\.pdf|\.docx)$/i, `-${ts}$1`);
+          filename = match[1];
         }
       }
 
