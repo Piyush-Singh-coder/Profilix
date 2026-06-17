@@ -56,7 +56,10 @@ export const registerUser = async (input: RegisterInput, res: Response) => {
     expiresIn: "2d",
   });
 
-  await sendVerificationEmail(user.email, user.fullName, verificationToken);
+  // Send verification email in the background to avoid blocking the HTTP response
+  sendVerificationEmail(user.email, user.fullName, verificationToken).catch((err) => {
+    console.error(`[EmailError] Failed to send verification email to ${user.email}:`, err);
+  });
 
   return user;
 };

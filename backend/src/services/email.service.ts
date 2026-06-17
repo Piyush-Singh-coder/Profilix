@@ -2,11 +2,15 @@ import nodemailer from "nodemailer";
 import { env } from "../config/env";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for 587
   auth: {
     user: env.EMAIL_USER,
     pass: env.EMAIL_PASS,
   },
+  connectionTimeout: 10000, // 10 seconds connection timeout
+  socketTimeout: 10000,     // 10 seconds socket timeout
 });
 
 export const sendVerificationEmail = async (
