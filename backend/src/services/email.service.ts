@@ -1,17 +1,5 @@
-import nodemailer from "nodemailer";
+import axios from "axios";
 import { env } from "../config/env";
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.resend.com",
-  port: 465,
-  secure: true, // true for 465, false for 587
-  auth: {
-    user: "resend",
-    pass: env.RESEND_API_KEY,
-  },
-  connectionTimeout: 10000, // 10 seconds connection timeout
-  socketTimeout: 10000,     // 10 seconds socket timeout
-});
 
 export const sendVerificationEmail = async (
   userEmail: string,
@@ -22,11 +10,7 @@ export const sendVerificationEmail = async (
   const logoUrl = "https://ik.imagekit.io/v6xwevpjp/Profilix/profilix.png?updatedAt=1776982992641";
   const currentYear = new Date().getFullYear();
 
-  await transporter.sendMail({
-    from: env.RESEND_FROM_EMAIL,
-    to: userEmail,
-    subject: "✅ Verify your Profilix account",
-    html: `
+  const html = `
       <!DOCTYPE html>
       <html lang="en">
         <head>
@@ -149,6 +133,22 @@ export const sendVerificationEmail = async (
           </table>
         </body>
       </html>
-    `,
-  });
+    `;
+
+  await axios.post(
+    "https://api.resend.com/emails",
+    {
+      from: env.RESEND_FROM_EMAIL,
+      to: [userEmail],
+      subject: "✅ Verify your Profilix account",
+      html,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      timeout: 10000,
+    }
+  );
 };
