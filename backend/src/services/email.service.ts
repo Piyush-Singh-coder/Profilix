@@ -2,12 +2,12 @@ import nodemailer from "nodemailer";
 import { env } from "../config/env";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // true for 465, false for 587
+  host: "smtp.resend.com",
+  port: 465,
+  secure: true, // true for 465, false for 587
   auth: {
-    user: env.EMAIL_USER,
-    pass: env.EMAIL_PASS,
+    user: "resend",
+    pass: env.RESEND_API_KEY,
   },
   connectionTimeout: 10000, // 10 seconds connection timeout
   socketTimeout: 10000,     // 10 seconds socket timeout
@@ -23,7 +23,7 @@ export const sendVerificationEmail = async (
   const currentYear = new Date().getFullYear();
 
   await transporter.sendMail({
-    from: `"Profilix" <${env.EMAIL_USER}>`,
+    from: env.RESEND_FROM_EMAIL,
     to: userEmail,
     subject: "✅ Verify your Profilix account",
     html: `
